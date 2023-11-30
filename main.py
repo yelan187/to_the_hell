@@ -42,10 +42,13 @@ MOVING_SPEED = 2
 BELT_SPEED = 1
 ACCELERATION = 0.2
 MAX_SPEED = 10
+MAX_JUMP_CHANCE = 2
 
-UNSTART = 2
+
 SOLO = 0
 MUTIPLE = 1
+UNSTART = 2
+INGAME = 3
 
 
 #
@@ -72,37 +75,57 @@ class Hell(Game):
         self.title_font = pygame.font.SysFont("arial", 80)
         self.last = 6 * SIDE
         self.barrier = [Barrier(self.screen, SOLID)]
-        self.player = [Player(self)]
+        self.players = [Player(self, [dash(pygame.K_q), hilaijinnojyutsu(pygame.K_e)])]
         # 按下事件
-        self.bindSelf(self.player[0])
+        self.bindSelf(self.players[0])
+        self.bindOthers()
+
+    def game_init(self):
+        self.last = 6 * SIDE
+        self.barrier = [Barrier(self.screen, SOLID)]
+        for player in self.players:
+            player.reset()
 
     # --------------------------------key related functions----------------------
-
-    def bindSelf(self, player):
+    def bindSelf(
+        self,
+        player,
+        key_list=[pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT],
+    ):
         # 按下事件
-        self.bind_key([pygame.K_LEFT, pygame.K_RIGHT], player.move)
-        self.bind_key([pygame.K_DOWN], player.fall)
-        self.bind_key([pygame.K_UP], player.jump)
-        if Player.skills:
-            for skill in Player.skills:
+        self.bind_key([key_list[0]], player.jump)
+        self.bind_key([key_list[1]], player.fall)
+        self.bind_key([key_list[2], key_list[3]], player.move)
+        if len(player.skills) > 0:
+            for skill in player.skills:
                 self.bind_key([skill.key], skill.use)
         # 松开事件
-        self.bind_key_up([pygame.K_LEFT, pygame.K_RIGHT], self.unmove)
+        self.bind_key_up([key_list[2], key_list[3]], player.unmove)
 
     def bindOthers(self):
-        self.bind_key(pygame.K_SPACE, self.pause)
-        self.bind_key(pygame.K_RETURN, self.startGame)
+        self.bind_key([pygame.K_SPACE], self.pause)
+        self.bind_key([pygame.K_RETURN], self.startGame)
 
     def startGame(self, key):
         if self.gameMode != UNSTART and self.end:
             self.gameMode = UNSTART
             self.end = False
-            self.draw_menu()
+            self.game_init()
         else:
-            self.gameMode = self.gameSelect
+            if self.gameSelect == MUTIPLE:
+                if len(self.players) > 1:
+                    return
+                self.players.append(Player(self))
+                self.bindSelf(
+                    self.players[-1], [pygame.K_t, pygame.K_g, pygame.K_f, pygame.K_h]
+                )
+
+            self.gameMode = INGAME
 
     # ---------------------------------game logic--------------------------------
     def draw_menu(self):
+        if self.gameMode != UNSTART:
+            return
         self.screen.fill(0x000000)
         if self.gameSelect == SOLO:
             pygame.draw.rect(self.screen, hex2rgb(0xB0C4DE), (320, 350, 235, 60))
@@ -117,68 +140,24 @@ class Hell(Game):
         self.screen.blit(game_title, (270, 200))
         self.screen.blit(solo_text, (390, 350))
         self.screen.blit(muti_text, (340, 450))
+        pygame.display.update()
 
-
-    def fall_man(self, id=0):
-        self.body[id].top += self.fallingSpeed
-        self.fallingSpeed = (
-            self.fallingSpeed + ACCELERATION
-            if self.fallingSpeed < MAX_SPEED
-            else MAX_SPEED
+    def draw_end(self):
+        self.screen.fill(0x000000)
+        end_text = self.title_font.render("Game Over", True, hex2rgb(COLOR[TITLE]))
+        score_text = self.text_font.render(
+            "Score: " + str(self.score), True, hex2rgb(COLOR[TEXT])
         )
-
-    def move_man(self,player, vel=MOVING_SPEED):
-        # 此时dire应该已经被game里的handle_input赋值为了某个常数
-        # 或者是被传送带赋值
-        if player.dire == 0:
-            return True
-        rect = player.body.copy()
-        if player.dire == pygame.K_LEFT:
-            rect.left -= vel
-        else:
-            rect.left += vel
-        if rect.left < 0 or rect.left + SIDE >= SCREEN_WIDTH:
-            return False
-        player.body = rect
-        return True
-        # 这些返回值在哪里有用？
-
-    def get_score(self, ba, id=0):
-        # 从to_hell来的
-        # if 人物在平台上方 then 获得分数
-        if self.body[id].top > ba.rect.top and not ba.score:
-            self.score += 1
-            ba.score = True
-            # 因为每次循环都会调用这个函数，这里表示这个ba的分数已经拿到过了
-
-    def exec_barriers(self, id=0):
-        for ba in self.barrier:
-            if not self.body[id].colliderect(ba.rect):
-                self.get_score(ba)
-                continue
-            # 以下都是建立在角色踩在障碍物的条件之上的
-            if ba.type == DEADLY:
-                self.show_end()
-                return
-            # 角色跟随障碍物
-            # 如果不写这个-2的话，会判断为colliderect，一直continue，一直移动不了
-
-            self.fallingSpeed = 0
-            # self.body.top = ba.rect.top - SIDE - 2
-            self.body[id].top -= 2
-            if ba.type == FRAGILE:
-                ba.frag_touch = True
-            elif ba.type == BELT_LEFT or ba.type == BELT_RIGHT:
-                self.move_man(ba.belt_dire, BELT_SPEED)
-            break
-
-        top = self.body[id].top
-        if top < 0 or top + SIDE >= SCREEN_HEIGHT:
-            self.show_end()
-            """TO FIX"""
+        tip_text = self.text_font.render(
+            "Press Enter To Restart", True, hex2rgb(COLOR[TEXT])
+        )
+        self.screen.blit(end_text, (self.screen.get_rect().center[0] - 185, 250))
+        self.screen.blit(score_text, (self.screen.get_rect().center[0] - 100, 400))
+        self.screen.blit(tip_text, (self.screen.get_rect().center[0] - 220, 500))
+        pygame.display.update()
 
     def to_hell(self):
-        # 人物和障碍交互逻辑
+        # 主逻辑
         self.last -= 1  # 生成两个障碍物的间隔（时间？）
         # （初始化为self.last = 6 * SIDE）
         # 生成新障碍
@@ -186,8 +165,6 @@ class Hell(Game):
             self.create_barrier()
             self.last = randint(3, 5) * SIDE
             # 去看barrier的生成逻辑
-        # 更新影子状态
-        self.skills.hilaijin.rise()
         # 更新障碍状态
         for ba in self.barrier:
             if not ba.rise():
@@ -196,14 +173,19 @@ class Hell(Game):
                     # 屏幕内被踩掉的frag
                     self.score += 1
                 self.barrier.remove(ba)
-
-        # 左右移动
-        self.move_man(self.dire)
-        # 下降
-        self.fall_man()
-        # self.body.top += FALLING_SPEED
-        # 障碍交互逻辑
-        self.exec_barriers()
+        # 逐人物处理
+        for player in self.players:
+            if not player.alive:
+                continue
+            # 更新技能
+            for skill in player.skills:
+                skill.update()
+            # 左右移动
+            player.move_man()
+            # 下降
+            player.fall_man()
+            # 障碍交互逻辑
+            player.exec_barriers()
 
     def create_barrier(self, x=None, y=None):
         if x != None:
@@ -217,37 +199,40 @@ class Hell(Game):
             self.barrier.append(Barrier(self.screen))
         # 回到update中
 
-    def update(self, current_time):
+    def update(self, current_time=None):
         # 更新下一帧状态
         if self.gameMode != UNSTART:
+            end = True
+            for player in self.players:
+                if player.alive:
+                    end = False
+            if end:
+                self.draw()
+                self.end = True
             if self.end or self.is_pause:
                 return
             self.to_hell()
 
-    def draw(self, current_time, end=False):
+    def draw(self, current_time=None):
         # 绘制下一帧
         if self.gameMode != UNSTART:
-            if self.end or self.is_pause:
+            if self.is_pause:
                 return
+            if self.end:
+                self.draw_end()
+                return 
             self.screen.fill(0x000000)
             self.draw_score((0x3C, 0x3C, 0x3C))
             for ba in self.barrier:
                 ba.draw()
-            if self.skills.hilaijin.ishilaijin:
-                self.screen.fill(COLOR[SHADOW], self.skills.hilaijin.shadow)
-            if not end:
-                for body in self.body:
-                    self.screen.fill(COLOR[BODY], body)
-            else:
-                self.screen.fill(COLOR[DEADLY], body)
-            """TO FIX"""
+            for player in self.players:
+                player.draw()
+            pygame.display.update()
         else:
             self.draw_menu()
-        pygame.display.update()
 
 
 if __name__ == "__main__":
-    skills = Skills()
-    hell = Hell("to the hell", (SCREEN_WIDTH, SCREEN_HEIGHT), skills=skills)
+    hell = Hell("to the hell", (SCREEN_WIDTH, SCREEN_HEIGHT))
     # 先声明了类，那我应该去看初始化
     hell.run()

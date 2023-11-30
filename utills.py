@@ -40,10 +40,13 @@ MOVING_SPEED = 2
 BELT_SPEED = 1
 ACCELERATION = 0.2
 MAX_SPEED = 10
+MAX_JUMP_CHANCE = 2
 
-UNSTART = 2
+
 SOLO = 0
 MUTIPLE = 1
+UNSTART = 2
+INGAME = 3
 
 
 # ---------------------------------------平台类---------------------------------------
@@ -100,22 +103,37 @@ class Barrier(object):
 
 # ------------------------------------------玩家类------------------------------------
 class Player:
-    def __init__(self, hell, skill=None, id=0, name="player", SIDE=13):
+    """
+    玩家类
+    可以通过self.hell访问主进程
+    self.skills为列表,其中元素为对应的技能类(继承自Skill)
+    hell进程中将各个按键绑定
+    reset将玩家状态重置,位置改为hell中第一个barrier位置
+    draw绘制自身及技能衍生物
+    """
+
+    def __init__(self, hell, skill=[], id=0, name="player", SIDE=13):
+        self.screen = hell.screen
         self.skills = skill  # List[functions]
         for skill in self.skills:
             skill.bind(self)
+        # 特殊属性
         self.hell = hell
         self.id = id
         self.name = name
+        self.alive = True
+        self.dead_clear = False
         self.body = pygame.Rect(self.hell.barrier[0].rect.center[0], 200, SIDE, SIDE)
         self.dire = 0
         self.fallingSpeed = 0
-        self.acceleration = 0.2
+        self.acceleration = ACCELERATION
+        self.jumpChance = MAX_JUMP_CHANCE
 
     def jump(self, key, vel=-8):
         if (not self.hell.is_pause) and (self.hell.gameMode != UNSTART):
-            # self.body.top -= 70
-            self.fallingSpeed = vel
+            if self.jumpChance > 0:
+                self.fallingSpeed = vel
+                self.jumpChance -= 1
         elif self.hell.gameMode == UNSTART:
             self.hell.gameSelect = 1 - self.hell.gameSelect
 
@@ -127,24 +145,183 @@ class Player:
 
     def move(self, key):
         if self.hell.gameMode != UNSTART:
-            self.dire = key
-
+            # 映射表，仅本地多人使用
+            match_rule = {
+                pygame.K_LEFT: pygame.K_LEFT,
+                pygame.K_RIGHT: pygame.K_RIGHT,
+                pygame.K_f: pygame.K_LEFT,
+                pygame.K_h: pygame.K_RIGHT,
+            }
+            self.dire = match_rule[key]
 
     def unmove(self, key):
         self.dire = 0
-    
-    def reset(self,x = 0,y = 0):
-        self.body.center = (x,y)
+
+    def reset(self):
+        self.body = pygame.Rect(self.hell.barrier[0].rect.center[0], 200, SIDE, SIDE)
         self.fallingSpeed = 0
         self.dire = 0
-#--------------------------------------技能类----------------------------------------
+        self.jumpChance = 2
+        self.acceleration = ACCELERATION
+        self.alive = True
+
+    def get_score(self, ba):
+        # if 人物在平台上方 then 获得分数
+        if self.body.top > ba.rect.top and not ba.score:
+            self.hell.score += 1
+            ba.score = True
+            # 因为每次循环都会调用这个函数，这里表示这个ba的分数已经拿到过了
+
+    def exec_barriers(self):
+        for ba in self.hell.barrier:
+            if not self.body.colliderect(ba.rect):
+                self.get_score(ba)
+                continue
+            # 以下都是建立在角色踩在障碍物的条件之上的
+            if ba.type == DEADLY:
+                self.alive = False
+                return
+            # 角色跟随障碍物
+            self.fallingSpeed = 0
+            self.body.top -= ROLLING_SPEED
+            # 重置跳跃次数
+            self.jumpChance = MAX_JUMP_CHANCE
+            if ba.type == FRAGILE:
+                ba.frag_touch = True
+            elif ba.type == BELT_LEFT or ba.type == BELT_RIGHT:
+                self.move_man(ba.belt_dire, BELT_SPEED)
+            break
+
+        top = self.body.top
+        if top < 0 or top + SIDE >= SCREEN_HEIGHT:
+            self.alive = False
+
+    def fall_man(self):
+        self.body.top += self.fallingSpeed
+        self.fallingSpeed = (
+            self.fallingSpeed + self.acceleration
+            if self.fallingSpeed < MAX_SPEED
+            else MAX_SPEED
+        )
+
+    def move_man(self, dire=None, vel=MOVING_SPEED):
+        # 此时dire应该已经被game里的handle_input赋值为了某个常数
+        # 或者是被传送带赋值
+        if dire is None:
+            dire = self.dire
+        if dire == 0:
+            return
+        rect = self.body.copy()
+        if dire == pygame.K_LEFT:
+            rect.left -= vel
+        else:
+            rect.left += vel
+        if rect.left < 0 or rect.left + SIDE >= SCREEN_WIDTH:
+            return 
+        self.body = rect
+
+    def draw(self):
+        if self.alive:
+            self.screen.fill(COLOR[BODY], self.body)
+            for skill in self.skills:
+                if skill.product != None:
+                    self.screen.fill(COLOR[skill.product_color], skill.product)
+        elif not self.dead_clear:
+            self.screen.fill(COLOR[DEADLY], self.body)
+            self.dead_clear = True
+
+
+# --------------------------------------技能类----------------------------------------
 class Skill:
-    def __init__(self,key):
-        self.key = key#key:pygame.Key
-        
+    """
+    技能根类
+    bind会在声明player时自动调用
+    使用self.player访问对应玩家
+    use在每次按下绑定按键时调用
+    update在主进程每次update(即生成下一帧)时调用
+    自定义子类可实现标准化操作
+    """
+
+    def __init__(self, key):
+        self.key = key  # key:pygame.Key
+        self.product = None
+        self.product_color = None
+
     def bind(self, player):
         self.player = player
 
-    def use():
+    def use(self):
         pass
 
+    def update(self):
+        pass
+
+
+class dash(Skill):
+    def __init__(self, key):
+        super(dash, self).__init__(key)
+        self.cd = 0
+
+    def use(self, key, distance=5):
+        if self.cd != 0:
+            return
+        dire = self.player.dire
+        if dire == pygame.K_LEFT:
+            self.player.body.x -= (
+                SIDE * distance if self.player.body.x - SIDE * distance > 2 else 2
+            )
+        elif dire == pygame.K_RIGHT:
+            self.player.body.x += (
+                SIDE * distance
+                if self.player.body.x + SIDE * distance < SCREEN_WIDTH - SIDE - 2
+                else SCREEN_WIDTH - SIDE - 2
+            )
+        self.cd = 60
+
+    def update(self):
+        if self.cd > 0:
+            self.cd -= 1
+
+
+class wall(Skill):
+    def __init__(self, key):
+        super(wall, self).__init__(key)
+        self.cd = 0
+
+    def use(self, key):
+        if self.cd != 0:
+            return
+        self.player.hell.create_barrier(
+            x=self.player.body.x - 10, y=self.player.body.y + SIDE + 25
+        )
+        self.cd = 90
+
+    def update(self):
+        if self.cd > 0:
+            self.cd -= 1
+
+
+class hilaijinnojyutsu(Skill):
+    def __init__(self, key):
+        super(hilaijinnojyutsu, self).__init__(key)
+        self.ishilaijin = 0
+        self.product_color = SHADOW
+
+    def use(self, key):
+        if self.ishilaijin == 0:
+            self.product = self.player.body.copy()
+            self.ishilaijin = 1
+        else:
+            self.player.body = self.product
+            self.player.fallingSpeed = 0
+            self.player.jumpChance = MAX_JUMP_CHANCE
+            self.ishilaijin = 0
+            self.product = None
+
+    def update(self, vel=ROLLING_SPEED):
+        if not self.ishilaijin:
+            return
+        self.product.y -= vel
+        if self.product.y - SIDE < 0:
+            self.ishilaijin = 0
+            self.product = None
