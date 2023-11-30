@@ -123,6 +123,8 @@ class Hell(Game):
             self.gameMode = INGAME
 
     # ---------------------------------game logic--------------------------------
+    
+    #绘制开始页面
     def draw_menu(self):
         if self.gameMode != UNSTART:
             return
@@ -142,6 +144,7 @@ class Hell(Game):
         self.screen.blit(muti_text, (340, 450))
         pygame.display.update()
 
+    #绘制结束页面
     def draw_end(self):
         self.screen.fill(0x000000)
         end_text = self.title_font.render("Game Over", True, hex2rgb(COLOR[TITLE]))
