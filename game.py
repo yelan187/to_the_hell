@@ -33,7 +33,6 @@ class Game(object):
         self.last_time = pygame.time.get_ticks()
         self.is_pause = False
         self.is_draw = True
-        self.score_font = pygame.font.SysFont("Calibri", 100, True)
 
     def bind_key(self, key, action=None):
         if isinstance(key, list):

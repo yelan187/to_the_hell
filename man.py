@@ -1,6 +1,7 @@
 import pygame
 from game import *
 from random import choice, randint
+import time
 
 # ---------------------------------def consts________________________________________
 SCORE = 0
@@ -11,6 +12,8 @@ BELT_LEFT = 4
 BELT_RIGHT = 5
 BODY = 6
 SHADOW = 7
+TEXT = 8
+TITLE = 9
 
 GAME_ROW = 60
 GAME_COL = 70
@@ -27,6 +30,8 @@ COLOR = {
     BELT_RIGHT: 0xFF99FF,
     BODY: 0x00FF00,
     SHADOW: 0xFFFF00,
+    TITLE: 0xB22222,
+    TEXT: 0x696969,
 }
 CHOICE = [SOLID, SOLID, SOLID, FRAGILE, FRAGILE, BELT_LEFT, BELT_RIGHT, DEADLY]
 
@@ -44,7 +49,9 @@ MUTIPLE = 1
 
 # ----------------------------------------技能类------------------------------------------
 class Skills(object):
-    def __init__(self):
+    def __init__(self,Hell = None,id = 0):
+        self.hell = Hell
+        self.id = id
         self.skill = {
             pygame.K_q: self.dash,
             pygame.K_w: self.wall,
@@ -55,29 +62,32 @@ class Skills(object):
         # hilaijinnojyutsu
         self.hilaijin = Hilaijin()
 
-    def dash(self, none, distance=5):
-        self.dire = hell.dire
+    def bind(self,Hell = None):
+        self.hell = Hell
+
+    def dash(self, none, distance=5,id = 0):
+        self.dire = self.hell.dire
         if self.dire == pygame.K_LEFT:
-            hell.body.x -= SIDE * distance if hell.body.x - SIDE * distance > 2 else 2
+            self.hell.body[id].x -= SIDE * distance if self.hell.body[id].x - SIDE * distance > 2 else 2
         elif self.dire == pygame.K_RIGHT:
-            hell.body.x += (
+            self.hell.body.x += (
                 SIDE * distance
-                if hell.body.x + SIDE * distance < SCREEN_WIDTH - SIDE - 2
+                if self.hell.body.x + SIDE * distance < SCREEN_WIDTH - SIDE - 2
                 else SCREEN_WIDTH - SIDE - 2
             )
         return
 
-    def wall(self, none):
-        hell.create_barrier(x=hell.body.x - 10, y=hell.body.y + SIDE + 25)
+    def wall(self, none,id = 0):
+        self.hell.create_barrier(x=self.hell.body[id].x - 10, y=self.hell.body[id].y + SIDE + 25)
 
-    def hilaijinnojyutsu(self, none):
+    def hilaijinnojyutsu(self, none,id = 0):
         # print(self.hilaijin.ishilaijin)
         if self.hilaijin.ishilaijin == 0:
             self.hilaijin.ishilaijin = 1
             self.hilaijin.make_shadow()
         else:
             self.hilaijin.ishilaijin = 0
-            hell.body = self.hilaijin.shadow
+            self.hell.body[id] = self.hilaijin.shadow
             self.hilaijin.shadow = None
 
 
@@ -85,8 +95,8 @@ class Hilaijin(object):
     def __init__(self):
         self.ishilaijin = 0
 
-    def make_shadow(self):
-        self.shadow = hell.body.copy()
+    def make_shadow(self,id = 0):
+        self.shadow = hell.body[id].copy()
 
     def rise(self, vel=ROLLING_SPEED):
         if not self.ishilaijin:
@@ -150,8 +160,10 @@ class Barrier(object):
 
 
 class Hell(Game):
-    def __init__(self, title, size, fps=60):
+    def __init__(self, title, size, fps=60,skills = None):
         super(Hell, self).__init__(title, size, fps)
+        self.skills = skills
+        self.skills.bind(self)
         self.gameMode = UNSTART
         self.gameSelect = SOLO
         self.score_font = pygame.font.SysFont("arial", 130)
@@ -165,7 +177,7 @@ class Hell(Game):
         self.fallingSpeed = 0
         self.barrier = [Barrier(self.screen, SOLID)]
         # 第一个肯定是solid防止开局就死
-        self.body = pygame.Rect(self.barrier[0].rect.center[0], 200, SIDE, SIDE)
+        self.body = [pygame.Rect(self.barrier[0].rect.center[0], 200, SIDE, SIDE)]
         # 按下事件
         self.bind_key([pygame.K_LEFT, pygame.K_RIGHT], self.move)
         self.bind_key([pygame.K_DOWN], self.fall)
@@ -173,7 +185,6 @@ class Hell(Game):
         self.bind_key(skills.skill)
         self.bind_key(pygame.K_SPACE, self.pause)
         self.bind_key(pygame.K_RETURN, self.startGame)
-        self.bind_key(pygame.K_r, self.restart)
         # 松开事件
         self.bind_key_up([pygame.K_LEFT, pygame.K_RIGHT], self.unmove)
 
@@ -201,54 +212,68 @@ class Hell(Game):
     def unmove(self, key):
         self.dire = 0
 
-    def startGame(self,key):
-        self.gameMode = self.gameSelect
-
-    def restart(self, key):
+    def startGame(self, key):
         if self.gameMode != UNSTART and self.end:
             self.gameMode = UNSTART
-            self.gameSelect = SOLO
             self.end = False
-            self.last = 6 * SIDE
-            self.dire = 0
-            self.fallingSpeed = 0
-            self.barrier = [Barrier(self.screen, SOLID)]
-            self.body = pygame.Rect(self.barrier[0].rect.center[0], 200, SIDE, SIDE)
             self.draw_menu()
+        else:
+            self.gameMode = self.gameSelect
+
     # ---------------------------------game logic--------------------------------
     def draw_menu(self):
         self.screen.fill(0x000000)
-        game_title = self.title_font.render("Starting Screen", True, hex2rgb(0xFFFFFF))
-        solo_text = self.text_font.render("Solo", True, hex2rgb(0xFFFFFF))
-        muti_text = self.text_font.render("Mutiplayer", True, hex2rgb(0xFFFFFF))
-        self.screen.blit(game_title, (180, 200))
-        self.screen.blit(solo_text, (390, 350))
-        self.screen.blit(muti_text, (320, 450))
         if self.gameSelect == SOLO:
             pygame.draw.rect(self.screen, hex2rgb(0xB0C4DE), (320, 350, 235, 60))
             pygame.draw.rect(self.screen, hex2rgb(0xFFFFFF), (320, 450, 235, 60))
         else:
             pygame.draw.rect(self.screen, hex2rgb(0xB0C4DE), (320, 450, 235, 60))
             pygame.draw.rect(self.screen, hex2rgb(0xFFFFFF), (320, 350, 235, 60))
+        game_title = self.title_font.render("To The Hell", True, hex2rgb(COLOR[TITLE]))
+        solo_text = self.text_font.render("Solo", True, hex2rgb(COLOR[TEXT]))
+        muti_text = self.text_font.render("Mutiplayer", True, hex2rgb(COLOR[TEXT]))
+        x = self.screen.get_rect().center[0]
+        self.screen.blit(game_title, (270, 200))
+        self.screen.blit(solo_text, (390, 350))
+        self.screen.blit(muti_text, (340, 450))
 
     def show_end(self):
         self.draw(0, end=True)
         self.end = True
+        self.gameSelect = SOLO
+        self.last = 6 * SIDE
+        self.dire = 0
+        self.fallingSpeed = 0
+        self.barrier = [Barrier(self.screen, SOLID)]
+        self.body = [pygame.Rect(self.barrier[0].rect.center[0], 200, SIDE, SIDE)]
+        time.sleep(1)
+        self.screen.fill(0x000000)
+        end_text = self.title_font.render("Game Over", True, hex2rgb(COLOR[TITLE]))
+        score_text = self.text_font.render(
+            "Score: " + str(self.score), True, hex2rgb(COLOR[TEXT])
+        )
+        tip_text = self.text_font.render(
+            "Press Enter To Restart", True, hex2rgb(COLOR[TEXT])
+        )
+        self.screen.blit(end_text, (self.screen.get_rect().center[0] - 185, 250))
+        self.screen.blit(score_text, (self.screen.get_rect().center[0] - 100, 400))
+        self.screen.blit(tip_text, (self.screen.get_rect().center[0] - 220, 500))
+        pygame.display.update()
 
-    def fall_man(self):
-        self.body.top += self.fallingSpeed
+    def fall_man(self,id = 0):
+        self.body[id].top += self.fallingSpeed
         self.fallingSpeed = (
             self.fallingSpeed + ACCELERATION
             if self.fallingSpeed < MAX_SPEED
             else MAX_SPEED
         )
 
-    def move_man(self, dire, vel=MOVING_SPEED):
+    def move_man(self, dire, vel=MOVING_SPEED,id = 0):
         # 此时dire应该已经被game里的handle_input赋值为了某个常数
         # 或者是被传送带赋值
         if dire == 0:
             return True
-        rect = self.body.copy()
+        rect = self.body[id].copy()
         if dire == pygame.K_LEFT:
             rect.left -= vel
         else:
@@ -259,21 +284,21 @@ class Hell(Game):
         #     if rect.colliderect(ba.rect):
         #         # return False
         #         pass
-        self.body = rect
+        self.body[id] = rect
         return True
         # 这些返回值在哪里有用？
 
-    def get_score(self, ba):
+    def get_score(self, ba,id = 0):
         # 从to_hell来的
         # if 人物在平台上方 then 获得分数
-        if self.body.top > ba.rect.top and not ba.score:
+        if self.body[id].top > ba.rect.top and not ba.score:
             self.score += 1
             ba.score = True
             # 因为每次循环都会调用这个函数，这里表示这个ba的分数已经拿到过了
 
-    def exec_barriers(self):
+    def exec_barriers(self,id = 0):
         for ba in self.barrier:
-            if not self.body.colliderect(ba.rect):
+            if not self.body[id].colliderect(ba.rect):
                 self.get_score(ba)
                 continue
             # 以下都是建立在角色踩在障碍物的条件之上的
@@ -285,16 +310,17 @@ class Hell(Game):
 
             self.fallingSpeed = 0
             # self.body.top = ba.rect.top - SIDE - 2
-            self.body.top -= 2
+            self.body[id].top -= 2
             if ba.type == FRAGILE:
                 ba.frag_touch = True
             elif ba.type == BELT_LEFT or ba.type == BELT_RIGHT:
                 self.move_man(ba.belt_dire, BELT_SPEED)
             break
 
-        top = self.body.top
+        top = self.body[id].top
         if top < 0 or top + SIDE >= SCREEN_HEIGHT:
             self.show_end()
+            '''TO FIX'''
 
     def to_hell(self):
         # 人物和障碍交互逻辑
@@ -306,7 +332,7 @@ class Hell(Game):
             self.last = randint(3, 5) * SIDE
             # 去看barrier的生成逻辑
         # 更新影子状态
-        skills.hilaijin.rise()
+        self.skills.hilaijin.rise()
         # 更新障碍状态
         for ba in self.barrier:
             if not ba.rise():
@@ -352,12 +378,14 @@ class Hell(Game):
             self.draw_score((0x3C, 0x3C, 0x3C))
             for ba in self.barrier:
                 ba.draw()
-            if skills.hilaijin.ishilaijin:
-                self.screen.fill(COLOR[SHADOW], skills.hilaijin.shadow)
+            if self.skills.hilaijin.ishilaijin:
+                self.screen.fill(COLOR[SHADOW], self.skills.hilaijin.shadow)
             if not end:
-                self.screen.fill(COLOR[BODY], self.body)
+                for body in self.body:
+                    self.screen.fill(COLOR[BODY], body)
             else:
-                self.screen.fill(COLOR[DEADLY], self.body)
+                self.screen.fill(COLOR[DEADLY], body)
+            '''TO FIX'''
         else:
             self.draw_menu()
         pygame.display.update()
@@ -365,7 +393,7 @@ class Hell(Game):
 
 if __name__ == "__main__":
     skills = Skills()
-    hell = Hell("to the hell", (SCREEN_WIDTH, SCREEN_HEIGHT))
+    hell = Hell("to the hell", (SCREEN_WIDTH, SCREEN_HEIGHT), skills = skills)
     # 先声明了类，那我应该去看初始化
     hell.run()
     # game里找run
