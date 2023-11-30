@@ -115,16 +115,19 @@ class Hell(Game):
         else:
             if self.gameSelect == MUTIPLE:
                 if len(self.players) > 1:
+                    self.gameMode = INGAME
                     return
                 self.players.append(Player(self))
                 self.bindSelf(
                     self.players[-1], [pygame.K_t, pygame.K_g, pygame.K_f, pygame.K_h]
                 )
-
+            else:
+                self.players = self.players[0:1]
+                
             self.gameMode = INGAME
 
     # ---------------------------------game logic--------------------------------
-    
+
     #绘制开始页面
     def draw_menu(self):
         if self.gameMode != UNSTART:
@@ -212,6 +215,7 @@ class Hell(Game):
                     end = False
             if end:
                 self.draw()
+                time.sleep(1)
                 self.end = True
             if self.end or self.is_pause:
                 return
