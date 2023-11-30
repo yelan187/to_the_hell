@@ -306,22 +306,29 @@ class hilaijinnojyutsu(Skill):
         super(hilaijinnojyutsu, self).__init__(key)
         self.ishilaijin = 0
         self.product_color = SHADOW
+        self.cd = 0
 
     def use(self, key):
-        if self.ishilaijin == 0:
-            self.product = self.player.body.copy()
-            self.ishilaijin = 1
-        else:
+        if self.ishilaijin == 1:
             self.player.body = self.product
             self.player.fallingSpeed = 0
             self.player.jumpChance = MAX_JUMP_CHANCE
             self.ishilaijin = 0
             self.product = None
+            return 
+        if self.cd != 0:
+            return  
+        self.product = self.player.body.copy()
+        self.ishilaijin = 1
+        self.cd = 60
+
 
     def update(self, vel=ROLLING_SPEED):
-        if not self.ishilaijin:
-            return
-        self.product.y -= vel
-        if self.product.y - SIDE < 0:
-            self.ishilaijin = 0
-            self.product = None
+        if self.cd > 0:
+            self.cd -= 1
+        if self.ishilaijin == 1:
+            self.product.y -= vel
+            if self.product.y - SIDE < 0:
+                self.ishilaijin = 0
+                self.product = None
+                self.cd = 0

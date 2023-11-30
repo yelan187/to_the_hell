@@ -75,12 +75,13 @@ class Hell(Game):
         self.title_font = pygame.font.SysFont("arial", 80)
         self.last = 6 * SIDE
         self.barrier = [Barrier(self.screen, SOLID)]
-        self.players = [Player(self, [dash(pygame.K_q), hilaijinnojyutsu(pygame.K_e)])]
+        self.players = [Player(self, [dash(pygame.K_q), wall(pygame.K_w),hilaijinnojyutsu(pygame.K_e)])]
         # 按下事件
         self.bindSelf(self.players[0])
         self.bindOthers()
 
     def game_init(self):
+        self.score = 0
         self.last = 6 * SIDE
         self.barrier = [Barrier(self.screen, SOLID)]
         for player in self.players:
