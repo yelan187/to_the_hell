@@ -1,7 +1,8 @@
 import pygame
-import game
+from game import *
 from random import choice, randint
 
+# ---------------------------------def consts________________________________________
 SCORE = 0
 SOLID = 1
 FRAGILE = 2
@@ -36,7 +37,12 @@ BELT_SPEED = 1
 ACCELERATION = 0.2
 MAX_SPEED = 10
 
+UNSTART = 2
+SOLO = 0
+MUTIPLE = 1
 
+
+# ----------------------------------------技能类------------------------------------------
 class Skills(object):
     def __init__(self):
         self.skill = {
@@ -91,6 +97,7 @@ class Hilaijin(object):
             self.shadow = None
 
 
+# ----------------------------障碍类-----------------------------
 class Barrier(object):
     def __init__(self, screen, opt=None, x=None, y=None):
         self.screen = screen
@@ -142,9 +149,14 @@ class Barrier(object):
             self.draw_side(i * SIDE + self.rect.left, self.rect.top)
 
 
-class Hell(game.Game):
+class Hell(Game):
     def __init__(self, title, size, fps=60):
         super(Hell, self).__init__(title, size, fps)
+        self.gameMode = UNSTART
+        self.gameSelect = SOLO
+        self.score_font = pygame.font.SysFont("arial", 130)
+        self.text_font = pygame.font.SysFont("arial", 50)
+        self.title_font = pygame.font.SysFont("arial", 80)
         # 去把game里的初始化也看了
         # 那边没什么太值得看的
         self.last = 6 * SIDE
@@ -154,38 +166,70 @@ class Hell(game.Game):
         self.barrier = [Barrier(self.screen, SOLID)]
         # 第一个肯定是solid防止开局就死
         self.body = pygame.Rect(self.barrier[0].rect.center[0], 200, SIDE, SIDE)
-
+        # 按下事件
         self.bind_key([pygame.K_LEFT, pygame.K_RIGHT], self.move)
         self.bind_key([pygame.K_DOWN], self.fall)
         self.bind_key([pygame.K_UP], self.jump)
-        # 绑定按键，去game里看
-        self.bind_key_up([pygame.K_LEFT, pygame.K_RIGHT], self.unmove)
-
-        self.skill = skills.skill
-        self.bind_key(self.skill)
-
+        self.bind_key(skills.skill)
         self.bind_key(pygame.K_SPACE, self.pause)
+        self.bind_key(pygame.K_RETURN, self.startGame)
+        self.bind_key(pygame.K_r, self.restart)
+        # 松开事件
+        self.bind_key_up([pygame.K_LEFT, pygame.K_RIGHT], self.unmove)
 
     # --------------------------------key related functions----------------------
     def jump(self, key, vel=-8):
-        if not self.is_pause:
+        if (not self.is_pause) and (self.gameMode != UNSTART):
             # self.body.top -= 70
             self.fallingSpeed = vel
+        elif self.gameMode == UNSTART:
+            self.gameSelect = 1 - self.gameSelect
 
     def fall(self, key):
-        if not self.is_pause:
+        if (not self.is_pause) and (self.gameMode != UNSTART):
             self.fallingSpeed = 14
+        elif self.gameMode == UNSTART:
+            self.gameSelect = 1 - self.gameSelect
 
     def move(self, key):
         # 从game.py来的，key是我按键的key属性。
         # 接下来看看dire有什么用，到move_man里去
-        self.dire = key
+        if self.gameMode != UNSTART:
+            self.dire = key
         # 会把我按下的按键的key属性作为参数传给dire，但我传的是一个key属性，这是一个常数值，映射为一个按键
 
     def unmove(self, key):
         self.dire = 0
 
+    def startGame(self,key):
+        self.gameMode = self.gameSelect
+
+    def restart(self, key):
+        if self.gameMode != UNSTART and self.end:
+            self.gameMode = UNSTART
+            self.gameSelect = SOLO
+            self.end = False
+            self.last = 6 * SIDE
+            self.dire = 0
+            self.fallingSpeed = 0
+            self.barrier = [Barrier(self.screen, SOLID)]
+            self.body = pygame.Rect(self.barrier[0].rect.center[0], 200, SIDE, SIDE)
+            self.draw_menu()
     # ---------------------------------game logic--------------------------------
+    def draw_menu(self):
+        self.screen.fill(0x000000)
+        game_title = self.title_font.render("Starting Screen", True, hex2rgb(0xFFFFFF))
+        solo_text = self.text_font.render("Solo", True, hex2rgb(0xFFFFFF))
+        muti_text = self.text_font.render("Mutiplayer", True, hex2rgb(0xFFFFFF))
+        self.screen.blit(game_title, (180, 200))
+        self.screen.blit(solo_text, (390, 350))
+        self.screen.blit(muti_text, (320, 450))
+        if self.gameSelect == SOLO:
+            pygame.draw.rect(self.screen, hex2rgb(0xB0C4DE), (320, 350, 235, 60))
+            pygame.draw.rect(self.screen, hex2rgb(0xFFFFFF), (320, 450, 235, 60))
+        else:
+            pygame.draw.rect(self.screen, hex2rgb(0xB0C4DE), (320, 450, 235, 60))
+            pygame.draw.rect(self.screen, hex2rgb(0xFFFFFF), (320, 350, 235, 60))
 
     def show_end(self):
         self.draw(0, end=True)
@@ -227,9 +271,7 @@ class Hell(game.Game):
             ba.score = True
             # 因为每次循环都会调用这个函数，这里表示这个ba的分数已经拿到过了
 
-    def to_hell(self):
-        # 人物和障碍交互逻辑
-        # 以下判断是否踩在障碍之上
+    def exec_barriers(self):
         for ba in self.barrier:
             if not self.body.colliderect(ba.rect):
                 self.get_score(ba)
@@ -254,22 +296,8 @@ class Hell(game.Game):
         if top < 0 or top + SIDE >= SCREEN_HEIGHT:
             self.show_end()
 
-    def create_barrier(self, x=None, y=None):
-        if x != None:
-            self.barrier.append(Barrier(self.screen, SOLID, x, y))
-            return
-        solid = list(filter(lambda ba: ba.type == SOLID, self.barrier))
-        # 保证至少有一个solid平台
-        if len(solid) < 1:
-            self.barrier.append(Barrier(self.screen, SOLID))
-        else:
-            self.barrier.append(Barrier(self.screen))
-        # 回到update中
-
-    def update(self, current_time):
-        # 更新下一帧状态
-        if self.end or self.is_pause:
-            return
+    def to_hell(self):
+        # 人物和障碍交互逻辑
         self.last -= 1  # 生成两个障碍物的间隔（时间？）
         # （初始化为self.last = 6 * SIDE）
         # 生成新障碍
@@ -293,23 +321,45 @@ class Hell(game.Game):
         # 下降
         self.fall_man()
         # self.body.top += FALLING_SPEED
-        # move_man的返回值是在to_hell里用到的
-        self.to_hell()
+        # 障碍交互逻辑
+        self.exec_barriers()
+
+    def create_barrier(self, x=None, y=None):
+        if x != None:
+            self.barrier.append(Barrier(self.screen, SOLID, x, y))
+            return
+        solid = list(filter(lambda ba: ba.type == SOLID, self.barrier))
+        # 保证至少有一个solid平台
+        if len(solid) < 1:
+            self.barrier.append(Barrier(self.screen, SOLID))
+        else:
+            self.barrier.append(Barrier(self.screen))
+        # 回到update中
+
+    def update(self, current_time):
+        # 更新下一帧状态
+        if self.gameMode != UNSTART:
+            if self.end or self.is_pause:
+                return
+            self.to_hell()
 
     def draw(self, current_time, end=False):
         # 绘制下一帧
-        if self.end or self.is_pause:
-            return
-        self.screen.fill(0x000000)
-        self.draw_score((0x3C, 0x3C, 0x3C))
-        for ba in self.barrier:
-            ba.draw()
-        if skills.hilaijin.ishilaijin:
-            self.screen.fill(COLOR[SHADOW], skills.hilaijin.shadow)
-        if not end:
-            self.screen.fill(COLOR[BODY], self.body)
+        if self.gameMode != UNSTART:
+            if self.end or self.is_pause:
+                return
+            self.screen.fill(0x000000)
+            self.draw_score((0x3C, 0x3C, 0x3C))
+            for ba in self.barrier:
+                ba.draw()
+            if skills.hilaijin.ishilaijin:
+                self.screen.fill(COLOR[SHADOW], skills.hilaijin.shadow)
+            if not end:
+                self.screen.fill(COLOR[BODY], self.body)
+            else:
+                self.screen.fill(COLOR[DEADLY], self.body)
         else:
-            self.screen.fill(COLOR[DEADLY], self.body)
+            self.draw_menu()
         pygame.display.update()
 
 

@@ -33,7 +33,7 @@ class Game(object):
         self.last_time = pygame.time.get_ticks()
         self.is_pause = False
         self.is_draw = True
-        self.score_font = pygame.font.SysFont("Calibri", 130, True)
+        self.score_font = pygame.font.SysFont("Calibri", 100, True)
 
     def bind_key(self, key, action=None):
         if isinstance(key, list):
@@ -76,12 +76,14 @@ class Game(object):
                 self.keys[event.key](event.key)
                 #把我的event的key去self.keys字典里对应。注意这里左右键都绑定成了move函数，
                 #那么我每次都会把我的按键对象event的key属性作为参数传到move里面
+            '''
             if event.key == pygame.K_F11:                           # F11全屏
                 self.fullscreen = not self.fullscreen
                 if self.fullscreen:
                     self.screen = pygame.display.set_mode(self.size, pygame.FULLSCREEN, 32)
                 else:
                     self.screen = pygame.display.set_mode(self.size, 0, 32)
+            '''
         if event.type == pygame.KEYUP:
             #抬起按键
             if event.key in self.keys_up.keys():
@@ -116,35 +118,3 @@ class Game(object):
 
     def draw(self, current_time):
         pass
-
-
-class Test(Game):
-    def __init__(self, title, size, fps=30):
-        super(Test, self).__init__(title, size, fps)
-        self.bind_key(pygame.K_RETURN, self.press_enter)
-
-    def press_enter(self):
-        print("press enter")
-
-    def draw(self, current_time):
-        pass
-
-
-def press_space(key):
-    print("press space.")
-
-
-def click(x, y):
-    print(x, y)
-
-
-def main():
-    print(hex2rgb(0xfcf040))
-    game = Test("game", (640, 480))
-    game.bind_key(pygame.K_SPACE, press_space)
-    game.bind_click(1, click)
-    game.run()
-
-
-if __name__ == '__main__':
-    main()
