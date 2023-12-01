@@ -139,14 +139,10 @@ class Player:
             if self.jumpChance > 0:
                 self.fallingSpeed = vel
                 self.jumpChance -= 1
-        elif self.hell.gameMode == UNSTART:
-            self.hell.gameSelect = 1 - self.hell.gameSelect
 
     def fall(self, key):
         if (not self.hell.is_pause) and (self.hell.gameMode != UNSTART):
             self.fallingSpeed = 14
-        elif self.hell.gameMode == UNSTART:
-            self.hell.gameSelect = 1 - self.hell.gameSelect
 
     def move(self, key):
         if self.hell.gameMode != UNSTART:
@@ -169,6 +165,8 @@ class Player:
         self.jumpChance = 2
         self.acceleration = ACCELERATION
         self.alive = True
+        for skill in self.skills:
+            skill.reset()
 
     def get_score(self, ba):
         # if 人物在平台上方 then 获得分数
@@ -250,7 +248,7 @@ class Skill:
     自定义子类可实现标准化操作
     """
 
-    def __init__(self, key):
+    def __init__(self, key = 1):
         self.key = key  # key:pygame.Key
         self.product = None
         self.product_color = None
@@ -262,6 +260,8 @@ class Skill:
         pass
 
     def update(self):
+        pass
+    def reset(self):
         pass
 
 
@@ -290,6 +290,9 @@ class dash(Skill):
         if self.cd > 0:
             self.cd -= 1
 
+    def reset(self):
+        self.cd = 0
+
 
 class wall(Skill):
     def __init__(self, key):
@@ -308,6 +311,9 @@ class wall(Skill):
         if self.cd > 0:
             self.cd -= 1
 
+    def reset(self):
+        self.cd = 0
+
 
 class hilaijinnojyutsu(Skill):
     def __init__(self, key):
@@ -320,7 +326,7 @@ class hilaijinnojyutsu(Skill):
         if self.ishilaijin == 1:
             self.player.body = self.product
             self.player.fallingSpeed = 0
-            self.player.jumpChance = MAX_JUMP_CHANCE
+            self.player.jumpChance = MAX_JUMP_CHANCE - 1
             self.ishilaijin = 0
             self.product = None
             return 
@@ -340,3 +346,8 @@ class hilaijinnojyutsu(Skill):
                 self.ishilaijin = 0
                 self.product = None
                 self.cd = 0
+
+    def reset(self):
+        self.ishilaijin = 0
+        self.cd = 0
+        self.product = None

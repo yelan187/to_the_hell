@@ -4,6 +4,7 @@ from random import choice, randint
 from utills import *
 from UI import *
 import time
+from flask import Flask,request
 
 # ---------------------------------def consts________________________________________
 SCORE = 0
@@ -45,7 +46,7 @@ MAX_JUMP_CHANCE = 2
 
 
 SOLO = 0
-MUTIPLE = 1
+MULTIPLE = 1
 INMENU = 2
 INGAME = 3
 ENDPAGE = 4
@@ -131,14 +132,15 @@ class Hell(Game):
         )
         button4.selective = False
         button5.selective = False
-        self.end_page.add(([label1, label2, button4,button5]))
-        #-----------------------------------ohters---------------------------
+        self.end_page.add(([label1, label2, button4, button5]))
+        # -----------------------------------ohters---------------------------
         self.bind_click(1, self.click_left_handler)
         # self.bindOthers()
         self.score_font = pygame.font.SysFont("arial", 130)
         self.last = 6 * SIDE
         self.barrier = []
         self.players = []
+        self.key_received = {}
 
     def SOLO_init(self):
         self.barrier = [Barrier(self.screen, SOLID)]
@@ -154,6 +156,7 @@ class Hell(Game):
                 )
             )
             self.bindSelf(self.players[-1])
+            self.bindOthers()
         elif l > 1:
             self.players = self.players[:1]
         else:
@@ -177,11 +180,18 @@ class Hell(Game):
 
     def bindOthers(self):
         self.bind_key([pygame.K_SPACE], self.pause)
-        # self.bind_key([pygame.K_RETURN], self.startGame)
 
     def startGame(self):
         if self.gameSelect == SOLO:
             self.SOLO_init()
+        elif self.gameSelect == MULTIPLE:
+            self.SOLO_init()
+            self.players.append(
+                Player(
+                    self,
+                    [dash(), wall(), hilaijinnojyutsu()],
+                )
+            )
         self.gameMode = INGAME
 
     def click_left_handler(self, pos):
@@ -302,8 +312,17 @@ class Hell(Game):
         else:
             self.draw_menu()
 
+#-------------------------主机-----------------------------
+# app = Flask(__name__)
+
+# @app.route("/")
+# def index():
+#     key = request.args.get('key')
+#     hell.key_received[1] = key
+#     return "OK"
 
 if __name__ == "__main__":
     hell = Hell("to the hell", (SCREEN_WIDTH, SCREEN_HEIGHT))
     # 先声明了类，那我应该去看初始化
+    # app.run(host = "127.0.0.1",port=8080)
     hell.run()
