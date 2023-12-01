@@ -2,7 +2,7 @@ import pygame
 from random import choice, randint
 import time
 
-# ---------------------------------def consts________________________________________
+# ---------------------------------def consts-----------------------------------
 SCORE = 0
 SOLID = 1
 FRAGILE = 2
@@ -13,6 +13,7 @@ BODY = 6
 SHADOW = 7
 TEXT = 8
 TITLE = 9
+BOUNCE = 10
 
 GAME_ROW = 60
 GAME_COL = 70
@@ -25,6 +26,7 @@ COLOR = {
     FRAGILE: 0xFF5500,
     DEADLY: 0xFF2222,
     SCORE: 0xCCCCCC,
+    BOUNCE: 0xFFA500,
     BELT_LEFT: 0xFFFF44,
     BELT_RIGHT: 0xFF99FF,
     BODY: 0x00FF00,
@@ -32,7 +34,7 @@ COLOR = {
     TITLE: 0xB22222,
     TEXT: 0x696969,
 }
-CHOICE = [SOLID, SOLID, SOLID, FRAGILE, FRAGILE, BELT_LEFT, BELT_RIGHT, DEADLY]
+CHOICE = [SOLID, SOLID, SOLID, FRAGILE, FRAGILE, BELT_LEFT, BELT_RIGHT, DEADLY,BOUNCE]
 
 ROLLING_SPEED = 2
 FALLING_SPEED = 3
@@ -80,6 +82,9 @@ class Barrier(object):
         if self.type == SOLID:
             rect = pygame.Rect(x, y, SIDE, SIDE)
             self.screen.fill(COLOR[SOLID], rect)
+        elif self.type == BOUNCE:
+            rect = pygame.Rect(x, y, SIDE, SIDE)
+            self.screen.fill(COLOR[BOUNCE], rect)
         elif self.type == FRAGILE:
             rect = pygame.Rect(x + 2, y, SIDE - 4, SIDE)
             self.screen.fill(COLOR[FRAGILE], rect)
@@ -180,6 +185,9 @@ class Player:
             # 以下都是建立在角色踩在障碍物的条件之上的
             if ba.type == DEADLY:
                 self.alive = False
+                return
+            if ba.type == BOUNCE:
+                self.fallingSpeed = -8
                 return
             # 角色跟随障碍物
             self.fallingSpeed = 0

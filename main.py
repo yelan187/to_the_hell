@@ -15,6 +15,7 @@ BODY = 6
 SHADOW = 7
 TEXT = 8
 TITLE = 9
+BOUNCE = 10
 
 GAME_ROW = 60
 GAME_COL = 70
@@ -27,6 +28,7 @@ COLOR = {
     FRAGILE: 0xFF5500,
     DEADLY: 0xFF2222,
     SCORE: 0xCCCCCC,
+    BOUNCE: 0xFFA500,
     BELT_LEFT: 0xFFFF44,
     BELT_RIGHT: 0xFF99FF,
     BODY: 0x00FF00,
@@ -34,7 +36,7 @@ COLOR = {
     TITLE: 0xB22222,
     TEXT: 0x696969,
 }
-CHOICE = [SOLID, SOLID, SOLID, FRAGILE, FRAGILE, BELT_LEFT, BELT_RIGHT, DEADLY]
+CHOICE = [SOLID, SOLID, SOLID, FRAGILE, FRAGILE, BELT_LEFT, BELT_RIGHT, DEADLY,BOUNCE]
 
 ROLLING_SPEED = 2
 FALLING_SPEED = 3
@@ -215,7 +217,6 @@ class Hell(Game):
                     end = False
             if end:
                 self.draw()
-                time.sleep(1)
                 self.end = True
             if self.end or self.is_pause:
                 return
