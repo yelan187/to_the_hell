@@ -52,7 +52,7 @@ INGAME = 3
 
 
 # ---------------------------------------平台类---------------------------------------
-class Barrier(object):
+class Barrier:
     def __init__(self, screen, opt=None, x=None, y=None):
         self.screen = screen
         if opt is None:
