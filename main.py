@@ -14,9 +14,7 @@ BELT_LEFT = 4
 BELT_RIGHT = 5
 BODY = 6
 SHADOW = 7
-TEXT = 8
-TITLE = 9
-BOUNCE = 10
+BOUNCE = 8
 
 GAME_ROW = 60
 GAME_COL = 70
@@ -34,8 +32,6 @@ COLOR = {
     BELT_RIGHT: 0xFF99FF,
     BODY: 0x00FF00,
     SHADOW: 0xFFFF00,
-    TITLE: 0xB22222,
-    TEXT: 0x696969,
 }
 CHOICE = [SOLID, SOLID, SOLID, FRAGILE, FRAGILE, BELT_LEFT, BELT_RIGHT, DEADLY, BOUNCE]
 
@@ -52,6 +48,7 @@ SOLO = 0
 MUTIPLE = 1
 INMENU = 2
 INGAME = 3
+ENDPAGE = 4
 
 
 #
@@ -73,7 +70,7 @@ class Hell(Game):
         """
         self.gameMode = INMENU
         self.gameSelect = SOLO
-
+        # --------------------------------pages------------------------------
         self.menu = form(self.screen)
         label = Label(
             pygame.font.SysFont("arial", 80),
@@ -100,6 +97,7 @@ class Hell(Game):
             (365, 550),
         )
         button1.select()
+        button3.selective = False
         self.menu.add([label, button1, button2, button3])
 
         self.end_page = form(self.screen)
@@ -112,26 +110,54 @@ class Hell(Game):
         )
         label2 = Label(
             pygame.font.SysFont("arial", 50),
-            "1",
-            "Score:"+str(self.score),
+            "score",
+            "placeHolder",
             0x696969,
             (self.screen.get_rect().center[0] - 185, 350),
         )
-        self.end_page.add(([label1, label2]))
-
+        button4 = Button(
+            pygame.font.SysFont("arial", 50),
+            "restart",
+            "click to restart",
+            0x696969,
+            (self.screen.get_rect().center[0] - 185, 450),
+        )
+        button5 = Button(
+            pygame.font.SysFont("arial", 50),
+            "tomenu",
+            "back to menu",
+            0x696969,
+            (self.screen.get_rect().center[0] - 185, 550),
+        )
+        button4.selective = False
+        button5.selective = False
+        self.end_page.add(([label1, label2, button4,button5]))
+        #-----------------------------------ohters---------------------------
         self.bind_click(1, self.click_left_handler)
         # self.bindOthers()
         self.score_font = pygame.font.SysFont("arial", 130)
         self.last = 6 * SIDE
+        self.barrier = []
         self.players = []
-        self.barrier = [Barrier(self.screen, SOLID)]
 
-    def game_init(self):
-        self.score = 0
-        self.last = 6 * SIDE
+    def SOLO_init(self):
         self.barrier = [Barrier(self.screen, SOLID)]
-        for player in self.players:
-            player.reset()
+        self.score = 0
+        self.end = False
+        self.last = 6 * SIDE
+        l = len(self.players)
+        if l == 0:
+            self.players.append(
+                Player(
+                    self,
+                    [dash(pygame.K_q), wall(pygame.K_w), hilaijinnojyutsu(pygame.K_e)],
+                )
+            )
+            self.bindSelf(self.players[-1])
+        elif l > 1:
+            self.players = self.players[:1]
+        else:
+            self.players[-1].reset()
 
     # --------------------------------key/click related functions----------------------
     def bindSelf(
@@ -151,36 +177,12 @@ class Hell(Game):
 
     def bindOthers(self):
         self.bind_key([pygame.K_SPACE], self.pause)
-        self.bind_key([pygame.K_RETURN], self.startGame)
+        # self.bind_key([pygame.K_RETURN], self.startGame)
 
-    def startGame(self, key):
-        if self.gameMode != INMENU and self.end:
-            self.gameMode = INMENU
-            self.end = False
-            self.game_init()
-        else:
-            if self.players == []:
-                self.players = [
-                    Player(
-                        self,
-                        [
-                            dash(pygame.K_q),
-                            wall(pygame.K_w),
-                            hilaijinnojyutsu(pygame.K_e),
-                        ],
-                    )
-                ]
-                # 按下事件
-                self.bindSelf(self.players[0])
-                self.bindOthers()
-            if self.gameSelect == MUTIPLE:
-                self.players.append(Player(self))
-                self.bindSelf(
-                    self.players[-1], [pygame.K_t, pygame.K_g, pygame.K_f, pygame.K_h]
-                )
-            else:
-                self.players = self.players[0:1]
-            self.gameMode = INGAME
+    def startGame(self):
+        if self.gameSelect == SOLO:
+            self.SOLO_init()
+        self.gameMode = INGAME
 
     def click_left_handler(self, pos):
         if self.gameMode == INMENU:
@@ -193,8 +195,15 @@ class Hell(Game):
                         self.gameSelect = MUTIPLE
                         self.menu.getElementByName("Solo").select()
                     elif element.name == "Submit":
-                        element.select()
-                        self.startGame(1)
+                        self.startGame()
+        elif self.gameMode == ENDPAGE:
+            for element in self.end_page.elements:
+                if element.type == "button" and element.click_event(pos):
+                    if element.name == "restart":
+                        self.startGame()
+                    elif element.name == "tomenu":
+                        self.gameMode = INMENU
+                        self.end = False
 
     # ---------------------------------game logic--------------------------------
 
@@ -207,29 +216,16 @@ class Hell(Game):
 
     # 绘制结束页面
     def draw_end(self):
+        self.end_page.getElementByName("score").setText("score:" + str(self.score))
         self.end_page.draw()
         pygame.display.update()
-        """
-        self.screen.fill(0x000000)
-        end_text = self.title_font.render("Game Over", True, hex2rgb(COLOR[TITLE]))
-        score_text = self.text_font.render(
-            "Score: " + str(self.score), True, hex2rgb(COLOR[TEXT])
-        )
-        tip_text = self.text_font.render(
-            "Press Enter To Restart", True, hex2rgb(COLOR[TEXT])
-        )
-        self.screen.blit(end_text, (self.screen.get_rect().center[0] - 185, 250))
-        self.screen.blit(score_text, (self.screen.get_rect().center[0] - 100, 400))
-        self.screen.blit(tip_text, (self.screen.get_rect().center[0] - 220, 500))
-        pygame.display.update()
-        """
 
     def to_hell(self):
-        '''
+        """
         更新所有人物状态
         receive:key
         exec key=>action
-        '''
+        """
         # 主逻辑
         self.last -= 1  # 生成两个障碍物的间隔（时间？）
         # （初始化为self.last = 6 * SIDE）
@@ -259,9 +255,9 @@ class Hell(Game):
             player.fall_man()
             # 障碍交互逻辑
             player.exec_barriers()
-        '''
+        """
         回传各个人物位置，障碍位置，分数
-        '''
+        """
 
     def create_barrier(self, x=None, y=None):
         if x != None:
@@ -278,13 +274,12 @@ class Hell(Game):
     def update(self, current_time=None):
         # 更新下一帧状态
         if self.gameMode != INMENU:
-            end = True
+            self.end = True
             for player in self.players:
                 if player.alive:
-                    end = False
-            if end:
-                self.draw()
-                self.end = True
+                    self.end = False
+            if self.end:
+                self.gameMode = ENDPAGE
             if self.end or self.is_pause:
                 return
             self.to_hell()
