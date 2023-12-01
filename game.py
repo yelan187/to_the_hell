@@ -6,16 +6,6 @@ FOUR_NEIGH = {"left": (0, -1), "right": (0, 1), "up": (-1, 0), "down": (1, 0)}
 EIGHT_NEIGH = list(FOUR_NEIGH.values()) + [(1, 1), (1, -1), (-1, 1), (-1, -1)]
 DIRECTION = {pygame.K_UP: "up", pygame.K_LEFT: "left", pygame.K_RIGHT: "right", pygame.K_DOWN: "down"}
 
-
-def hex2rgb(color):
-    b = color % 256
-    color = color >> 8
-    g = color % 256
-    color = color >> 8
-    r = color % 256
-    return (r, g, b)
-
-
 class Game(object):
     def __init__(self, title, size, fps=30):
         self.size = size
@@ -55,6 +45,12 @@ class Game(object):
     def bind_click(self, button, action):
         self.clicks[button] = action
 
+    def debind_key_all(self):
+        self.keys = {}
+
+    def debind_click_all(self):
+        self.clicks = {}
+
     def pause(self, key):
         self.is_pause = not self.is_pause
 
@@ -68,11 +64,13 @@ class Game(object):
             pygame.quit()
             exit()
             #这会直接导致程序关闭
-        if event.type == pygame.KEYDOWN:
+        elif event.type == pygame.KEYDOWN:
             # 哦，这个判断的条件是“按下按键事件”
             # print('已按下按键')
             if event.key in self.keys.keys():
                 self.keys[event.key](event.key)
+                if "global" in self.keys:
+                    self.keys["global"](event.key)
                 #把我的event的key去self.keys字典里对应。注意这里左右键都绑定成了move函数，
                 #那么我每次都会把我的按键对象event的key属性作为参数传到move里面
             '''
@@ -83,10 +81,13 @@ class Game(object):
                 else:
                     self.screen = pygame.display.set_mode(self.size, 0, 32)
             '''
-        if event.type == pygame.KEYUP:
+        elif event.type == pygame.KEYUP:
             #抬起按键
             if event.key in self.keys_up.keys():
                 self.keys_up[event.key](event.key)
+
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            self.clicks[event.button](event.pos)
 
 
     def run(self):
