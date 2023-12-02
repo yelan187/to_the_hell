@@ -1,13 +1,7 @@
 import socket
 
-hostname = socket.gethostname()
-ip = socket.gethostbyname(hostname)
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-print("Hostname: ", hostname)
-print("IP: ", ip)
+client.connect(("127.0.0.1", 8080))
 
-
-addrs = socket.getaddrinfo(socket.gethostname(), None)
-for item in addrs:
-    if ":" not in item[4][0]:
-        print("当前主机IPV4地址为:" + item[4][0])
+client.send(b"up")
