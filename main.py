@@ -146,7 +146,15 @@ class Hell(Game):
             0x696969,
             (self.screen.get_rect().center[0] - 185, 250),
         )
-        self.multiple_server_page.add([label1])
+        button1 = Button(
+            pygame.font.SysFont("arial", 50),
+            "start",
+            "start game",
+            0x696969,
+            ((self.screen.get_rect().center[0] - 185, 350)),
+        )
+        button1.selective = False
+        self.multiple_server_page.add([label1, button1])
         # -----------------------------------ohters---------------------------
         self.bind_click(1, self.click_left_handler)
         # self.bindOthers()
@@ -161,6 +169,9 @@ class Hell(Game):
         self.ip = "192.168.137.1"
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.bind((self.ip, 7890))
+        thread = Thread(target=self.waitForConnect)
+        thread.setDaemon(True)
+        thread.start()
 
     def SOLO_init(self):
         self.barrier = [Barrier(self.screen, SOLID)]
@@ -202,18 +213,30 @@ class Hell(Game):
         self.bind_key([pygame.K_SPACE], self.pause)
 
     def startGame(self):
+        if self.gameMode == MULTIPLE_SERVER:
+            self.gameMode = INGAME
+            return
         if self.gameSelect == SOLO:
             self.SOLO_init()
             self.gameMode = INGAME
         elif self.gameSelect == MULTIPLE:
             self.SOLO_init()
             self.gameMode = MULTIPLE_SERVER
+        
 
     def click_left_handler(self, pos):
         if self.gameMode == INMENU:
             self.menu_handler(pos)
         elif self.gameMode == ENDPAGE:
             self.end_page_handler(pos)
+        elif self.gameMode == MULTIPLE_SERVER:
+            self.multiple_server_handler(pos)
+
+    def multiple_server_handler(self, pos):
+        for element in self.multiple_server_page.elements:
+            if element.type == "button" and element.click_event(pos):
+                if element.name == "start":
+                    self.startGame()
 
     def menu_handler(self, pos):
         for element in self.menu.elements:
@@ -240,22 +263,30 @@ class Hell(Game):
 
     # 绘制开始页面
     def waitForConnect(self):
-        self.listen = True
         self.server.listen(4)
-        while self.listen:
+        while True:
             connection, address = self.server.accept()
             self.active_connection += 1
-            thread = Thread(target=self.dealConnection, args=(connection))
+            thread = Thread(target=self.dealConnection, args=(connection,))
+            thread.setDaemon(True)
             thread.start()
 
     def dealConnection(self, connection):
         while True:
             data = connection.recv(128).decode("UTF-8")
-            if data.strip() == "":
+            if not data:
                 self.active_connection -= 1
                 break
             elif data == "up":
-                self.players[1].jump()
+                self.players[0].jump()
+            elif data == "down":
+                self.players[0].fall()
+            elif data == "left":
+                self.players[0].move(pygame.K_LEFT)
+            elif data == "right":
+                self.players[0].move(pygame.K_RIGHT)
+            elif data == "unmove":
+                self.players[0].unmove()
 
     def draw_menu(self):
         if self.gameMode != INMENU:

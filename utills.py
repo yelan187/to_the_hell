@@ -145,7 +145,7 @@ class Player:
             self.fallingSpeed = 14
 
     def move(self, key = 1):
-        if self.hell.gameMode != UNSTART:
+        if self.hell.gameMode == INGAME:
             self.dire = key
 
     def unmove(self, key = 1):
