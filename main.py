@@ -4,7 +4,9 @@ from random import choice, randint
 from utills import *
 from UI import *
 import time
-from flask import Flask,request
+from flask import Flask, request
+from threading import Thread
+import socket
 
 # ---------------------------------def consts________________________________________
 SCORE = 0
@@ -50,6 +52,8 @@ MULTIPLE = 1
 INMENU = 2
 INGAME = 3
 ENDPAGE = 4
+MULTIPLE_SERVER = 5
+MULTIPLE_CLIENT = 6
 
 
 #
@@ -116,23 +120,33 @@ class Hell(Game):
             0x696969,
             (self.screen.get_rect().center[0] - 185, 350),
         )
-        button4 = Button(
+        button1 = Button(
             pygame.font.SysFont("arial", 50),
             "restart",
             "click to restart",
             0x696969,
             (self.screen.get_rect().center[0] - 185, 450),
         )
-        button5 = Button(
+        button2 = Button(
             pygame.font.SysFont("arial", 50),
             "tomenu",
             "back to menu",
             0x696969,
             (self.screen.get_rect().center[0] - 185, 550),
         )
-        button4.selective = False
-        button5.selective = False
-        self.end_page.add(([label1, label2, button4, button5]))
+        button1.selective = False
+        button2.selective = False
+        self.end_page.add(([label1, label2, button1, button2]))
+
+        self.multiple_server_page = form(self.screen)
+        label1 = Label(
+            pygame.font.SysFont("arial", 50),
+            "active_connection",
+            "placeHolder",
+            0x696969,
+            (self.screen.get_rect().center[0] - 185, 250),
+        )
+        self.multiple_server_page.add([label1])
         # -----------------------------------ohters---------------------------
         self.bind_click(1, self.click_left_handler)
         # self.bindOthers()
@@ -141,6 +155,12 @@ class Hell(Game):
         self.barrier = []
         self.players = []
         self.key_received = {}
+        self.clientList = {}  # dict[id]->socket.client()
+        self.active_connection = 0
+        """TO DO"""
+        self.ip = "192.168.137.1"
+        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server.bind((self.ip, 7890))
 
     def SOLO_init(self):
         self.barrier = [Barrier(self.screen, SOLID)]
@@ -184,40 +204,59 @@ class Hell(Game):
     def startGame(self):
         if self.gameSelect == SOLO:
             self.SOLO_init()
+            self.gameMode = INGAME
         elif self.gameSelect == MULTIPLE:
             self.SOLO_init()
-            self.players.append(
-                Player(
-                    self,
-                    [dash(), wall(), hilaijinnojyutsu()],
-                )
-            )
-        self.gameMode = INGAME
+            self.gameMode = MULTIPLE_SERVER
 
     def click_left_handler(self, pos):
         if self.gameMode == INMENU:
-            for element in self.menu.elements:
-                if element.type == "button" and element.click_event(pos):
-                    if element.name == "Solo":
-                        self.gameSelect = SOLO
-                        self.menu.getElementByName("Multiple").select()
-                    elif element.name == "Multiple":
-                        self.gameSelect = MUTIPLE
-                        self.menu.getElementByName("Solo").select()
-                    elif element.name == "Submit":
-                        self.startGame()
+            self.menu_handler(pos)
         elif self.gameMode == ENDPAGE:
-            for element in self.end_page.elements:
-                if element.type == "button" and element.click_event(pos):
-                    if element.name == "restart":
-                        self.startGame()
-                    elif element.name == "tomenu":
-                        self.gameMode = INMENU
-                        self.end = False
+            self.end_page_handler(pos)
+
+    def menu_handler(self, pos):
+        for element in self.menu.elements:
+            if element.type == "button" and element.click_event(pos):
+                if element.name == "Solo":
+                    self.gameSelect = SOLO
+                    self.menu.getElementByName("Multiple").select()
+                elif element.name == "Multiple":
+                    self.gameSelect = MUTIPLE
+                    self.menu.getElementByName("Solo").select()
+                elif element.name == "Submit":
+                    self.startGame()
+
+    def end_page_handler(self, pos):
+        for element in self.end_page.elements:
+            if element.type == "button" and element.click_event(pos):
+                if element.name == "restart":
+                    self.startGame()
+                elif element.name == "tomenu":
+                    self.gameMode = INMENU
+                    self.end = False
 
     # ---------------------------------game logic--------------------------------
 
     # 绘制开始页面
+    def waitForConnect(self):
+        self.listen = True
+        self.server.listen(4)
+        while self.listen:
+            connection, address = self.server.accept()
+            self.active_connection += 1
+            thread = Thread(target=self.dealConnection, args=(connection))
+            thread.start()
+
+    def dealConnection(self, connection):
+        while True:
+            data = connection.recv(128).decode("UTF-8")
+            if data.strip() == "":
+                self.active_connection -= 1
+                break
+            elif data == "up":
+                self.players[1].jump()
+
     def draw_menu(self):
         if self.gameMode != INMENU:
             return
@@ -228,6 +267,13 @@ class Hell(Game):
     def draw_end(self):
         self.end_page.getElementByName("score").setText("score:" + str(self.score))
         self.end_page.draw()
+        pygame.display.update()
+
+    def draw_mutiple_server(self):
+        self.multiple_server_page.getElementByName("active_connection").setText(
+            "players connected:" + str(self.active_connection)
+        )
+        self.multiple_server_page.draw()
         pygame.display.update()
 
     def to_hell(self):
@@ -283,7 +329,7 @@ class Hell(Game):
 
     def update(self, current_time=None):
         # 更新下一帧状态
-        if self.gameMode != INMENU:
+        if self.gameMode == INGAME:
             self.end = True
             for player in self.players:
                 if player.alive:
@@ -296,11 +342,8 @@ class Hell(Game):
 
     def draw(self, current_time=None):
         # 绘制下一帧
-        if self.gameMode != INMENU:
+        if self.gameMode == INGAME:
             if self.is_pause:
-                return
-            if self.end:
-                self.draw_end()
                 return
             self.screen.fill(0x000000)
             self.draw_score((0x3C, 0x3C, 0x3C))
@@ -309,20 +352,15 @@ class Hell(Game):
             for player in self.players:
                 player.draw()
             pygame.display.update()
-        else:
+        elif self.gameMode == ENDPAGE:
+            self.draw_end()
+        elif self.gameMode == INMENU:
             self.draw_menu()
+        elif self.gameMode == MULTIPLE_SERVER:
+            self.draw_mutiple_server()
 
-#-------------------------主机-----------------------------
-# app = Flask(__name__)
 
-# @app.route("/")
-# def index():
-#     key = request.args.get('key')
-#     hell.key_received[1] = key
-#     return "OK"
-
+# -------------------------主机-----------------------------
 if __name__ == "__main__":
     hell = Hell("to the hell", (SCREEN_WIDTH, SCREEN_HEIGHT))
-    # 先声明了类，那我应该去看初始化
-    # app.run(host = "127.0.0.1",port=8080)
     hell.run()

@@ -134,28 +134,21 @@ class Player:
         self.acceleration = ACCELERATION
         self.jumpChance = MAX_JUMP_CHANCE
 
-    def jump(self, key, vel=-8):
+    def jump(self, key = 1, vel=-8):
         if (not self.hell.is_pause) and (self.hell.gameMode != UNSTART):
             if self.jumpChance > 0:
                 self.fallingSpeed = vel
                 self.jumpChance -= 1
 
-    def fall(self, key):
+    def fall(self, key = 1):
         if (not self.hell.is_pause) and (self.hell.gameMode != UNSTART):
             self.fallingSpeed = 14
 
-    def move(self, key):
+    def move(self, key = 1):
         if self.hell.gameMode != UNSTART:
-            # 映射表，仅本地多人使用
-            match_rule = {
-                pygame.K_LEFT: pygame.K_LEFT,
-                pygame.K_RIGHT: pygame.K_RIGHT,
-                pygame.K_f: pygame.K_LEFT,
-                pygame.K_h: pygame.K_RIGHT,
-            }
-            self.dire = match_rule[key]
+            self.dire = key
 
-    def unmove(self, key):
+    def unmove(self, key = 1):
         self.dire = 0
 
     def reset(self):
@@ -266,7 +259,7 @@ class Skill:
 
 
 class dash(Skill):
-    def __init__(self, key):
+    def __init__(self, key = 1):
         super(dash, self).__init__(key)
         self.cd = 0
 
@@ -295,7 +288,7 @@ class dash(Skill):
 
 
 class wall(Skill):
-    def __init__(self, key):
+    def __init__(self, key = 1):
         super(wall, self).__init__(key)
         self.cd = 0
 
@@ -316,7 +309,7 @@ class wall(Skill):
 
 
 class hilaijinnojyutsu(Skill):
-    def __init__(self, key):
+    def __init__(self, key = 1):
         super(hilaijinnojyutsu, self).__init__(key)
         self.ishilaijin = 0
         self.product_color = SHADOW
