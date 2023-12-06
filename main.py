@@ -274,7 +274,9 @@ class Hell(Game):
         button2.hide = True
         button2.selective = False
         button3.selective = False
-        self.client_lobby_page.add([label1,label2, button1, button2, button3,button4,button5])
+        self.client_lobby_page.add(
+            [label1, label2, button1, button2, button3, button4, button5]
+        )
 
         self.error_page = form(self.screen)
         label1 = Label(
@@ -432,9 +434,7 @@ class Hell(Game):
 
     def remote_skill(self):
         if self.client:
-            self.client.send(
-                self.skill_list[self.currentSkill_index][0].encode("UTF-8")
-            )
+            self.client.send(b"skill")
 
     def click_left_handler(self, pos):
         if self.currentPage == MENU:
@@ -477,6 +477,22 @@ class Hell(Game):
                             connection.close()
                         self.is_server = False
                     self.currentPage = MENU
+                elif element.name == "skill_left":
+                    self.currentSkill_index = (self.currentSkill_index - 1) % len(
+                        self.skill_list
+                    )
+                    if self.client:
+                        self.client.send(
+                            f"sk:{self.currentSkill_index}".encode("UTF-8")
+                        )
+                elif element.name == "skill_right":
+                    self.currentSkill_index = (self.currentSkill_index + 1) % len(
+                        self.skill_list
+                    )
+                    if self.client:
+                        self.client.send(
+                            f"sk:{self.currentSkill_index}".encode("UTF-8")
+                        )
 
     def server_lobby_handler(self, pos):
         for element in self.server_lobby_page.elements:
@@ -554,6 +570,7 @@ class Hell(Game):
                         thread = Thread(target=self.AutoFindServer)
                         thread.setDaemon(True)
                         thread.start()
+                        self.currentSkill_index = 0
                         self.client_lobby_page.getElementByName("prepare").setStatus(
                             False
                         )
@@ -659,6 +676,7 @@ class Hell(Game):
                 thread = Thread(target=self.messageLoop)
                 thread.setDaemon(True)
                 thread.start()
+                self.client.send(f"sk:{self.currentSkill_index}".encode("UTF-8"))
                 return
             else:
                 client.close()
@@ -715,22 +733,33 @@ class Hell(Game):
                 del self.players[id]
                 del self.score_players[id]
                 break
-            elif data == "prepare":
-                self.prepared_connection += 1
-                self.prepared_list[id] = True
-            elif data == "unprepare":
-                self.prepared_connection -= 1
-                self.prepared_list[id] = False
-            elif data == "up":
-                self.players[id].jump()
-            elif data == "down":
-                self.players[id].fall()
-            elif data == "left":
-                self.players[id].move(pygame.K_LEFT)
-            elif data == "right":
-                self.players[id].move(pygame.K_RIGHT)
-            elif data == "unmove":
-                self.players[id].unmove()
+            elif self.currentPage == INGAME_MULTIPLE:
+                if data == "up":
+                    self.players[id].jump()
+                elif data == "down":
+                    self.players[id].fall()
+                elif data == "left":
+                    self.players[id].move(pygame.K_LEFT)
+                elif data == "right":
+                    self.players[id].move(pygame.K_RIGHT)
+                elif data == "unmove":
+                    self.players[id].unmove()
+                elif data == "skill":
+                    self.players[id].skills[0].use()
+            elif self.currentPage == SERVER_LOBBY:
+                if data == "prepare":
+                    self.prepared_connection += 1
+                    self.prepared_list[id] = True
+                elif data == "unprepare":
+                    self.prepared_connection -= 1
+                    self.prepared_list[id] = False
+                elif data.startswith("sk:"):
+                    del self.players[id]
+                    self.players[id] = Player(
+                        self,
+                        [eval(self.skill_list[int(data[3:])][1])],
+                        id=0,
+                    )
 
     def get_all_hosts(self):
         host = socket.gethostname()
@@ -871,6 +900,9 @@ class Hell(Game):
             self.client_lobby_page.getElementByName("retry").hide = True
             self.client_lobby_page.getElementByName("Tip").setText(
                 "Connecting to server..."
+            )
+            self.client_lobby_page.getElementByName("skill").setText(
+                string_align_cnter(self.skill_list[self.currentSkill_index][0], 14)
             )
         self.client_lobby_page.draw()
         pygame.display.update()
