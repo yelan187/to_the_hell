@@ -328,13 +328,15 @@ class Hell(Game):
         self.barrier = [Barrier(self.screen, SOLID)]
         self.players = {}
         self.error = ""
-        self.score_players = {0: 0}
         self.skill_list = [
             ["dash", "dash()"],
             ["wall", "wall()"],
             ["hilaijin", "hilaijinnojyutsu()"],
         ]
         self.currentSkill_index = 0
+        self.score_players = {0: 0}
+        
+        self.gameStastics = {"mostScorePlayer":"","firstDie":""}
         # network
         # server
         self.active_connection = 0
@@ -344,6 +346,7 @@ class Hell(Game):
         self.server = None
         self.is_server = False
         self.prepared_list = {0: False}
+        self.startTime = 0
         # client
         self.ServerTimeOut = False
         self.currentServer = ""
@@ -362,7 +365,7 @@ class Hell(Game):
             self.players[0] = Player(
                 self,
                 [dash(pygame.K_q), wall(pygame.K_w), hilaijinnojyutsu(pygame.K_e)],
-                id=0,
+                name = "player0",id = 0
             )
         elif l > 1:
             self.players = {0: self.players[0]}
@@ -378,7 +381,7 @@ class Hell(Game):
             self.players[0] = Player(
                 self,
                 [dash(pygame.K_q)],
-                id=0,
+                name = "player0",id = 0
             )
         self.score = 0
         self.last = 6 * SIDE
@@ -521,7 +524,7 @@ class Hell(Game):
                     self.players[0] = Player(
                         self,
                         [eval(self.skill_list[self.currentSkill_index][1])],
-                        id=0,
+                        id=0,name = "player0"
                     )
                 elif element.name == "skill_right":
                     self.currentSkill_index = (self.currentSkill_index + 1) % len(
@@ -531,7 +534,7 @@ class Hell(Game):
                     self.players[0] = Player(
                         self,
                         [eval(self.skill_list[self.currentSkill_index][1])],
-                        id=0,
+                        id=0,name = "player0"
                     )
 
     def menu_handler(self, pos):
@@ -604,6 +607,8 @@ class Hell(Game):
                         for connection in self.connections:
                             connection.close()
                         self.is_server = False
+                        self.active_connection = 0
+                        self.prepared_connection = 0
                     self.currentPage = MENU
 
     # -------------------------------network---------------------------
@@ -715,7 +720,7 @@ class Hell(Game):
             thread.start()
 
     def dealConnection(self, connection, id):
-        self.players[id] = Player(self, id=id)
+        self.players[id] = Player(self, name = f"player{id}",id = 0)
         self.players[id].body_color = randomColor()
         self.score_players[id] = 0
         self.prepared_list[id] = False
@@ -726,6 +731,8 @@ class Hell(Game):
             print(data)
             if not data:
                 self.active_connection -= 1
+                if self.prepared_list[id]:
+                    self.prepared_connection -= 1
                 self.connections.remove(connection)
                 if self.prepared_list[id]:
                     self.prepared_connection -= 1
@@ -745,7 +752,7 @@ class Hell(Game):
                 elif data == "unmove":
                     self.players[id].unmove()
                 elif data == "skill":
-                    self.players[id].skills[0].use()
+                    self.players[id].skills[0].use(1)
             elif self.currentPage == SERVER_LOBBY:
                 if data == "prepare":
                     self.prepared_connection += 1
@@ -758,7 +765,7 @@ class Hell(Game):
                     self.players[id] = Player(
                         self,
                         [eval(self.skill_list[int(data[3:])][1])],
-                        id=0,
+                        id=id,name = f"player{id}"
                     )
 
     def get_all_hosts(self):
@@ -1002,6 +1009,7 @@ class Hell(Game):
                 self.currentPage = INGAME_MULTIPLE
                 for connection in self.connections:
                     connection.send(b"STSTSTSTSTST" + b"0" * 244)
+                self.startTime = time.time()
 
     def draw(self, current_time=None):
         # 绘制下一帧
