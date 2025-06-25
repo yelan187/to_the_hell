@@ -6,7 +6,7 @@
 
 2. 安装依赖
 
-- 安装 g++, git
+- 安装 g++ 17, git
 
 - 安装 CMake 3.26 或更高版本
 
@@ -38,19 +38,23 @@ make
 
 ## 代码架构
 
+采用 MVVM 设计模式,类似前后端分离的设计思想
+
 - `src/`
-    + `main.cpp` 
-    + `game/` 
-    + `ui/` 
-    + `utils/` 
+    + `View/` - 界面设计
+    + `Binding/` - 实现视图和模型的数据绑定
+    + `ViewModel/` - 实现游戏数据到界面数据的转换
+    + `Model/` - 游戏模型
+    + `Core/` - 核心逻辑
+    + `Utils/` - 工具类
+    + `main.cpp` - 程序入口
 
 - `include/` 
-    + `game/`
-    + `ui/`
-    + `utils/`
+    与 `src/` 目录结构类似
 
 ## 资源文件结构
 
 - `assets/`
     + `images/`
     + `sounds/`
+    + `fonts/`
