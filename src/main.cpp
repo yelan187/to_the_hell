@@ -1,6 +1,15 @@
-#include "hello.h"
+#include <vector>
+#include <string>
+
+#include <SFML/Graphics.hpp>
+#include "Core/Engine.h"
 
 int main() {
-    hello();
+    Core::Engine engine(
+        std::string("To The Hell"),
+        sf::Vector2u(800, 600),
+        60
+    );
+    engine.run();
     return 0;
 }

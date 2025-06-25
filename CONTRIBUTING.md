@@ -15,7 +15,6 @@
 3. 构建项目
 
 ```bash
-git clone https://github.com/yelan187/to_the_hell
 mkdir build && cd build
 cmake ..
 make
@@ -37,21 +36,29 @@ make
 
 - 注释少用中文
 
+## 提交规范
+
+- `feat`: 新功能
+- `fix`: 修复 bug
+- `docs`: 文档变更
+- `style`: 代码格式（不影响功能的变更）
+- `refactor`: 重构（既不是新增功能，也不是修复 bug）
+- `perf`: 提升性能
+- `chore`: 其他变更（例如构建过程或辅助工具的变更）
+
 ## 代码架构
 
 采用 MVVM 设计模式,类似前后端分离的设计思想
 
 - `src/`
     + `View/` - 界面设计
-    + `Binding/` - 实现视图和模型的数据绑定
     + `ViewModel/` - 实现游戏数据到界面数据的转换
     + `Model/` - 游戏模型
     + `Core/` - 核心逻辑
     + `Utils/` - 工具类
     + `main.cpp` - 程序入口
 
-- `include/` 
-    与 `src/` 目录结构类似
+- `include/` - 与 `src/` 目录结构类似
 
 ## 资源文件结构
 
