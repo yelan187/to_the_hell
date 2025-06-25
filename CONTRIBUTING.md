@@ -15,6 +15,7 @@
 3. 构建项目
 
 ```bash
+git clone https://github.com/yelan187/to_the_hell
 mkdir build && cd build
 cmake ..
 make
