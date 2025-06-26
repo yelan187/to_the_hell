@@ -1,17 +1,22 @@
+#pragma once
 #include <SFML/Graphics.hpp>
-#include "ViewModel/GameViewModel.h"
 #include <map>
+#include "ViewModel/GameViewModel.h"
+
 namespace View{
 namespace UI {
 
-class Platform {
-public:
+namespace PlatformType {
     enum class Type {
         NORMAL
     };
+}
+
+class Platform {
+public:
+    using Type = PlatformType::Type;
     void init(std::shared_ptr<ViewModel::GameViewModel> view_model,int id);
     void render(sf::RenderWindow& window);
-    void update(float delta_time);
 
     int id;
     std::shared_ptr<ViewModel::GameViewModel> view_model;

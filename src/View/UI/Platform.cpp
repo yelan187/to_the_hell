@@ -18,11 +18,3 @@ void Platform::init(std::shared_ptr<ViewModel::GameViewModel> view_model,int id)
 void Platform::render(sf::RenderWindow& window){
     window.draw(rect);
 }
-
-void Platform::update(float delta_time) {
-    switch (view_model->getPlatformTypeById(id)) {
-        case Type::NORMAL:
-            break;
-    }
-    rect.setPosition(view_model->getPlatformPositionById(id));
-}

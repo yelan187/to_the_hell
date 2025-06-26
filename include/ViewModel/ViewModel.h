@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include "Core/Engine.h"
+#include "Model/Model.h"
 
 namespace ViewModel {
 

@@ -1,15 +1,22 @@
+#pragma once
 #include <SFML/Graphics.hpp>
-#include <ViewModel/GameViewModel.h>
 #include <map>
+#include "ViewModel/GameViewModel.h"
 
 namespace View{
 namespace UI {
 
+namespace PlayerState {
+    enum class State {
+        IDLE,
+        WALKING,
+        JUMPING
+    };
+}
+
 class Player {
 public:
-    enum class State {
-        WALKING
-    };
+    using State = PlayerState::State;
 
     void init(std::shared_ptr<ViewModel::GameViewModel> view_model);
     void render(sf::RenderWindow& window);

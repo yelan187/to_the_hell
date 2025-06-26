@@ -5,11 +5,22 @@
 #include <functional>
 #include <vector>
 #include <string>
+#include <chrono>
+#include <iomanip>
+#include <sstream>
 
 namespace View{
 namespace UI{
     class Player;
     class Platform;
+    
+    namespace PlayerState {
+        enum class State;
+    }
+    
+    namespace PlatformType {
+        enum class Type;
+    }
 }
 }
 
@@ -25,7 +36,7 @@ public:
     std::string getTotalScore();
     std::string getGameTime();
 
-    View::UI::Player::State getPlayerState();
+    View::UI::PlayerState::State getPlayerState();
     sf::Vector2f getPlayerPosition();
 
     void playerJump();
@@ -36,12 +47,12 @@ public:
     void playerStopRight();
 
     std::vector<int> getPlatformsId();
-    View::UI::Platform::Type getPlatformTypeById(int id);
+    View::UI::PlatformType::Type getPlatformTypeById(int id);
     sf::Vector2f getPlatformPositionById(int id);    
-    bool platformExists(int id);
 
 private:
-    std::shared_ptr<Model::MainMenuModel> model;
+    std::shared_ptr<Model::GameModel> model;
+    std::chrono::time_point<std::chrono::steady_clock> start_time;
     
 };
 
