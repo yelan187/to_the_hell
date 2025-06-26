@@ -42,7 +42,7 @@ cd build/bin
 游戏使用 C++ 语言开发,采用了 **MVVM** 的设计模式。主要使用了以下技术栈:
 
 - C++17
-- SFML (Simple and Fast Multimedia Library) 用于图形渲染和音频处理
+- SFML 用于图形渲染和音频处理
 - CMake 用于构建系统
 
 ## 📚 项目历史
@@ -53,3 +53,17 @@ cd build/bin
 - [yelan](https://github.com/yelan187)
 - [WuYan](https://github.com/wuyan1345)
 - [XueBaStudy](https://github.com/XueBaStudy)
+
+## 👏🏻 致谢
+
+感谢以下(上文未提到的)开源项目支持：
+
+- [Fusion Pixel Font](https://github.com/TakWolf/fusion-pixel-font) - 开源像素字体
+
+<!-- ### 角色设计灵感
+
+游戏主角的形象设计灵感来源于B站UP主 [Warma](https://space.bilibili.com/53456)。本项目是非商业性质的学习作品，仅作学习交流用途。如有侵权，请联系我们删除。 -->
+
+## 📄 许可证
+
+本项目采用 [MIT 许可证](LICENSE) 开源。您可以自由使用、修改和分发代码，但请保留原作者的版权声明和许可证信息。

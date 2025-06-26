@@ -4,7 +4,7 @@
 using View::MainMenuView;
 
 MainMenuView::MainMenuView(Core::Engine &engine) : View::Page(engine) {
-    if (!font.loadFromFile("assets/fonts/JetBrainsMono.ttf")) {
+    if (!font.loadFromFile("assets/fonts/fusion.ttf")) {
         std::cerr << "Error loading font!" << std::endl;
         return;
     }
