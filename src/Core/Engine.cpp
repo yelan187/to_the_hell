@@ -10,12 +10,17 @@ using View::MainMenuView;
 using View::GameView;
 
 Engine::Engine(std::string game_title, sf::Vector2u window_size, int fps) {
-    this->fps = fps;
-    changePage(PAGE_STATE::MAIN_MENU);
-
+    this->game_title = game_title;
     window.create(sf::VideoMode(window_size.x, window_size.y), game_title, sf::Style::Default);
 
+    this->fps = fps;
+
     window.setFramerateLimit(fps);
+    changePage(PAGE_STATE::MAIN_MENU);
+}
+
+sf::Vector2u Engine::getWindowSize() const {
+    return window.getSize();
 }
 
 void Engine::changePage(PAGE_STATE new_page_state) {

@@ -32,10 +32,6 @@ make
 
 - 每行代码尽量不超过 100 个字符
 
-- 函数写清楚参数定义和返回值
-
-- 注释少用中文
-
 ## 提交规范
 
 - `feat`: 新功能
@@ -46,16 +42,34 @@ make
 - `perf`: 提升性能
 - `chore`: 其他变更（例如构建过程或辅助工具的变更）
 
+## 设计思路
+
+采用 MVVM 设计模式.
+
+- `View` 层负责界面设计和输入处理, 持有 `ViewModel` 
+
+- `ViewModel` 层负责将输入转发到模型层,持有 `Model`
+
+- `Model` 层负责保存数据和处理游戏逻辑,同时持有 `engine`,可以处理游戏状态
+
 ## 代码架构
 
-采用 MVVM 设计模式,类似前后端分离的设计思想
-
 - `src/`
-    + `View/` - 界面设计
-    + `ViewModel/` - 实现游戏数据到界面数据的转换
-    + `Model/` - 游戏模型
+    + `View/`
+        + `MainMenuView.cpp` - 主菜单界面
+        + `GameView.cpp` - 游戏界面
+        + `UI/` - 界面组件
+            - `Player.cpp` - 用户组件
+            - `Platform.cpp` - 平台组件
+    + `ViewModel/`
+        + `MainMenuViewModel.cpp` - 主菜单视图模型
+        + `GameViewModel.cpp` - 游戏视图模型
+    + `Model/`
+        + `MainMenuModel.cpp` - 主菜单模型
+        + `GameModel.cpp` - 游戏模型
     + `Core/` - 核心逻辑
-    + `Utils/` - 工具类
+        + `Engine.cpp` - 游戏引擎,负责游戏循环和事件处理,处理页面切换
+    <!-- + `Utils/` - 工具类 -->
     + `main.cpp` - 程序入口
 
 - `include/` - 与 `src/` 目录结构类似

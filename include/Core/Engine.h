@@ -24,6 +24,12 @@ public:
     
     void run();
 
+    inline std::string getGameTitle() const {
+        return game_title;
+    }
+
+    sf::Vector2u getWindowSize() const;
+
     void handleInput(const sf::Event& event);
 
     void changePage(PAGE_STATE new_page_state);
@@ -39,5 +45,6 @@ private:
     std::shared_ptr<View::Page> page;
     
     sf::RenderWindow window;
+    std::string game_title;
 };
 }
