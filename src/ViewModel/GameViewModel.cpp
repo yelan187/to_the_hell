@@ -4,20 +4,6 @@
 
 using ViewModel::GameViewModel;
 
-//     View::UI::PlayerState::State getPlayerState();
-//     sf::Vector2f getPlayerPosition();
-
-//     void playerJump();
-//     void playerDown();
-//     void playerWalkLeft();
-//     void playerWalkRight();
-//     void playerStopLeft();
-//     void playerStopRight();
-
-//     std::vector<int> getPlatformsId();
-//     View::UI::PlatformType::Type getPlatformTypeById(int id);
-//     sf::Vector2f getPlatformPositionById(int id);    
-
 GameViewModel::GameViewModel(Core::Engine& engine) : ViewModel(engine) {
     model = std::make_shared<Model::GameModel>(engine);
     start_time = std::chrono::steady_clock::now();
@@ -47,4 +33,44 @@ std::string GameViewModel::getTotalScore() {
 
 View::UI::PlayerState::State GameViewModel::getPlayerState() {
     
+}
+
+sf::Vector2f GameViewModel::getPlayerPosition() {
+    
+}
+
+void GameViewModel::playerJump() {
+    
+}
+
+void GameViewModel::playerDown() {
+    
+}
+
+void GameViewModel::playerWalkLeft() {
+    
+}
+
+void GameViewModel::playerWalkRight() {
+    
+}
+
+void GameViewModel::playerStopLeft() {
+    
+}
+
+void GameViewModel::playerStopRight() {
+    
+}
+
+std::vector<int> GameViewModel::getPlatformsId() {
+    
+}
+
+View::UI::PlatformType::Type GameViewModel::getPlatformTypeById(int id) {
+    
+}
+
+sf::Vector2f GameViewModel::getPlatformPositionById(int id) {
+
 }
