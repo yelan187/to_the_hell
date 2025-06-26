@@ -13,5 +13,8 @@ public:
 
 protected:
     Core::Engine& engine;
+
+private:
+    std::shared_ptr<ViewModel::ViewModel> view_model;
 };
 }

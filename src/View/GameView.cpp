@@ -1,0 +1,95 @@
+#include <iostream>
+#include "View/GameView.h"
+
+using View::GameView;
+
+GameView::GameView(Core::Engine &engine) : View::Page(engine) {
+    if (!font.loadFromFile("assets/fonts/arial.ttf")) {
+        std::cerr << "Error loading font!" << std::endl;
+        return;
+    }
+    view_model = std::make_shared<ViewModel::GameViewModel>(engine);
+    
+    total_score_text.setString(view_model->getTotalScore());
+    total_score_text.setCharacterSize(24);
+    total_score_text.setFillColor(sf::Color::White);
+    total_score_text.setFont(font);
+    total_score_text.setPosition(1400,50);
+
+    game_time_text.setString(view_model->getGameTime());
+    game_time_text.setCharacterSize(24);
+    game_time_text.setFillColor(sf::Color::White);
+    game_time_text.setFont(font);
+    game_time_text.setPosition(1400,150);
+
+    player.init(view_model);
+    for (int id : view_model->getPlatformsId()){
+        View::UI::Platform p;
+        platforms[id] = p;
+        p.init(view_model,id);
+    }
+}
+
+void GameView::update(float deltaTime) {
+    view_model->update();
+
+    total_score_text.setString(view_model->getTotalScore());
+
+    game_time_text.setString(view_model->getGameTime());
+
+    player.update(deltaTime);
+    for (auto pair:platforms){
+        if (!view_model->platformExists(pair.second.id)){
+            platforms.erase(pair.second.id);
+            delete &pair.second;
+        } else {
+            pair.second.update(deltaTime);
+        }
+    }
+}
+
+void GameView::render(sf::RenderWindow& window) {
+    window.clear(sf::Color::Black);
+    
+    window.draw(game_time_text);
+    window.draw(total_score_text);
+
+    player.render(window);
+
+    for (auto &p: platforms)
+        p.second.render(window);
+
+    window.display();
+}
+
+void GameView::handleInput(const sf::Event& event) {
+    if (event.type == sf::Event::KeyPressed) {
+        switch (event.key.code) {
+            case sf::Keyboard::W:
+                view_model->playerJump();
+                break;
+            case sf::Keyboard::S:
+                view_model->playerDown();
+                break;
+            case sf::Keyboard::A:
+                view_model->playerWalkLeft();
+                break;
+            case sf::Keyboard::D:
+                view_model->playerWalkRight();
+                break;
+            default:
+                break;
+        }
+    } else if (event.type == sf::Event::KeyReleased) {
+        switch (event.key.code) {
+            case sf::Keyboard::A:
+                view_model->playerStopLeft();
+                break;
+            case sf::Keyboard::D:
+                view_model->playerStopRight();
+                break;
+            default:
+                break;
+        }
+    }
+}

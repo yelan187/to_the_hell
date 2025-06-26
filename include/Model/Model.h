@@ -5,6 +5,7 @@ namespace Model {
 class Model {
 public:
     Model(Core::Engine &engine) : engine(engine) {};
+    virtual void update();
 protected:
     Core::Engine &engine;
 
