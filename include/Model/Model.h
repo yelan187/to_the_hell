@@ -7,7 +7,7 @@ public:
     Model(Core::Engine &engine) : engine(engine) {};
     
     virtual void update() {};
-
+    
     virtual ~Model() {}; 
     
 protected:

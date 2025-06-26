@@ -1,6 +1,7 @@
 #include <ViewModel/MainMenuViewModel.h>
 #include <Model/MainMenuModel.h>
 #include <iostream>
+#include <cmath> 
 
 namespace ViewModel {
 

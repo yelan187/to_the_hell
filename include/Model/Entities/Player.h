@@ -6,14 +6,13 @@
 namespace Model {
 namespace Entities {
 
+enum class PlayerState {
+    IDLE,
+    WALKING,
+    JUMPING
+};
 class Player {
 public:
-    enum class State {
-        IDLE,
-        WALKING,
-        JUMPING
-    };
-
     Player();
     void update(float deltaTime);
     void jump();
@@ -22,12 +21,12 @@ public:
     void stopLeft();
     void stopRight();
 
-    State getState() const;
+    PlayerState getState() const;
     sf::Vector2f getPosition() const;
     void setPosition(const sf::Vector2f& position);
 
 private:
-    State state;
+    PlayerState state;
     sf::Vector2f position;
     sf::Vector2f velocity;
 };

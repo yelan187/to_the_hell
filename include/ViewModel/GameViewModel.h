@@ -14,21 +14,19 @@ namespace UI{
     class Player;
     class Platform;
     
-    namespace PlayerState {
-        enum class State;
-    }
-    
-    namespace PlatformType {
-        enum class Type;
-    }
+    enum class PlayerState;
+    enum class PlatformType;
 }
 }
 
 namespace ViewModel {
 
+enum class towards {
+    LEFT,
+    RIGHT
+};
 class GameViewModel : public ViewModel {
 public:
-
     GameViewModel(Core::Engine& engine);
     
     void update() { model->update(); }
@@ -36,7 +34,7 @@ public:
     std::string getTotalScore();
     std::string getGameTime();
 
-    View::UI::PlayerState::State getPlayerState();
+    View::UI::PlayerState getPlayerState();
     sf::Vector2f getPlayerPosition();
 
     void playerJump();
@@ -47,12 +45,12 @@ public:
     void playerStopRight();
 
     std::vector<int> getPlatformsId();
-    View::UI::PlatformType::Type getPlatformTypeById(int id);
+    View::UI::PlatformType getPlatformTypeById(int id);
     sf::Vector2f getPlatformPositionById(int id);    
 
 private:
     std::shared_ptr<Model::GameModel> model;
-    std::chrono::time_point<std::chrono::steady_clock> start_time;
+    towards player_towards = towards::RIGHT;
     
 };
 

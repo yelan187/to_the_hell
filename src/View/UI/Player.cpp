@@ -1,4 +1,5 @@
 #include <View/UI/Player.h>
+#include <ViewModel/GameViewModel.h>
 
 using View::UI::Player;
 
@@ -6,7 +7,7 @@ void Player::init(std::shared_ptr<ViewModel::GameViewModel> view_model) {
     size = sf::Vector2f(50, 50);
 
     switch (view_model->getPlayerState()) {
-        case State::WALKING:
+        case View::UI::PlayerState::WALKING_L:
             break;
     }
 
@@ -16,7 +17,7 @@ void Player::init(std::shared_ptr<ViewModel::GameViewModel> view_model) {
 
 void Player::update(float delta_time) {
     switch (view_model->getPlayerState()) {
-        case State::WALKING:
+        case View::UI::PlayerState::WALKING_L:
             break;
     }
     rect.setPosition(view_model->getPlayerPosition());
