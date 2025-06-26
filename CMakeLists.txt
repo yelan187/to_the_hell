@@ -33,3 +33,15 @@ target_link_libraries(ToTheHell PRIVATE
     # SFML::Network 
     sfml-graphics
 )
+
+# 仅在 Windows 且使用 MinGW 时复制运行时 DLL
+# cmake -G "MinGW Makefiles" ..
+if(WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    get_filename_component(MINGW_BIN "${CMAKE_CXX_COMPILER}" DIRECTORY)
+    file(COPY
+        "${MINGW_BIN}/libstdc++-6.dll"
+        "${MINGW_BIN}/libgcc_s_seh-1.dll"
+        "${MINGW_BIN}/libwinpthread-1.dll"
+        DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    )
+endif()
