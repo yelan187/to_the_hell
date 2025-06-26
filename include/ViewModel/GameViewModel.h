@@ -5,6 +5,9 @@
 #include <functional>
 #include <vector>
 #include <string>
+#include <chrono>
+#include <iomanip>
+#include <sstream>
 
 namespace View{
 namespace UI{
@@ -46,10 +49,10 @@ public:
     std::vector<int> getPlatformsId();
     View::UI::PlatformType::Type getPlatformTypeById(int id);
     sf::Vector2f getPlatformPositionById(int id);    
-    bool platformExists(int id);
 
 private:
     std::shared_ptr<Model::GameModel> model;
+    std::chrono::time_point<std::chrono::steady_clock> start_time;
     
 };
 

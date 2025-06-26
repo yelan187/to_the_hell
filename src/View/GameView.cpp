@@ -25,8 +25,8 @@ GameView::GameView(Core::Engine &engine) : View::Page(engine) {
     player.init(view_model);
     for (int id : view_model->getPlatformsId()){
         View::UI::Platform p;
-        platforms[id] = p;
         p.init(view_model,id);
+        platforms.push_back(p);
     }
 }
 
@@ -38,13 +38,11 @@ void GameView::update(float deltaTime) {
     game_time_text.setString(view_model->getGameTime());
 
     player.update(deltaTime);
-    for (auto pair:platforms){
-        if (!view_model->platformExists(pair.second.id)){
-            platforms.erase(pair.second.id);
-            delete &pair.second;
-        } else {
-            pair.second.update(deltaTime);
-        }
+    platforms.clear();
+    for (int id : view_model->getPlatformsId()){
+        View::UI::Platform p;
+        p.init(view_model,id);
+        platforms.push_back(p);
     }
 }
 
@@ -57,7 +55,7 @@ void GameView::render(sf::RenderWindow& window) {
     player.render(window);
 
     for (auto &p: platforms)
-        p.second.render(window);
+        p.render(window);
 
     window.display();
 }

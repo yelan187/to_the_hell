@@ -28,7 +28,7 @@ private:
 
     View::UI::Player player;
     
-    std::map<int,View::UI::Platform> platforms;
+    std::vector<View::UI::Platform> platforms;
 };
 
 }

@@ -1,15 +1,16 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include <ViewModel/GameViewModel.h>
 #include <map>
+#include "ViewModel/GameViewModel.h"
 
 namespace View{
 namespace UI {
 
-// 为了与前向声明匹配
 namespace PlayerState {
     enum class State {
-        WALKING
+        IDLE,
+        WALKING,
+        JUMPING
     };
 }
 
