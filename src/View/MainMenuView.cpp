@@ -4,7 +4,7 @@
 using View::MainMenuView;
 
 MainMenuView::MainMenuView(Core::Engine &engine) : View::Page(engine) {
-    if (!font.loadFromFile("assets/fonts/arial.ttf")) {
+    if (!font.loadFromFile("assets/fonts/JetBrainsMono.ttf")) {
         std::cerr << "Error loading font!" << std::endl;
         return;
     }
@@ -13,33 +13,54 @@ MainMenuView::MainMenuView(Core::Engine &engine) : View::Page(engine) {
     for (auto s: view_model->getMenuOptions()){
         sf::Text text;
         text.setString(s);
-        text.setCharacterSize(24);
+        text.setCharacterSize(50);
         text.setFillColor(sf::Color::White);
         text.setFont(font);
+        text.setOrigin(text.getLocalBounds().width / 2, text.getLocalBounds().height / 2);
+        text.setPosition(
+            window_size.x / 2,
+            window_size.y / 2 + (menu_options.size() * text.getCharacterSize() * 1.5f) - text.getCharacterSize() * 1.5f
+        );
         std::cout << text.getString().toAnsiString() << std::endl;
         menu_options.push_back(text);
     }
+
+    option_pointer.setPointCount(3);
+    option_pointer.setRadius(menu_options[0].getCharacterSize() / 3);
+    option_pointer.setFillColor(sf::Color::Red);
+    option_pointer.setOrigin(option_pointer.getRadius(), option_pointer.getRadius());
+    option_pointer.rotate(90);
 }
 
 void MainMenuView::update(float deltaTime) {
     current_selection = view_model->getCurrentSelectionIndex();
+
+    for (int i = 0; i < menu_options.size(); ++i) {
+        if (i == current_selection) {
+            menu_options[i].setFillColor(sf::Color::Yellow);
+        } else {
+            menu_options[i].setFillColor(sf::Color::White);
+        }
+    }
+
+    sf::Text& selected_text = menu_options[current_selection];
+
+    sf::FloatRect text_rect = selected_text.getGlobalBounds();
+
+    float pointer_x = window_size.x / 2 - selected_text.getCharacterSize() * 3;
+    float pointer_y = text_rect.top + text_rect.height/2;
+
+    option_pointer.setPosition(pointer_x, pointer_y);
+    
 }
 
 void MainMenuView::render(sf::RenderWindow& window) {
 
     window.clear(sf::Color::Black);
-    // std::cout << menu_options.size() << " menu options." << std::endl;
     for (int i = 0; i < menu_options.size(); ++i) {
-        if (i == current_selection) {
-            menu_options[i].setFillColor(sf::Color::Yellow); // Highlight
-        } else {
-            menu_options[i].setFillColor(sf::Color::White);
-        }
-        menu_options[i].setPosition(100, 100 + i * 30); // Align vertically
-        // std::cout << "Rendering option: " << menu_options[i].getString().toAnsiString() << std::endl;
         window.draw(menu_options[i]);
     }
-    
+    window.draw(option_pointer);
     window.display();
 }
 

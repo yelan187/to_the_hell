@@ -21,10 +21,10 @@ private:
     std::shared_ptr<ViewModel::MainMenuViewModel> view_model;
     
     std::vector<sf::Text> menu_options;
-
     int current_selection;
-
     sf::Font font;
+
+    sf::CircleShape option_pointer;
 };
 
 }

@@ -7,7 +7,7 @@
 int main() {
     Core::Engine engine(
         std::string("To The Hell"),
-        sf::Vector2u(1600, 900),
+        sf::Vector2u(800, 600),
         60
     );
     engine.run();

@@ -24,6 +24,8 @@ public:
     
     void run();
 
+    sf::Vector2u getWindowSize() const;
+
     void handleInput(const sf::Event& event);
 
     void changePage(PAGE_STATE new_page_state);

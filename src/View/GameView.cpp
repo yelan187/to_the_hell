@@ -4,7 +4,7 @@
 using View::GameView;
 
 GameView::GameView(Core::Engine &engine) : View::Page(engine) {
-    if (!font.loadFromFile("assets/fonts/arial.ttf")) {
+    if (!font.loadFromFile("assets/fonts/JetBrainsMono.ttf")) {
         std::cerr << "Error loading font!" << std::endl;
         return;
     }
