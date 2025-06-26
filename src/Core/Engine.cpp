@@ -10,7 +10,7 @@ using View::MainMenuView;
 using View::GameView;
 
 Engine::Engine(std::string game_title, sf::Vector2u window_size, int fps) {
-
+    this->game_title = game_title;
     window.create(sf::VideoMode(window_size.x, window_size.y), game_title, sf::Style::Default);
 
     this->fps = fps;

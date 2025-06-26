@@ -15,7 +15,7 @@ public:
         EXIT
     };
 
-    MainMenuViewModel(Core::Engine& engine);
+    MainMenuViewModel(Core::Engine& engine, sf::Vector2u window_size);
     virtual ~MainMenuViewModel() = default;
 
     void navigateUp();
@@ -25,7 +25,17 @@ public:
     std::vector<std::string> getMenuOptions() const;
     int getCurrentSelectionIndex() const;
 
+public:
+    sf::Color getTitleColor() const;
+    
+    std::vector<sf::Vector2f> getBackgroundParticles() const;
+    
+    void updateAnimationState(float delta_time);
+    
 private:
+    float animation_time_ = 0.0f;
+    std::vector<sf::Vector2f> background_particles;
+
     std::shared_ptr<Model::MainMenuModel> model;
     std::vector<MenuOption> available_options;
     int current_selection_index;

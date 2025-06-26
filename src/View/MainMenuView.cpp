@@ -8,7 +8,15 @@ MainMenuView::MainMenuView(Core::Engine &engine) : View::Page(engine) {
         std::cerr << "Error loading font!" << std::endl;
         return;
     }
-    view_model = std::make_shared<ViewModel::MainMenuViewModel>(engine);
+    view_model = std::make_shared<ViewModel::MainMenuViewModel>(engine,window_size);
+
+    title_text.setString(engine.getGameTitle());
+    title_text.setCharacterSize(80);
+    title_text.setFillColor(sf::Color::Red);
+    title_text.setFont(font);
+    title_text.setOrigin(title_text.getLocalBounds().width / 2, title_text.getLocalBounds().height / 2);
+    title_text.setPosition(window_size.x / 2, window_size.y / 4);
+
     current_selection = view_model->getCurrentSelectionIndex();
     for (auto s: view_model->getMenuOptions()){
         sf::Text text;
@@ -19,7 +27,7 @@ MainMenuView::MainMenuView(Core::Engine &engine) : View::Page(engine) {
         text.setOrigin(text.getLocalBounds().width / 2, text.getLocalBounds().height / 2);
         text.setPosition(
             window_size.x / 2,
-            window_size.y / 2 + (menu_options.size() * text.getCharacterSize() * 1.5f) - text.getCharacterSize() * 1.5f
+            window_size.y / 2 + (menu_options.size() * text.getCharacterSize() * 1.5f)
         );
         std::cout << text.getString().toAnsiString() << std::endl;
         menu_options.push_back(text);
@@ -33,7 +41,11 @@ MainMenuView::MainMenuView(Core::Engine &engine) : View::Page(engine) {
 }
 
 void MainMenuView::update(float deltaTime) {
+    view_model->updateAnimationState(deltaTime);
+
     current_selection = view_model->getCurrentSelectionIndex();
+
+    title_text.setFillColor(view_model->getTitleColor());
 
     for (int i = 0; i < menu_options.size(); ++i) {
         if (i == current_selection) {
@@ -51,12 +63,30 @@ void MainMenuView::update(float deltaTime) {
     float pointer_y = text_rect.top + text_rect.height/2;
 
     option_pointer.setPosition(pointer_x, pointer_y);
+    updateBackgroundParticles();
+}
+
+void MainMenuView::updateBackgroundParticles() {
+    auto particles = view_model->getBackgroundParticles();
+    background_particles.clear();
     
+    for (const auto& pos : particles) {
+        sf::CircleShape particle(2.0f);
+        particle.setFillColor(sf::Color(255, 255, 255, 100));
+        particle.setPosition(pos);
+        background_particles.push_back(particle);
+    }
 }
 
 void MainMenuView::render(sf::RenderWindow& window) {
 
     window.clear(sf::Color::Black);
+
+    for (const auto& particle : background_particles) {
+        window.draw(particle);
+    }
+    window.draw(title_text);
+
     for (int i = 0; i < menu_options.size(); ++i) {
         window.draw(menu_options[i]);
     }
@@ -74,6 +104,9 @@ void MainMenuView::handleInput(const sf::Event& event) {
                 view_model->navigateDown();
                 break;
             case sf::Keyboard::Enter:
+                view_model->confirmSelection();
+                break;
+            case sf::Keyboard::J:
                 view_model->confirmSelection();
                 break;
             default:
