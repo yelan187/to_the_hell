@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Engine.h"
+#include "ViewModel/ViewModel.h"
 #include <SFML/Graphics.hpp>
 
 namespace View {

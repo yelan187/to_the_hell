@@ -1,3 +1,4 @@
+#pragma once
 #include <SFML/Graphics.hpp>
 #include <ViewModel/GameViewModel.h>
 #include <map>
@@ -5,11 +6,16 @@
 namespace View{
 namespace UI {
 
-class Player {
-public:
+// 为了与前向声明匹配
+namespace PlayerState {
     enum class State {
         WALKING
     };
+}
+
+class Player {
+public:
+    using State = PlayerState::State;
 
     void init(std::shared_ptr<ViewModel::GameViewModel> view_model);
     void render(sf::RenderWindow& window);
