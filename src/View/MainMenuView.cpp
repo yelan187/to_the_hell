@@ -10,12 +10,18 @@ MainMenuView::MainMenuView(Core::Engine &engine) : View::Page(engine) {
     }
     view_model = std::make_shared<ViewModel::MainMenuViewModel>(engine,window_size);
 
-    title_text.setString(engine.getGameTitle());
-    title_text.setCharacterSize(80);
-    title_text.setFillColor(sf::Color::Red);
-    title_text.setFont(font);
-    title_text.setOrigin(title_text.getLocalBounds().width / 2, title_text.getLocalBounds().height / 2);
-    title_text.setPosition(window_size.x / 2, window_size.y / 4);
+    if (!title_texture.loadFromFile("assets/images/title.png")) {
+        std::cerr << "Error loading title image!" << std::endl;
+        return;
+    }
+    
+    title_sprite.setTexture(title_texture);
+    
+    title_sprite.setScale(0.4f, 0.4f);
+
+    sf::FloatRect bounds = title_sprite.getLocalBounds();
+    title_sprite.setOrigin(bounds.width / 2, bounds.height / 2);
+    title_sprite.setPosition(window_size.x / 2, window_size.y / 4);
 
     current_selection = view_model->getCurrentSelectionIndex();
     for (auto s: view_model->getMenuOptions()){
@@ -44,8 +50,6 @@ void MainMenuView::update(float deltaTime) {
     view_model->updateAnimationState(deltaTime);
 
     current_selection = view_model->getCurrentSelectionIndex();
-
-    title_text.setFillColor(view_model->getTitleColor());
 
     for (int i = 0; i < menu_options.size(); ++i) {
         if (i == current_selection) {
@@ -85,7 +89,7 @@ void MainMenuView::render(sf::RenderWindow& window) {
     for (const auto& particle : background_particles) {
         window.draw(particle);
     }
-    window.draw(title_text);
+    window.draw(title_sprite);
 
     for (int i = 0; i < menu_options.size(); ++i) {
         window.draw(menu_options[i]);

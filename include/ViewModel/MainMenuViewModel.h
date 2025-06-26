@@ -26,8 +26,6 @@ public:
     int getCurrentSelectionIndex() const;
 
 public:
-    sf::Color getTitleColor() const;
-    
     std::vector<sf::Vector2f> getBackgroundParticles() const;
     
     void updateAnimationState(float delta_time);

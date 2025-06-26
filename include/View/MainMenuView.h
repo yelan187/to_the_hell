@@ -21,7 +21,8 @@ public:
 private:
     std::shared_ptr<ViewModel::MainMenuViewModel> view_model;
     
-    sf::Text title_text;
+    sf::Texture title_texture;
+    sf::Sprite title_sprite;
 
     std::vector<sf::Text> menu_options;
     int current_selection;

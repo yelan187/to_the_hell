@@ -77,13 +77,6 @@ void MainMenuViewModel::confirmSelection() {
     }
 }
 
-sf::Color MainMenuViewModel::getTitleColor() const {
-    int r = 255;
-    int g = 215 + 40 * std::sin(animation_time_ * 1.5f);
-    int b = 0;
-    return sf::Color(r, g, b);
-}
-
 void MainMenuViewModel::updateAnimationState(float delta_time) {
     animation_time_ += delta_time;
 
