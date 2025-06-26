@@ -3,9 +3,11 @@
 #include "Core/Engine.h"
 #include "View/Page.h"
 #include "View/MainMenuView.h"
+#include "View/GameView.h"
 
 using Core::Engine;
 using View::MainMenuView;
+using View::GameView;
 
 Engine::Engine(std::string game_title, sf::Vector2u window_size, int fps) {
     fps = fps;
@@ -22,6 +24,10 @@ void Engine::changePage(PAGE_STATE new_page_state) {
     switch (page_state) {
         case PAGE_STATE::MAIN_MENU:
             page = std::make_shared<MainMenuView>(*this);
+            break;
+        case PAGE_STATE::GAME:
+            page = std::make_shared<GameView>(*this);
+            break;
     }
 }
 
