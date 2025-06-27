@@ -4,7 +4,7 @@
 using View::GameView;
 
 GameView::GameView(Core::Engine &engine) : View::Page(engine) {
-    if (!font.loadFromFile("assets/fonts/JetBrainsMono.ttf")) {
+    if (!font.loadFromFile("assets/fonts/fusion.ttf")) {
         std::cerr << "Error loading font!" << std::endl;
         return;
     }
@@ -14,13 +14,13 @@ GameView::GameView(Core::Engine &engine) : View::Page(engine) {
     total_score_text.setCharacterSize(24);
     total_score_text.setFillColor(sf::Color::White);
     total_score_text.setFont(font);
-    total_score_text.setPosition(1400,50);
+    total_score_text.setPosition(15,15);
 
     game_time_text.setString(view_model->getGameTime());
     game_time_text.setCharacterSize(24);
     game_time_text.setFillColor(sf::Color::White);
     game_time_text.setFont(font);
-    game_time_text.setPosition(1400,150);
+    game_time_text.setPosition(15,40);
 
     player.init(view_model);
     for (int id : view_model->getPlatformsId()){
@@ -85,6 +85,12 @@ void GameView::handleInput(const sf::Event& event) {
                 break;
             case sf::Keyboard::D:
                 view_model->playerStopRight();
+                break;
+            case sf::Keyboard::W:
+                view_model->playerStopJump();
+                break;
+            case sf::Keyboard::S:
+                view_model->playerStopDown();
                 break;
             default:
                 break;

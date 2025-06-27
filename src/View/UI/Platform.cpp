@@ -5,7 +5,7 @@ using View::UI::Platform;
 
 void Platform::init(std::shared_ptr<ViewModel::GameViewModel> view_model,int id) {
     this->id = id;
-    size = sf::Vector2f(200, 30);
+    size = view_model->getPlatformSize();
 
     switch (view_model->getPlatformTypeById(id)) {
         case View::UI::PlatformType::NORMAL:

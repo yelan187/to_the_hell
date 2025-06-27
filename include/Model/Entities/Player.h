@@ -16,8 +16,11 @@ enum class PlayerState {
 class Player {
 public:
     Player(sf::Vector2f position,sf::Vector2f size)
-        : position(position),size(size),on_platform(-1),walking_speed(3.0f) 
-    {}
+        : position(position),size(size),on_platform(false),on_platform_id(1),state(PlayerState::IDLE) {
+            walking_speed = 100.0f;
+            jumping_speed = 200.0f;
+            gravity = sf::Vector2f(0,300.0f);
+        }
 
     void updatePosition(float delta_time);
     void updateVelocity(float delta_time);
@@ -29,35 +32,36 @@ public:
     void addAcceleration(sf::Vector2f a) {
         acceleration += a;
     }
-    void update(float delta_time); // x += v * t + 1/2 * a * t * t, v += a * v, a = 0
-    bool onPlatform(Platform* platform);
+    void update(float delta_time, std::map<int, Platform*>& platforms); // x += v * t + 1/2 * a * t * t, v += a * v, a = 0
+    void adjustPosition(Platform* &platforms);
     void jump();
-    void walkLeft() {
-        velocity.x -= walking_speed;
-    }
-    void walkRight() {
-        velocity.x += walking_speed;
-    }
+    void fall();
+    void walkLeft();
+    void walkRight();
     void stopLeft();
     void stopRight();
 
-    PlayerState getState() const {return state;};
-    sf::Vector2f getPosition() const { return position; };
-    sf::Vector2f getSize() const { return size; };
-    void setPosition(const sf::Vector2f& position);
-
-    int on_platform; // -1 if player is not standing on any platform, else platform id  
+    PlayerState getState() const {return state;}
+    sf::Vector2f getPosition() const { return position; }
+    sf::Vector2f getSize() const { return size; }
+    void setPosition(const sf::Vector2f& position) {
+        this->position = position;
+    }
 
 private:
+    bool on_platform;
+    int on_platform_id;
+
     PlayerState state;
 
     sf::Vector2f size;
     sf::Vector2f position;
-
-    sf::Vector2f velocity;
-    float walking_speed;
-
     sf::Vector2f acceleration;
+    sf::Vector2f velocity;
+    sf::Vector2f gravity;
+
+    float walking_speed;
+    float jumping_speed;
 };
 
 }

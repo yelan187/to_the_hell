@@ -5,12 +5,9 @@
 
 using ViewModel::GameViewModel;
 
-GameViewModel::GameViewModel(Core::Engine& engine) : ViewModel(engine) {
-    model = std::make_shared<Model::GameModel>(engine);
-}
-
 GameViewModel::GameViewModel(Core::Engine& engine, sf::Vector2u window_size) : ViewModel(engine) {
     model = std::make_shared<Model::GameModel>(engine, window_size);
+    init_keystate();
 }
 
 std::string GameViewModel::getGameTime() {
@@ -22,11 +19,15 @@ std::string GameViewModel::getGameTime() {
     std::stringstream ss;
     ss << "Time: ";
     if (hours > 0) {
-        ss << std::setw(2) << std::setfill('0') << hours << ":";
+        ss << std::setw(2) << std::setfill('0') << hours << "h";
     }
-    ss << std::setw(2) << std::setfill('0') << minutes << ":"
-       << std::setw(2) << std::setfill('0') << seconds;
-    
+    if (hours > 0 || minutes > 0) {
+        ss << std::setw(2) << std::setfill('0') << minutes << "m";
+    } else {
+        ss << "00m";
+    }
+    ss << std::setw(2) << std::setfill('0') << seconds << "s";
+
     return ss.str();
 }
 
@@ -63,29 +64,65 @@ sf::Vector2f GameViewModel::getPlayerPosition() {
 }
 
 void GameViewModel::playerJump() {
-    model->playerJump();
+    if (!key_state[sf::Keyboard::W]) {
+        model->playerJump();
+        key_state[sf::Keyboard::W] = true;
+    }
 }
 
 void GameViewModel::playerDown() {
-    model->playerDown();
+    if (!key_state[sf::Keyboard::S]) {
+        model->playerDown();
+        key_state[sf::Keyboard::S] = true;
+    }
 }
 
 void GameViewModel::playerWalkLeft() {
-    model->playerWalkLeft();
-    player_towards = towards::LEFT;
+    if (!key_state[sf::Keyboard::A]) {
+        std::cout << "Press A to walk left" << std::endl;
+        model->playerWalkLeft();
+        key_state[sf::Keyboard::A] = true;
+        if (!key_state[sf::Keyboard::D]) {
+            player_towards = towards::LEFT;
+        }
+    }
 }
 
 void GameViewModel::playerWalkRight() {
-    model->playerWalkRight();
-    player_towards = towards::RIGHT;
+    if (!key_state[sf::Keyboard::D]) {
+        std::cout << "Press D to walk right" << std::endl;
+        model->playerWalkRight();
+        key_state[sf::Keyboard::D] = true;
+        if (!key_state[sf::Keyboard::A]) {
+            player_towards = towards::RIGHT;
+        }
+    }
 }
 
 void GameViewModel::playerStopLeft() {
+    std::cout << "Release A" << std::endl;
+    key_state[sf::Keyboard::A] = false;
+    if (key_state[sf::Keyboard::D]) {
+        player_towards = towards::RIGHT;
+    }
     model->playerStopLeft();
 }
 
 void GameViewModel::playerStopRight() {
+    std::cout << "Release D" << std::endl;
+    key_state[sf::Keyboard::D] = false;
+    if (key_state[sf::Keyboard::A]) {
+        player_towards = towards::LEFT;
+    }
     model->playerStopRight();
+}
+
+void GameViewModel::playerStopJump() {
+    key_state[sf::Keyboard::W] = false;
+}
+
+void GameViewModel::playerStopDown() {
+    key_state[sf::Keyboard::S] = false;
 }
 
 std::vector<int> GameViewModel::getPlatformsId() {

@@ -27,7 +27,6 @@ enum class towards {
 };
 class GameViewModel : public ViewModel {
 public:
-    GameViewModel(Core::Engine& engine);
     GameViewModel(Core::Engine& engine, sf::Vector2u windowSize);
     
     void update(float delta_time) { model->update(delta_time); }
@@ -37,6 +36,8 @@ public:
 
     View::UI::PlayerState getPlayerState();
     sf::Vector2f getPlayerPosition();
+    sf::Vector2f getPlayerSize() { return model->player_size; }
+    sf::Vector2f getPlatformSize() { return model->platform_size; }
 
     void playerJump();
     void playerDown();
@@ -44,6 +45,8 @@ public:
     void playerWalkRight();
     void playerStopLeft();
     void playerStopRight();
+    void playerStopJump();
+    void playerStopDown();
 
     std::vector<int> getPlatformsId();
     View::UI::PlatformType getPlatformTypeById(int id);
@@ -52,7 +55,13 @@ public:
 private:
     std::shared_ptr<Model::GameModel> model;
     towards player_towards = towards::RIGHT;
-    
+    std::map<sf::Keyboard::Key, bool> key_state;
+    void init_keystate() {
+        key_state[sf::Keyboard::W] = false;
+        key_state[sf::Keyboard::A] = false;
+        key_state[sf::Keyboard::S] = false;
+        key_state[sf::Keyboard::D] = false;
+    }
 };
 
 }

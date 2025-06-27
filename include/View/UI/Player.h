@@ -30,6 +30,7 @@ public:
     sf::RectangleShape rect;
 private:
     void loadTextures();
+    void setTexture(PlayerState state);
 };
 
 }

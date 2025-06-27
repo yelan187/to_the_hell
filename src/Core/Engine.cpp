@@ -24,7 +24,7 @@ sf::Vector2u Engine::getWindowSize() const {
 }
 
 void Engine::changePage(PAGE_STATE new_page_state) {
-    std::cout << "change page." << std::endl;
+    // std::cout << "change page." << std::endl;
     page_state = new_page_state;
     switch (page_state) {
         case PAGE_STATE::MAIN_MENU:
@@ -42,7 +42,7 @@ void Engine::run() {
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 window.close();
-            } else if (event.type == sf::Event::KeyPressed) {
+            } else if (event.type == sf::Event::KeyPressed || event.type == sf::Event::KeyReleased) {
                 handleInput(event);
             }
         }
@@ -56,11 +56,11 @@ void Engine::handleInput(const sf::Event& event) {
 }
 
 void Engine::startGame() {
-    std::cout << "Game started!" << std::endl;
+    // std::cout << "Game started!" << std::endl;
     changePage(PAGE_STATE::GAME);
 }
 
 void Engine::exitGame() {
-    std::cout << "Exiting game!" << std::endl;
+    // std::cout << "Exiting game!" << std::endl;
     window.close();
 }
