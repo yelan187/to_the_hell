@@ -3,15 +3,19 @@
 
 using Model::Entities::Player;
 
-void Player::jump() {
+void Player::jump(float scroll_speed) {
     if (state==PlayerState::IDLE || state == PlayerState::WALKING) {
         state = PlayerState::JUMPING;
-        velocity.y -= jumping_speed;
+        if (on_platform) {
+            velocity.y = -jumping_speed;
+        } else {
+            velocity.y = -jumping_speed - scroll_speed;
+        }
     }
 }
 void Player::fall() {
-    if (state == PlayerState::JUMPING) {
-        velocity.y += 5.0f;
+    if (!on_platform) {
+        velocity.y += 300.0f;
     }
 }
 void Player::walkLeft() {

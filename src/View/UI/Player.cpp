@@ -7,13 +7,13 @@ using View::UI::Player;
 void Player::init(std::shared_ptr<ViewModel::GameViewModel> view_model) {
     loadTextures();
     this->view_model = view_model;
-    size = view_model->getPlayerSize();
+    size = sf::Vector2f(60,60);
     rect.setSize(size);
 }
 
 void Player::update(float delta_time) {
     setTexture(view_model->getPlayerState());
-    rect.setPosition(view_model->getPlayerPosition());
+    rect.setPosition(view_model->getPlayerPosition(size));
 }
 
 void Player::render(sf::RenderWindow& window){

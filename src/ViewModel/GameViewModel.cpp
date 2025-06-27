@@ -59,8 +59,11 @@ View::UI::PlayerState GameViewModel::getPlayerState() {
     }
 }
 
-sf::Vector2f GameViewModel::getPlayerPosition() {
-    return model->getPlayerPosition();
+sf::Vector2f GameViewModel::getPlayerPosition(sf::Vector2f view_playersize) {
+    sf::Vector2f position = model->getPlayerPosition();
+    sf::Vector2f real_pos = position - (view_playersize - getPlayerSize()) / 2.0f;
+
+    return real_pos;
 }
 
 void GameViewModel::playerJump() {
@@ -72,6 +75,7 @@ void GameViewModel::playerJump() {
 
 void GameViewModel::playerDown() {
     if (!key_state[sf::Keyboard::S]) {
+        std::cout << "Press S to go down" << std::endl;
         model->playerDown();
         key_state[sf::Keyboard::S] = true;
     }

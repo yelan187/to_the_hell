@@ -35,7 +35,7 @@ public:
     std::string getGameTime();
 
     View::UI::PlayerState getPlayerState();
-    sf::Vector2f getPlayerPosition();
+    sf::Vector2f getPlayerPosition(sf::Vector2f view_playersize);
     sf::Vector2f getPlayerSize() { return model->player_size; }
     sf::Vector2f getPlatformSize() { return model->platform_size; }
 

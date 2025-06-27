@@ -34,7 +34,7 @@ public:
     }
     void update(float delta_time, std::map<int, Platform*>& platforms); // x += v * t + 1/2 * a * t * t, v += a * v, a = 0
     void adjustPosition(Platform* &platforms);
-    void jump();
+    void jump(float scroll_speed);
     void fall();
     void walkLeft();
     void walkRight();

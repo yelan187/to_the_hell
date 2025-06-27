@@ -16,7 +16,7 @@ public:
     void update(float delta_time) override;
 
     void playerJump() {
-        player->jump();
+        player->jump(scroll_speed);
     }
     void playerDown() {
         player->fall();
@@ -37,7 +37,7 @@ public:
     std::map<int, Entities::Platform*> getPlatforms() const { return platforms; }
 
     sf::Vector2f platform_size = sf::Vector2f(100, 12);
-    sf::Vector2f player_size = sf::Vector2f(60, 60);
+    sf::Vector2f player_size = sf::Vector2f(30, 60);
     
 private:
     bool init;
