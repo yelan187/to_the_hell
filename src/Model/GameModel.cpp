@@ -13,6 +13,28 @@ GameModel::GameModel(Core::Engine &engine, sf::Vector2f window_size) :
 }
 
 void GameModel::update(float delta_time) {
+    /*
+     *
+     * This function is called every frame to update the game state (after handling input).
+     * 
+     * It will check if the game is initialized, and if not, it will initialize the game.
+     * 
+     * Then :
+     * 
+     *  1. update the platform generation interval
+     * 
+     *  2. check if the player is on any platform
+     *      2.1 if the player is on a platform, associate the player's velocity with the platform's velocity
+     *      2.2 if the player is not on any platform, add gravity to the player's acceleration
+     * 
+     *  3. update all platform's **position** and the player's **position** and **velocity** 
+     * 
+     *  4. after updating the platforms and player, the player may be stuck in a platform , 
+     *      so we need to check if the player is in any platform again
+     * 
+     *      4.1. if the player is on a platform, adjust the player's position
+     * 
+     */
     if (!init) {
         initGame();
         init = true;
@@ -71,7 +93,7 @@ void GameModel::adjustPlayerPosition(){
     sf::Vector2f platform_lt = platform->getPosition();
     sf::Vector2f platform_rb = platform_lt + platform->getSize();
 
-    // witch corner of the player is in the platform
+    // which corner of the player is in the platform
     int lt = player_lt.x < platform_rb.x && player_lt.x > platform_lt.x &&
             player_lt.y < platform_rb.y && player_lt.y > platform_lt.y;
 
