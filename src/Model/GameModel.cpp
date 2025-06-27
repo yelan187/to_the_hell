@@ -13,9 +13,118 @@ GameModel::GameModel(Core::Engine &engine, sf::Vector2u window_size) :
 }
 
 void GameModel::update(float delta_time) {
+    /*
+     *
+     * This function is called every frame to update the game state (after handling input).
+     * 
+     * It will check if the game is initialized, and if not, it will initialize the game.
+     * 
+     * Then :
+     * 
+     *  1. update the platform generation interval
+     * 
+     *  2. check if the player is on any platform
+     *      2.1 if the player is on a platform, associate the player's velocity with the platform's velocity
+     *      2.2 if the player is not on any platform, add gravity to the player's acceleration
+     * 
+     *  3. update all platform's **position** and the player's **position** and **velocity** 
+     * 
+     *  4. after updating the platforms and player, the player may be stuck in a platform , 
+     *      so we need to check if the player is in any platform again
+     * 
+     *      4.1. if the player is on a platform, adjust the player's position
+     * 
+     */
     if (!init) {
         initGame();
         init = true;
+        return;
+    }
+
+    platform_generate_interval -= delta_time;
+    if (platform_generate_interval <= 0.0f) {
+        resetPlatformGenerateInterval();
+        generatePlatform();
+    }
+
+    player->on_platform = -1;
+    for (auto& platform_pair : platforms) {
+        Entities::Platform* platform = platform_pair.second;
+        if (player->onPlatform(platform)) {
+            player->on_platform = platform->id;
+            break;
+        }
+    }
+
+    if (player->on_platform != -1) {
+        player->assocatedVelocity(platforms[player->on_platform]->getVelocity());
+    } else {
+        player->addAcceleration(gravity);
+    }
+
+    for (auto& platform_pair : platforms) {
+        platform_pair.second->update(delta_time);
+    }
+    player->update(delta_time);
+
+    // check if player is in certain platform
+    player->on_platform = -1;
+    for (auto& platform_pair : platforms) {
+        Entities::Platform* platform = platform_pair.second;
+        if (player->onPlatform(platform)) {
+            player->on_platform = platform->id;
+            break;
+        }
+    }
+
+    if (player->on_platform != -1) {
+        adjustPlayerPosition();
+    } else {
+        player->addAcceleration(gravity);
+    }
+}
+
+void GameModel::adjustPlayerPosition(){
+    Entities::Platform* platform = platforms[player->on_platform];
+    
+    sf::Vector2f player_lt = player->getPosition();
+    sf::Vector2f player_rb = player_lt + player->getSize();
+
+    sf::Vector2f platform_lt = platform->getPosition();
+    sf::Vector2f platform_rb = platform_lt + platform->getSize();
+
+    // which corner of the player is in the platform
+    int lt = player_lt.x < platform_rb.x && player_lt.x > platform_lt.x &&
+            player_lt.y < platform_rb.y && player_lt.y > platform_lt.y;
+
+    int rb = player_rb.x < platform_rb.x && player_rb.x > platform_lt.x &&
+            player_rb.y < platform_rb.y && player_rb.y > platform_lt.y;
+
+    int lb = player_lt.x < platform_rb.x && player_lt.x > platform_lt.x &&
+            player_rb.y < platform_rb.y && player_rb.y > platform_lt.y;
+    
+    int rt = player_rb.x < platform_rb.x && player_rb.x > platform_lt.x &&
+            player_lt.y < platform_rb.y && player_lt.y > platform_lt.y;
+
+    switch (lt*8 + lb*4 + rb*2 + rt) {
+        case 0b1000: // left top
+            player->setPosition(sf::Vector2f(platform_rb.x, player_lt.y));
+            break;
+        case 0b0100: // left bottom
+            player->setPosition(sf::Vector2f(player_lt.x, platform_rb.y - player->getSize().y));
+            break;
+        case 0b0010: // right bottom
+            player->setPosition(sf::Vector2f(player_lt.x, platform_rb.y - player->getSize().y));
+            break;
+        case 0b0001: // right top
+            player->setPosition(sf::Vector2f(platform_rb.x - player->getSize().x, player_lt.y));
+            break;
+        case 0b0110: // right bottom and left bottom
+            player->setPosition(sf::Vector2f(player_lt.x, platform_lt.y - player->getSize().y));
+            break;
+        case 0b1001: // left top and right top
+            player->setPosition(sf::Vector2f(player_lt.x, player_rb.y));
+            break;
     }
     
 }
@@ -72,6 +181,7 @@ void GameModel::resetPlatformGenerateInterval() {
 void GameModel::initGame() {
     total_score = 0;
     game_time = std::chrono::seconds(0);
+    gravity += sf::Vector2f(0,2.0f);
     resetPlatformGenerateInterval();
     initPlatforms();
     initPlayer();

@@ -13,12 +13,19 @@ public:
     int getTotalScore() const { return total_score; }
     std::chrono::seconds getDuration() { return game_time; };
     sf::Vector2f getPlayerPosition() const { return player->getPosition(); }
+
     void update(float delta_time) override;
+
+    void adjustPlayerPosition();
 
     void playerJump() {};
     void playerDown() {};
-    void playerWalkLeft() {};
-    void playerWalkRight() {};
+    void playerWalkLeft() {
+        player->walkLeft();
+    };
+    void playerWalkRight() {
+        player->walkRight();
+    };
     void playerStopLeft() {};
     void playerStopRight() {};
     Entities::Platform* getPlatformById(int id) const { return platforms.at(id); }
@@ -30,6 +37,7 @@ private:
     int total_score;
     std::chrono::seconds game_time;
     float scroll_speed;
+    sf::Vector2f gravity;
 
     std::map<int, Entities::Platform*> platforms;
     int next_platform_id;

@@ -6,6 +6,8 @@
 namespace Model {
 namespace Entities {
 
+class Platform;
+
 enum class PlayerState {
     IDLE,
     WALKING,
@@ -13,11 +15,29 @@ enum class PlayerState {
 };
 class Player {
 public:
-    Player(sf::Vector2f position,sf::Vector2f size) {};
-    void update(float deltaTime);
+    Player(sf::Vector2f position,sf::Vector2f size)
+        : position(position),size(size),on_platform(-1),walking_speed(3.0f) 
+    {}
+
+    void updatePosition(float delta_time);
+    void updateVelocity(float delta_time);
+
+    void assocatedVelocity(sf::Vector2f v) {
+        velocity += v;
+    }
+    
+    void addAcceleration(sf::Vector2f a) {
+        acceleration += a;
+    }
+    void update(float delta_time); // x += v * t + 1/2 * a * t * t, v += a * v, a = 0
+    bool onPlatform(Platform* platform);
     void jump();
-    void moveLeft();
-    void moveRight();
+    void walkLeft() {
+        velocity.x -= walking_speed;
+    }
+    void walkRight() {
+        velocity.x += walking_speed;
+    }
     void stopLeft();
     void stopRight();
 
@@ -26,14 +46,17 @@ public:
     sf::Vector2f getSize() const { return size; };
     void setPosition(const sf::Vector2f& position);
 
+    int on_platform; // -1 if player is not standing on any platform, else platform id  
+
 private:
     PlayerState state;
+
     sf::Vector2f size;
     sf::Vector2f position;
 
     sf::Vector2f velocity;
-    
-    
+    float walking_speed;
+
     sf::Vector2f acceleration;
 };
 
