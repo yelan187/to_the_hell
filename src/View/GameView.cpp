@@ -8,7 +8,7 @@ GameView::GameView(Core::Engine &engine) : View::Page(engine) {
         std::cerr << "Error loading font!" << std::endl;
         return;
     }
-    view_model = std::make_shared<ViewModel::GameViewModel>(engine);
+    view_model = std::make_shared<ViewModel::GameViewModel>(engine,window_size);
     
     total_score_text.setString(view_model->getTotalScore());
     total_score_text.setCharacterSize(24);

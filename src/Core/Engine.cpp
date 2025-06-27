@@ -46,7 +46,7 @@ void Engine::run() {
                 handleInput(event);
             }
         }
-        page->update(1.00f / this->fps);
+        page->update(1.00f / fps);
         page->render(window);
     }
 }

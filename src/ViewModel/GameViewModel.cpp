@@ -6,7 +6,7 @@
 using ViewModel::GameViewModel;
 
 GameViewModel::GameViewModel(Core::Engine& engine) : ViewModel(engine) {
-    model = std::make_shared<Model::GameModel>(engine);
+    model = std::make_shared<Model::GameModel>(engine,window_size);
 }
 
 std::string GameViewModel::getGameTime() {

@@ -29,7 +29,7 @@ class GameViewModel : public ViewModel {
 public:
     GameViewModel(Core::Engine& engine);
     
-    void update() { model->update(); }
+    void update(float delta_time) { model->update(delta_time); }
 
     std::string getTotalScore();
     std::string getGameTime();

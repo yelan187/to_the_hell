@@ -16,9 +16,7 @@ MainMenuView::MainMenuView(Core::Engine &engine) : View::Page(engine) {
     }
     
     title_sprite.setTexture(title_texture);
-    
     title_sprite.setScale(0.4f, 0.4f);
-
     sf::FloatRect bounds = title_sprite.getLocalBounds();
     title_sprite.setOrigin(bounds.width / 2, bounds.height / 2);
     title_sprite.setPosition(window_size.x / 2, window_size.y / 4);
