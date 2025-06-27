@@ -57,6 +57,7 @@ void Engine::handleInput(const sf::Event& event) {
 
 void Engine::startGame() {
     std::cout << "Game started!" << std::endl;
+    changePage(PAGE_STATE::GAME);
 }
 
 void Engine::exitGame() {

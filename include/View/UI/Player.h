@@ -12,7 +12,7 @@ namespace UI {
 
 enum class PlayerState {
     IDLE_L,
-    IDEL_R,
+    IDLE_R,
     WALKING_L,
     WALKING_R,
     JUMPING_L,
@@ -28,6 +28,8 @@ public:
     sf::Vector2f size;
     std::map<PlayerState,sf::Texture> texture_map;
     sf::RectangleShape rect;
+private:
+    void loadTextures();
 };
 
 }

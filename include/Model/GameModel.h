@@ -8,10 +8,10 @@ namespace Model {
 class GameModel : public Model {
 public:
     GameModel(Core::Engine &engine);
-    GameModel(Core::Engine &engine, sf::Vector2f window_size);
-    Entities::PlayerState getPlayerState() {};
+    GameModel(Core::Engine &engine, sf::Vector2u window_size);
+    Entities::PlayerState getPlayerState() { return Entities::PlayerState::IDLE; };
     int getTotalScore() const { return total_score; }
-    std::chrono::seconds getDuration() {};
+    std::chrono::seconds getDuration() { return game_time; };
     sf::Vector2f getPlayerPosition() const { return player->getPosition(); }
     void update(float delta_time) override;
 
@@ -39,7 +39,7 @@ private:
 
     void resetPlatformGenerateInterval();
     void generatePlatform();
-    Entities::PlatformType GameModel::getPlatformTypeRand();
+    Entities::PlatformType getPlatformTypeRand();
     void initPlatforms();
     void initPlayer();
     void initGame();

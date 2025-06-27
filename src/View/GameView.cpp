@@ -31,7 +31,7 @@ GameView::GameView(Core::Engine &engine) : View::Page(engine) {
 }
 
 void GameView::update(float deltaTime) {
-    view_model->update();
+    view_model->update(deltaTime);
 
     total_score_text.setString(view_model->getTotalScore());
 

@@ -28,6 +28,7 @@ enum class towards {
 class GameViewModel : public ViewModel {
 public:
     GameViewModel(Core::Engine& engine);
+    GameViewModel(Core::Engine& engine, sf::Vector2u windowSize);
     
     void update(float delta_time) { model->update(delta_time); }
 

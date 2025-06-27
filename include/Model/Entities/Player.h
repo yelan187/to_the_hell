@@ -13,7 +13,7 @@ enum class PlayerState {
 };
 class Player {
 public:
-    Player(sf::Vector2f position,sf::Vector2f size);
+    Player(sf::Vector2f position,sf::Vector2f size) {};
     void update(float deltaTime);
     void jump();
     void moveLeft();
@@ -21,9 +21,9 @@ public:
     void stopLeft();
     void stopRight();
 
-    PlayerState getState() const;
-    sf::Vector2f getPosition() const;
-    sf::Vector2f getSize() const;
+    PlayerState getState() const {return state;};
+    sf::Vector2f getPosition() const { return position; };
+    sf::Vector2f getSize() const { return size; };
     void setPosition(const sf::Vector2f& position);
 
 private:

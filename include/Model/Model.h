@@ -5,7 +5,7 @@ namespace Model {
 class Model {
 public:
     Model(Core::Engine &engine) : engine(engine) {};
-    Model(Core::Engine &engine,sf::Vector2f window_size) : engine(engine), window_size(window_size){};
+    Model(Core::Engine &engine,sf::Vector2u window_size) : engine(engine), window_size(window_size){};
 
     virtual void update(float delta_time) {};
     
@@ -13,7 +13,7 @@ public:
     
 protected:
     Core::Engine &engine;
-    sf::Vector2f window_size;
+    sf::Vector2u window_size;
 };
 
 };

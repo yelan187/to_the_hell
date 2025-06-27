@@ -8,7 +8,7 @@ GameModel::GameModel(Core::Engine &engine) :
     Model(engine), init(false) {
 }
 
-GameModel::GameModel(Core::Engine &engine, sf::Vector2f window_size) : 
+GameModel::GameModel(Core::Engine &engine, sf::Vector2u window_size) : 
     Model(engine, window_size), init(false) {
 }
 
@@ -16,19 +16,8 @@ void GameModel::update(float delta_time) {
     if (!init) {
         initGame();
         init = true;
-        return;
     }
-
-    platform_generate_interval -= delta_time;
-    if (platform_generate_interval <= 0.0f) {
-        resetPlatformGenerateInterval();
-        generatePlatform();
-    }
-
-    for (auto& platform_pair : platforms) {
-        Entities::Platform* platform = platform_pair.second;
-        
-    }
+    
 }
 
 PlatformType GameModel::getPlatformTypeRand() {
@@ -72,6 +61,7 @@ void GameModel::initPlayer() {
         platforms[0]->getPosition().x + platforms[0]->getSize().x / 2 - player_size.x / 2,
         window_size.y / 4
     );
+    std::cout << "Player position: " << player_position.x << ", " << player_position.y << std::endl;
     player = new Entities::Player(player_position,player_size);
 }
 

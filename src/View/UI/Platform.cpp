@@ -9,6 +9,7 @@ void Platform::init(std::shared_ptr<ViewModel::GameViewModel> view_model,int id)
 
     switch (view_model->getPlatformTypeById(id)) {
         case View::UI::PlatformType::NORMAL:
+            rect.setFillColor(sf::Color::Green);
             break;
     }
 

@@ -6,7 +6,11 @@
 using ViewModel::GameViewModel;
 
 GameViewModel::GameViewModel(Core::Engine& engine) : ViewModel(engine) {
-    model = std::make_shared<Model::GameModel>(engine,window_size);
+    model = std::make_shared<Model::GameModel>(engine);
+}
+
+GameViewModel::GameViewModel(Core::Engine& engine, sf::Vector2u window_size) : ViewModel(engine) {
+    model = std::make_shared<Model::GameModel>(engine, window_size);
 }
 
 std::string GameViewModel::getGameTime() {
@@ -37,7 +41,7 @@ View::UI::PlayerState GameViewModel::getPlayerState() {
             if (player_towards == towards::LEFT) {
                 return View::UI::PlayerState::IDLE_L;
             } else {
-                return View::UI::PlayerState::IDEL_R;
+                return View::UI::PlayerState::IDLE_R;
             }
         case Model::Entities::PlayerState::WALKING:
             if (player_towards == towards::LEFT) {
