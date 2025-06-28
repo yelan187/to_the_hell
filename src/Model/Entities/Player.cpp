@@ -1,5 +1,6 @@
 #include "Model/Entities/Player.h"
 #include "Model/Entities/Platform.h"
+#include "Utils/Config.h"
 
 using Model::Entities::Player;
 
@@ -76,14 +77,25 @@ void Player::updateVelocity(float delta_time) {
     acceleration = sf::Vector2f(0, 0);
 }
 void Player::update(float delta_time, std::map<int, Platform*>& platforms) {
-    // cout velocity and acceleration
-    std::cout << "Velocity: " << velocity.x << ", " << velocity.y << std::endl;
-    if (on_platform) {
+    // print velocity and acceleration
+    // std::cout << "Velocity: " << velocity.x << ", " << velocity.y << std::endl;
+    // Check if on_platform_id is valid
+    if (on_platform && platforms.count(on_platform_id) > 0 && platforms[on_platform_id]) {
         assocatedVelocity(platforms[on_platform_id]->getVelocity());
     } else {
         addAcceleration(gravity);
     }
     updatePosition(delta_time);
+    // Only restrict the player from flying out of the top window boundary when on a platform
+    if (on_platform && position.y < 0) {
+        position.y = 0;
+        velocity.y = 0;
+    }
+    // Reset player position if falling out of the bottom of the window
+    if (position.y > Utils::WINDOW_HEIGHT) {
+        position.y = 0;
+        velocity.y = 0;
+    }
     updateVelocity(delta_time);
     on_platform = false;
     for (auto& platform_pair : platforms) {
