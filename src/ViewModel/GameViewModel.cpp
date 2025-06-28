@@ -56,6 +56,9 @@ View::UI::PlayerState GameViewModel::getPlayerState() {
             } else {
                 return View::UI::PlayerState::JUMPING_R;
             }
+        
+        // Default
+        return View::UI::PlayerState::IDLE_R;
     }
 }
 
