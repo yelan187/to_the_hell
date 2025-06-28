@@ -45,17 +45,20 @@ void GameModel::update(float delta_time) {
         generatePlatform();
     }
 
-    for (auto& platform_pair : platforms) {
-        Entities::Platform* platform = platform_pair.second;
+    for (auto it = platforms.begin(); it != platforms.end(); ) {
+        Entities::Platform* platform = it->second;
         platform->update(delta_time);
         if (platform->outOfWindow(window_size)) {
-            // remove platform if it is out of window
             delete platform;
-            platforms.erase(platform_pair.first);
+            std::cout << "Platform " << it->first << " removed." << std::endl;
+            it = platforms.erase(it);
+        } else {
+            ++it;
         }
     }
-
-    player->update(delta_time, platforms);
+    std::cout << "player update start" << std::endl;
+    player->update(delta_time);
+    std::cout << "player update end" << std::endl;
 }
 
 PlatformType GameModel::getPlatformTypeRand() {
@@ -97,11 +100,11 @@ void GameModel::initPlayer() {
         window_size.y / 5
     );
     // std::cout << "Player position: " << player_position.x << ", " << player_position.y << std::endl;
-    player = new Entities::Player(player_position,player_size);
+    player = new Entities::Player(player_position,player_size, this);
 }
 
 void GameModel::resetPlatformGenerateInterval() {
-    platform_generate_interval = 1.0f + static_cast<float>(rand() % 1 - 0.5);
+    platform_generate_interval = 1.0f + static_cast<float>(rand() % 1 - 0.5) / 2;
 }
 
 void GameModel::initGame() {

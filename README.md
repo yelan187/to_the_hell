@@ -60,9 +60,9 @@ cd build/bin
 
 - [Fusion Pixel Font](https://github.com/TakWolf/fusion-pixel-font) - 开源像素字体
 
-<!-- ### 角色设计灵感
+### ✨ 角色设计灵感
 
-游戏主角的形象设计灵感来源于B站UP主 [Warma](https://space.bilibili.com/53456)。本项目是非商业性质的学习作品，仅作学习交流用途。如有侵权，请联系我们删除。 -->
+游戏主角的形象设计灵感来源于B站UP主 [Warma](https://space.bilibili.com/53456)。本项目是非商业性质的学习作品，仅作学习交流用途。如有侵权，请联系我们删除。
 
 ## 📄 许可证
 

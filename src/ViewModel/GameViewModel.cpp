@@ -50,12 +50,14 @@ View::UI::PlayerState GameViewModel::getPlayerState() {
             } else {
                 return View::UI::PlayerState::WALKING_R;
             }
-        case Model::Entities::PlayerState::JUMPING:
+        case Model::Entities::PlayerState::JUMPING_IDLE:
+        case Model::Entities::PlayerState::JUMPING_WALKING:
             if (player_towards == towards::LEFT) {
                 return View::UI::PlayerState::JUMPING_L;
             } else {
                 return View::UI::PlayerState::JUMPING_R;
             }
+        
     }
 }
 
@@ -84,22 +86,22 @@ void GameViewModel::playerDown() {
 void GameViewModel::playerWalkLeft() {
     if (!key_state[sf::Keyboard::A]) {
         std::cout << "Press A to walk left" << std::endl;
-        model->playerWalkLeft();
         key_state[sf::Keyboard::A] = true;
         if (!key_state[sf::Keyboard::D]) {
             player_towards = towards::LEFT;
         }
+        model->playerWalkLeft();
     }
 }
 
 void GameViewModel::playerWalkRight() {
     if (!key_state[sf::Keyboard::D]) {
         std::cout << "Press D to walk right" << std::endl;
-        model->playerWalkRight();
         key_state[sf::Keyboard::D] = true;
         if (!key_state[sf::Keyboard::A]) {
             player_towards = towards::RIGHT;
         }
+        model->playerWalkRight();
     }
 }
 
