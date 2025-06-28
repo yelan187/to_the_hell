@@ -4,10 +4,12 @@
 #include "View/Page.h"
 #include "View/MainMenuView.h"
 #include "View/GameView.h"
+#include "View/ScoreView.h"
 
 using Core::Engine;
 using View::MainMenuView;
 using View::GameView;
+using View::ScoreView;
 
 Engine::Engine(std::string game_title, sf::Vector2u window_size, int fps) {
     this->game_title = game_title;
@@ -33,7 +35,15 @@ void Engine::changePage(PAGE_STATE new_page_state) {
         case PAGE_STATE::GAME:
             page = std::make_shared<GameView>(*this);
             break;
+        case PAGE_STATE::SCORE:
+            page = std::make_shared<ScoreView>(*this, last_game_result.score, last_game_result.time);
+            break;
     }
+}
+
+void Engine::endGame(int score, std::chrono::seconds time) {
+    last_game_result = {score, time};
+    changePage(PAGE_STATE::SCORE);
 }
 
 void Engine::run() {

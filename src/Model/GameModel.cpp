@@ -1,5 +1,6 @@
 #include <iostream>
 #include "Model/GameModel.h"
+#include "Core/Engine.h"
 
 using Model::GameModel;
 using Model::Entities::PlatformType;
@@ -56,6 +57,10 @@ void GameModel::update(float delta_time) {
     }
 
     player->update(delta_time, platforms);
+
+    if (player->getPosition().y < 0 || player->getPosition().y > window_size.y) {
+        engine.endGame(total_score, getDuration());
+    }
 }
 
 PlatformType GameModel::getPlatformTypeRand() {

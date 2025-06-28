@@ -4,12 +4,13 @@
 using View::MainMenuView;
 
 MainMenuView::MainMenuView(Core::Engine &engine) : View::Page(engine) {
+
+    view_model = std::make_shared<ViewModel::MainMenuViewModel>(engine,window_size);
+
     if (!font.loadFromFile("assets/fonts/fusion.ttf")) {
         std::cerr << "Error loading font!" << std::endl;
         return;
-    }
-    view_model = std::make_shared<ViewModel::MainMenuViewModel>(engine,window_size);
-
+    }    
     if (!title_texture.loadFromFile("assets/images/title.png")) {
         std::cerr << "Error loading title image!" << std::endl;
         return;

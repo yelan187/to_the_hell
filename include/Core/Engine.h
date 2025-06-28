@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <chrono>
 
 #include <SFML/Graphics.hpp>
 
@@ -14,6 +15,11 @@ namespace View {
 namespace Core {
 class Engine {
 public:
+    struct GameResult {
+        int score;
+        std::chrono::seconds time;
+    };
+
     enum class PAGE_STATE {
         MAIN_MENU,
         GAME,
@@ -33,6 +39,7 @@ public:
     void handleInput(const sf::Event& event);
 
     void changePage(PAGE_STATE new_page_state);
+    void endGame(int score, std::chrono::seconds time);
 
     void startGame();
 
@@ -41,6 +48,7 @@ public:
 private:
     int fps;
     PAGE_STATE page_state;
+    GameResult last_game_result;
 
     std::shared_ptr<View::Page> page;
     
