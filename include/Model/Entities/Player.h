@@ -32,9 +32,10 @@ public:
     Player(sf::Vector2f position,sf::Vector2f size,GameModel* game_model)
         : position(position),size(size),on_platform(false),on_platform_id(-1),state(PlayerState::IDLE),game_model(game_model) {
             walking_speed = 150.0f;
-            jumping_speed = 300.0f;
-            gravity = sf::Vector2f(0,400.0f);
+            jumping_speed = 350.0f;
+            gravity = sf::Vector2f(0,500.0f);
             collision_direction = CollisionDirection::NONE;
+            prev_collision_direction = CollisionDirection::NONE;
         }
 
     void updatePosition(float delta_time);
@@ -64,6 +65,11 @@ public:
     PlayerState getState() const {return state;}
     sf::Vector2f getPosition() const { return position; }
     sf::Vector2f getSize() const { return size; }
+
+    int getOnPlatformId() const {
+        return on_platform_id;
+    }
+
     void setPosition(float x, float y) {
         position.x = x;
         position.y = y;
@@ -87,6 +93,7 @@ private:
     sf::Vector2f gravity;
 
     CollisionDirection collision_direction;
+    CollisionDirection prev_collision_direction;
 
     float walking_speed;
     float jumping_speed;

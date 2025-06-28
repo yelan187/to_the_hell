@@ -26,6 +26,9 @@ private:
     sf::Text game_time_text;
     sf::Text total_score_text;
 
+    bool debug;
+    sf::Text debug_info_text;
+
     View::UI::Player player;
     
     std::vector<View::UI::Platform> platforms;

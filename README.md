@@ -7,7 +7,7 @@
 ## 👋🏻 游戏简介
 
 <p align="center">
-    <img src="assets/images/main_menu.png" width="600" alt="游戏界面">
+    <img src="assets/gif/demo.gif" width="800" alt="游戏演示">
 </p>
 
 这是一个 Rougelike 风格的游戏,采用经典的"是男人就下100层"的玩法,玩家需要在地牢中不断探索,击败敌人,尽可能取得更高的分数。

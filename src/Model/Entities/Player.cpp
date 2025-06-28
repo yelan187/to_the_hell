@@ -7,11 +7,8 @@ using Model::Entities::Player;
 void Player::jump(float scroll_speed) {
     if (state == PlayerState::IDLE) {
         state = PlayerState::JUMPING_IDLE;
-        if (on_platform) {
-            velocity.y = -jumping_speed;
-        } else {
-            velocity.y = -jumping_speed - scroll_speed;
-        }
+        velocity.y = -jumping_speed;
+        
     } else if (state == PlayerState::WALKING) {
         state = PlayerState::JUMPING_WALKING;
         if (on_platform) {
@@ -123,14 +120,22 @@ void Player::updateVelocity(float delta_time) {
     } else {
         if (collision_direction == CollisionDirection::UP) {
             velocity.y = 0;
-        } else if (collision_direction == CollisionDirection::LEFT
-                    && state == PlayerState::JUMPING_WALKING) {
+        } else if (collision_direction == CollisionDirection::LEFT) {
             velocity.x = 0;
-        } else if (collision_direction == CollisionDirection::RIGHT
-                    && state == PlayerState::JUMPING_WALKING) {
+        } else if (collision_direction == CollisionDirection::RIGHT) {
             velocity.x = 0;
+        } else if (collision_direction == CollisionDirection::NONE) {
+            if ((state == PlayerState::JUMPING_WALKING || state == PlayerState::WALKING)
+                && velocity.x == 0){
+                if (prev_collision_direction == CollisionDirection::LEFT) {
+                    velocity.x = -walking_speed;
+                } else if (prev_collision_direction == CollisionDirection::RIGHT) {
+                    velocity.x = walking_speed;
+                }
+            }
         }
     }
+    prev_collision_direction = collision_direction;
     collision_direction = CollisionDirection::NONE;
 }
 
@@ -159,9 +164,9 @@ bool Player::collisionDetection(Platform* platform) {
     return collisionDetection(platform, getPosition());
 }
 
-bool Player::collisionDetection(Platform* platform, sf::Vector2f position) {
-    sf::Vector2f player_lt = position;
-    sf::Vector2f player_rb = player_lt + size;
+bool Player::collisionDetection(Platform* platform, sf::Vector2f p) {
+    sf::Vector2f player_lt = p;
+    sf::Vector2f player_rb = player_lt + getSize();
 
     sf::Vector2f platform_lt = platform->getPosition();
     sf::Vector2f platform_rb = platform_lt + platform->getSize();
@@ -208,12 +213,14 @@ sf::Vector2f Player::findCollisionPosition(Platform* platform,
 }
 
 void Player::handleCollision(Platform* platform, sf::Vector2f prev_position, float delta_time) {
+    std::cout << "Handling collision with platform ID: " << platform->id << std::endl;
     sf::Vector2f p = findCollisionPosition(platform, prev_position, delta_time);
-    if ((p.y + getSize().y) <= (platform->getPosition().y + 1)) {
+    if ((p.y + getSize().y) <= (platform->getPosition().y + 2)) {
         /*
          * player is above the platform
          */
         // std::cout << "Player is above the platform" << std::endl;
+        std::cout << "Player is above the platform" << std::endl;
         setPosition(p);
         on_platform = true;
         on_platform_id = platform->id;
@@ -228,22 +235,25 @@ void Player::handleCollision(Platform* platform, sf::Vector2f prev_position, flo
         /*
          * player is below the platform
          */
+        std::cout << "Player is below the platform" << std::endl;
         setPosition(p);
         on_platform = false;
         on_platform_id = -1;
         collision_direction = CollisionDirection::UP;
-    } else if ((getPosition().x + getSize().x) <= (platform->getPosition().x + 1)) {
+    } else if ((p.x + getSize().x) <= (platform->getPosition().x + 1)) {
         /*
          * player is to the left of the platform
          */
+        std::cout << "Player is to the left of the platform" << std::endl;
         setPosition(p.x, getPosition().y);
         on_platform = false;
         on_platform_id = -1;
         collision_direction = CollisionDirection::RIGHT;
-    } else if (getPosition().x >= (platform->getPosition().x + platform->getSize().x - 1)) {
+    } else if (p.x >= (platform->getPosition().x + platform->getSize().x - 1)) {
         /*
          * player is to the right of the platform
          */
+        std::cout << "Player is to the right of the platform" << std::endl;
         setPosition(p.x, getPosition().y);
         on_platform = false;
         on_platform_id = -1;

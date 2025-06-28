@@ -3,7 +3,7 @@
 
 using View::GameView;
 
-GameView::GameView(Core::Engine &engine) : View::Page(engine) {
+GameView::GameView(Core::Engine &engine) : View::Page(engine), debug(true) {
     if (!font.loadFromFile("assets/fonts/fusion.ttf")) {
         std::cerr << "Error loading font!" << std::endl;
         return;
@@ -22,6 +22,15 @@ GameView::GameView(Core::Engine &engine) : View::Page(engine) {
     game_time_text.setFont(font);
     game_time_text.setPosition(15,40);
 
+    if (debug) {
+        std::cout << "Debug mode is ON" << std::endl;
+        debug_info_text.setString(view_model->getDebugInfo());
+        debug_info_text.setCharacterSize(24);
+        debug_info_text.setFillColor(sf::Color::White);
+        debug_info_text.setFont(font);
+        debug_info_text.setPosition(15,65);
+    }
+
     player.init(view_model);
     for (int id : view_model->getPlatformsId()){
         View::UI::Platform p;
@@ -37,6 +46,10 @@ void GameView::update(float deltaTime) {
 
     game_time_text.setString(view_model->getGameTime());
 
+    if (debug) {
+        debug_info_text.setString(view_model->getDebugInfo());
+    }
+
     player.update(deltaTime);
     platforms.clear();
     for (int id : view_model->getPlatformsId()){
@@ -51,6 +64,10 @@ void GameView::render(sf::RenderWindow& window) {
     
     window.draw(game_time_text);
     window.draw(total_score_text);
+
+    if (debug) {
+        window.draw(debug_info_text);
+    }
 
     player.render(window);
 

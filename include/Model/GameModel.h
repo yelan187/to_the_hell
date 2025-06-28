@@ -10,6 +10,16 @@ public:
     GameModel(Core::Engine &engine, sf::Vector2u window_size);
     Entities::PlayerState getPlayerState() { return player->getState(); }
     int getTotalScore() const { return total_score; }
+
+    std::string getDebugInfo() {
+        std::string debug_info;
+        if (player) {
+            debug_info += "on_platform: " + std::to_string(player->getOnPlatformId()) + "\n";
+        } else {
+            debug_info += "Player not initialized\n";
+        }
+        return debug_info;
+    }
     std::chrono::seconds getDuration() { return std::chrono::seconds(static_cast<int>(game_time)); }
     sf::Vector2f getPlayerPosition() const { return player->getPosition(); }
 

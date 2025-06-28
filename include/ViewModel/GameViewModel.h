@@ -33,6 +33,9 @@ public:
 
     std::string getTotalScore();
     std::string getGameTime();
+    std::string getDebugInfo() {
+        return model->getDebugInfo();
+    }
 
     View::UI::PlayerState getPlayerState();
     sf::Vector2f getPlayerPosition(sf::Vector2f view_playersize);
