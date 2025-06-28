@@ -1,9 +1,11 @@
+#include <iostream>
 #include "Model/ScoreModel.h"
 #include "Core/Engine.h"
 
 namespace Model {
 
 ScoreModel::ScoreModel(Core::Engine &engine, int score, std::chrono::seconds time) : Model(engine), score(score), time(time) {
+std::cout << "ScoreModel initialized with score: " << score << " and time: " << time.count() << " seconds." << std::endl;
 }
 
 int ScoreModel::getScore() const {
@@ -15,7 +17,7 @@ std::chrono::seconds ScoreModel::getTime() const {
 }
 
 void ScoreModel::restartGame() {
-    engine.changePage(Core::Engine::PAGE_STATE::GAME);
+    engine.startGame();
 }
 
 void ScoreModel::backToMainMenu() {

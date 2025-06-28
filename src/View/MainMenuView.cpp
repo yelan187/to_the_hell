@@ -100,15 +100,15 @@ void MainMenuView::render(sf::RenderWindow& window) {
 void MainMenuView::handleInput(const sf::Event& event) {
     if (event.type == sf::Event::KeyPressed) {
         switch (event.key.code) {
+            case sf::Keyboard::Up:
             case sf::Keyboard::W:
                 view_model->navigateUp();
                 break;
+            case sf::Keyboard::Down:
             case sf::Keyboard::S:
                 view_model->navigateDown();
                 break;
             case sf::Keyboard::Enter:
-                view_model->confirmSelection();
-                break;
             case sf::Keyboard::J:
                 view_model->confirmSelection();
                 break;

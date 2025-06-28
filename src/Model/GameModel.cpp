@@ -9,6 +9,20 @@ GameModel::GameModel(Core::Engine &engine, sf::Vector2u window_size) :
     Model(engine, window_size), init(false) {
 }
 
+GameModel::~GameModel() {
+    
+    if (player) {
+        delete player;
+        player = nullptr;
+    }
+    for (auto& pair : platforms) {
+        if (pair.second) {
+            delete pair.second;
+        }
+    }
+    platforms.clear();
+}
+
 void GameModel::update(float delta_time) {
     /*
      *
@@ -59,7 +73,7 @@ void GameModel::update(float delta_time) {
     player->update(delta_time, platforms);
 
     if (player->getPosition().y < 0 || player->getPosition().y > window_size.y) {
-        engine.endGame(total_score, getDuration());
+        engine.requestEndGame(total_score, getDuration());
     }
 }
 

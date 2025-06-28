@@ -86,16 +86,16 @@ void Player::update(float delta_time, std::map<int, Platform*>& platforms) {
         addAcceleration(gravity);
     }
     updatePosition(delta_time);
-    // Only restrict the player from flying out of the top window boundary when on a platform
-    if (on_platform && position.y < 0) {
-        position.y = 0;
-        velocity.y = 0;
-    }
-    // Reset player position if falling out of the bottom of the window
-    if (position.y > Utils::WINDOW_HEIGHT) {
-        position.y = 0;
-        velocity.y = 0;
-    }
+    // // Only restrict the player from flying out of the top window boundary when on a platform
+    // if (on_platform && position.y < 0) {
+    //     position.y = 0;
+    //     velocity.y = 0;
+    // }
+    // // Reset player position if falling out of the bottom of the window
+    // if (position.y > Utils::WINDOW_HEIGHT) {
+    //     position.y = 0;
+    //     velocity.y = 0;
+    // }
     updateVelocity(delta_time);
     on_platform = false;
     for (auto& platform_pair : platforms) {

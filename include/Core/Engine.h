@@ -39,11 +39,20 @@ public:
     void handleInput(const sf::Event& event);
 
     void changePage(PAGE_STATE new_page_state);
-    void endGame(int score, std::chrono::seconds time);
 
     void startGame();
 
     void exitGame();
+
+    // Deferred page switching mechanism
+    void requestPageChange(PAGE_STATE state);
+    bool hasPendingPageChange() const;
+    PAGE_STATE getPendingPageState() const;
+
+    // Deferred end game mechanism
+    void requestEndGame(int score, std::chrono::seconds time);
+    bool hasPendingEndGame() const;
+    std::pair<int, std::chrono::seconds> getPendingEndGame() const;
 
 private:
     int fps;
@@ -54,5 +63,14 @@ private:
     
     sf::RenderWindow window;
     std::string game_title;
+
+    // Deferred page switching mechanism
+    bool pending_page_change = false;
+    PAGE_STATE pending_page_state;
+
+    // Deferred end game mechanism
+    bool pending_end_game = false;
+    int pending_score = 0;
+    std::chrono::seconds pending_time = std::chrono::seconds(0);
 };
 }

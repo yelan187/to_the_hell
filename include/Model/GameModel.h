@@ -8,6 +8,7 @@ namespace Model {
 class GameModel : public Model {
 public:
     GameModel(Core::Engine &engine, sf::Vector2u window_size);
+    ~GameModel();
     Entities::PlayerState getPlayerState() { return player->getState(); }
     int getTotalScore() const { return total_score; }
     std::chrono::seconds getDuration() { return std::chrono::seconds(static_cast<int>(game_time)); }
