@@ -1,15 +1,18 @@
-#include <ViewModel/MainMenuViewModel.h>
-#include <Model/MainMenuModel.h>
+#include "ViewModel/MainMenuViewModel.h"
 #include <iostream>
 #include <cmath> 
 
-namespace ViewModel {
+using ViewModel::MainMenuViewModel;
 
-MainMenuViewModel::MainMenuViewModel(Core::Engine &engine, sf::Vector2u window_size) 
-    : ViewModel(engine, window_size),
-      model(std::make_shared<Model::MainMenuModel>(engine)),
-      current_selection_index(0) {
-    
+MainMenuViewModel::MainMenuViewModel(sf::Vector2u window_size) : 
+    ViewModel(window_size),
+    model(nullptr),
+    current_selection_index(0),
+    animation_time(0.0f),
+    navigateUp_command(this),
+    navigateDown_command(this),
+    update_command(this) 
+{
     updateAvailableOptions();
 }
 
@@ -34,10 +37,6 @@ std::vector<std::string> MainMenuViewModel::getMenuOptions() const {
     return options;
 }
 
-int MainMenuViewModel::getCurrentSelectionIndex() const {
-    return current_selection_index;
-}
-
 void MainMenuViewModel::navigateUp() {
     if (available_options.empty()) return;
     
@@ -57,27 +56,8 @@ void MainMenuViewModel::navigateDown() {
 
 }
 
-void MainMenuViewModel::confirmSelection() {
-    if (available_options.empty() || 
-        current_selection_index < 0 || 
-        current_selection_index >= available_options.size()) {
-        return;
-    }
-    
-    MenuOption selected = available_options[current_selection_index];
-
-    switch (selected) {
-        case MenuOption::START_GAME:
-            model->startGame();
-            break;
-        case MenuOption::EXIT:
-            model->exitGame();
-            break;
-    }
-}
-
 void MainMenuViewModel::updateAnimationState(float delta_time) {
-    animation_time_ += delta_time;
+    animation_time += delta_time;
 
     if (background_particles.empty()) {
         for (int i = 0; i < 20; i++) {
@@ -100,4 +80,17 @@ std::vector<sf::Vector2f> MainMenuViewModel::getBackgroundParticles() const {
     return background_particles;
 }
 
-}
+class MainMenuViewModel::UpdateCommand : public Common::CommandBase {
+public:
+    UpdateCommand(MainMenuViewModel* view_model) : view_model(view_model) {}
+    void execute(Common::CommandParam& delta_time) override {
+        auto& update_param = dynamic_cast<Common::UpdateParam&>(delta_time);
+        view_model->updateAnimationState(update_param.value);
+        Common::ChangeBackgroundParticlesParam* param = new Common::ChangeBackgroundParticlesParam();
+        param->value = &view_model->background_particles;
+        view_model->trigger.fire(param);
+    }
+
+private:
+    MainMenuViewModel* view_model;
+};

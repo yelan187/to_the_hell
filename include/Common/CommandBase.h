@@ -2,6 +2,14 @@
 
 #include "Common/ParamBase.h"
 
+namespace ViewModel {
+    class ViewModel;
+}
+
+namespace View {
+    enum class PAGE_STATE;
+}
+
 namespace Common {
 
 class CommandParam : public Param {
@@ -23,6 +31,12 @@ public:
 
 // Add command param
 typedef CommandTypeParam<float> UpdateParam;
-typedef CommandTypeParam<int> ChangePageParam;
+
+typedef struct {
+    View::PAGE_STATE new_page_state;
+    bool deferred;
+} ChangePageParamValue;
+typedef CommandTypeParam<ChangePageParamValue> ChangePageParam;
+
 
 }

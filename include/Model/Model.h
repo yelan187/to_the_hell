@@ -1,18 +1,18 @@
 #pragma once
-#include "Core/Engine.h"
+
+#include "Common/Trigger.h"
 
 namespace Model {
 class Model {
 public:
-    Model(Core::Engine &engine) : engine(engine) {};
-    Model(Core::Engine &engine,sf::Vector2u window_size) : engine(engine), window_size(window_size){};
+    Model() = default;
+    Model(sf::Vector2u window_size) : window_size(window_size){};
 
     virtual void update(float delta_time) {};
     
     virtual ~Model() {}; 
     
 protected:
-    Core::Engine &engine;
     sf::Vector2u window_size;
 };
 

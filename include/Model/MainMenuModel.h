@@ -4,9 +4,6 @@
 namespace Model {
 class MainMenuModel : public Model {
 public:
-    MainMenuModel(Core::Engine &engine) : Model(engine) {}
-    
-    void startGame();
-    void exitGame();
+    MainMenuModel() {}
 };
 }

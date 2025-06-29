@@ -13,11 +13,11 @@ enum class PAGE_STATE {
 };
 class Page {
 public:
-    Page(std::string game_title, sf::Vector2u window_size, int fps) :game_title(std::move(game_title)), window_size(window_size), fps(fps) {
+    Page(std::string game_title, sf::Vector2u window_size, int fps) :game_title(game_title.data()), window_size(window_size), fps(fps) {
         window.create(sf::VideoMode(window_size.x, window_size.y), game_title, sf::Style::Default);
         window.setFramerateLimit(fps);
     }
-    void set_updateCommand(Common::CommandBase* command) {
+    void setUpdateCommand(Common::CommandBase* command) {
         update_command = command;
     }
     void run(){

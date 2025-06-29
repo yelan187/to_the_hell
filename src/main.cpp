@@ -1,15 +1,15 @@
 #include <vector>
 #include <string>
-#include "Utils/Config.h"
 #include <SFML/Graphics.hpp>
-#include "Core/Engine.h"
+#include "Utils/Config.h"
+#include "App/GameApp.h"
 
 int main() {
-    Core::Engine engine(
+    App::GameApp game_app(
         Utils::WINDOW_TITLE,
         sf::Vector2u(Utils::WINDOW_WIDTH, Utils::WINDOW_HEIGHT),
-        60
+        Utils::FPS
     );
-    engine.run();
+    game_app.run();
     return 0;
 }

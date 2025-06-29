@@ -30,13 +30,13 @@ public:
         }
     }
     // commands
-    void set_NavigateUpCommand(Common::CommandBase* command) {
+    void setNavigateUpCommand(Common::CommandBase* command) {
         navigateUp_command = command;
     }
-    void set_NavigateDownCommand(Common::CommandBase* command) {
+    void setNavigateDownCommand(Common::CommandBase* command) {
         navigateDown_command = command;
     }
-    void set_ConfirmSelectionCommand(Common::CommandBase* command) {
+    void setConfirmSelectionCommand(Common::CommandBase* command) {
         confirmSelection_command = command;
     }
     // notification
