@@ -28,6 +28,7 @@ public:
     sf::Vector2f size;
     std::map<PlatformType,sf::Texture> texture_map;
     sf::RectangleShape rect;
+    sf::CircleShape ellipse; // 用于弹跳平台的椭圆形状
 };
 
 }

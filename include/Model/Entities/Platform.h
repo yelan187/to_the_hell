@@ -28,6 +28,7 @@ public:
     bool isDeadly() const { return type == PlatformType::SPIKED; }
     bool isBroken() const { return type == PlatformType::FRAGILE && is_broken; }
     float getRollingSpeed() const { return rolling_speed; }
+    bool getRollingDirection() const { return rolling_direction_right; } // 获取滚动方向
     float getBounceForce() const { return bounce_force; }
     
     // 新增方法：触发平台特殊效果
@@ -48,7 +49,7 @@ private:
     // 脆弱平台相关
     bool is_broken;
     float break_timer;
-    static constexpr float BREAK_DELAY = 0.5f; // 0.5秒后破碎
+    static constexpr float BREAK_DELAY = 0.3f; // 0.3秒后破碎
 
     // 弹跳平台相关
     float bounce_force;

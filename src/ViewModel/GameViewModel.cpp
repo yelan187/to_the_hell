@@ -158,6 +158,14 @@ sf::Vector2f GameViewModel::getPlatformPositionById(int id) {
     return sf::Vector2f(0, 0);
 }
 
+bool GameViewModel::getPlatformRollingDirection(int id) {
+    Model::Entities::Platform* platform = model->getPlatformById(id);
+    if (platform) {
+        return platform->getRollingDirection();
+    }
+    return true; // 默认向右
+}
+
 std::vector<int> GameViewModel::getEnemiesId() {
     std::map<int, Model::Entities::Enemy*> enemies = model->getEnemies();
     std::vector<int> enemy_ids;

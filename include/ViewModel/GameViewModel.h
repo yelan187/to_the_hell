@@ -64,6 +64,7 @@ public:
     std::vector<int> getPlatformsId();
     View::UI::PlatformType getPlatformTypeById(int id);
     sf::Vector2f getPlatformPositionById(int id);
+    bool getPlatformRollingDirection(int id); // 获取滚动平台方向
     
     std::vector<int> getEnemiesId();
     View::UI::EnemyType getEnemyTypeById(int id);
