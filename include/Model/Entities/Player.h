@@ -42,6 +42,7 @@ public:
             collision_direction = CollisionDirection::NONE;
             prev_collision_direction = CollisionDirection::NONE;
             facing_direction = FacingDirection::RIGHT; // 默认面向右
+            is_dead = false; // 初始状态为活着
         }
 
     void updatePosition(float delta_time);
@@ -67,6 +68,12 @@ public:
     void walkRight();
     void stopLeft();
     void stopRight();
+    
+    // 新增方法：处理平台特殊效果
+    void handlePlatformEffects(Platform* platform);
+    bool isDead() const { return is_dead; }
+    void kill() { is_dead = true; }
+    void bounce(float bounce_force); // 弹跳效果
 
     PlayerState getState() const {return state;}
     sf::Vector2f getPosition() const { return position; }
@@ -106,6 +113,9 @@ private:
 
     float walking_speed;
     float jumping_speed;
+    
+    // 新增状态：处理平台特殊效果
+    bool is_dead;
 };
 
 }

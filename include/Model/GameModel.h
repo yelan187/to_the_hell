@@ -16,6 +16,7 @@ public:
     ~GameModel();
     Entities::PlayerState getPlayerState() { return player->getState(); }
     int getTotalScore() const { return total_score; }
+    bool isPlayerDead() const { return player->isDead(); } // 新增：检查玩家是否死亡
 
     std::string getDebugInfo() {
         std::string debug_info;

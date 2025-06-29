@@ -44,6 +44,7 @@ public:
 
     View::UI::PlayerState getPlayerState();
     sf::Vector2f getPlayerPosition(sf::Vector2f view_playersize);
+    bool isPlayerDead() { return model->isPlayerDead(); } // 新增：检查玩家死亡状态
     sf::Vector2f getPlayerSize() { return model->player_size; }
     sf::Vector2f getPlatformSize() { return model->platform_size; }
     sf::Vector2f getEnemySize() { return model->enemy_size; }

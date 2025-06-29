@@ -115,7 +115,8 @@ void GameModel::update(float delta_time) {
     for (auto it = platforms.begin(); it != platforms.end(); ) {
         Entities::Platform* platform = it->second;
         platform->update(delta_time);
-        if (platform->outOfWindow(window_size)) {
+        if (platform->outOfWindow(window_size) || platform->isBroken()) {
+            // 移除出界的平台或已破碎的脆弱平台
             delete platform;
             // std::cout << "Platform " << it->first << " removed." << std::endl;
             it = platforms.erase(it);
@@ -190,13 +191,31 @@ void GameModel::update(float delta_time) {
     // 检查碰撞
     checkCollisions();
 
+    // 检查玩家是否死亡（如踩到带刺平台）
+    if (player->isDead()) {
+        engine.requestEndGame(total_score, getDuration());
+        return; // 直接返回，不需要继续更新
+    }
+
     if (player->getPosition().y < 0 || player->getPosition().y > window_size.y) {
         engine.requestEndGame(total_score, getDuration());
     }
 }
 
 PlatformType GameModel::getPlatformTypeRand() {
-    return PlatformType::NORMAL;
+    int random = rand() % 100;
+    
+    if (random < 50) {
+        return PlatformType::NORMAL;      // 50% 普通平台
+    } else if (random < 65) {
+        return PlatformType::ROLLING;     // 15% 滚动平台
+    } else if (random < 80) {
+        return PlatformType::BOUNCY;      // 15% 弹跳平台
+    } else if (random < 95) {
+        return PlatformType::FRAGILE;     // 15% 脆弱平台
+    } else {
+        return PlatformType::SPIKED;      // 5% 带刺平台（最危险，概率最低）
+    }
 }
 
 void GameModel::generatePlatform() {
@@ -212,7 +231,7 @@ void GameModel::generatePlatform() {
 }
 
 void GameModel::initPlatforms() {
-    const int initial_platforms = 3;
+    const int initial_platforms = 3; // 初始平台数量
     for (int i = 0; i < initial_platforms; ++i) {
         int id = i;
         
@@ -221,7 +240,8 @@ void GameModel::initPlatforms() {
             static_cast<float>(window_size.y / 3 + window_size.y / 2 / initial_platforms * i)
         );
         
-        PlatformType type = getPlatformTypeRand();
+        // 初始平台都使用普通平台，避免玩家一开始就遇到危险平台
+        PlatformType type = PlatformType::NORMAL;
 
         platforms[id] = new Entities::Platform(id, type, position, platform_size, scroll_speed);
     }
@@ -458,6 +478,9 @@ void GameModel::useSkill(int skill_index) {
                     float sprint_distance = 150.0f; // 冲刺距离150像素
                     float direction = (player->getFacingDirection() == Entities::FacingDirection::RIGHT) ? 1.0f : -1.0f;
                     
+                    // 获取玩家当前所在的平台ID（如果有的话）
+                    int current_platform_id = player->getOnPlatformId();
+                    
                     // 分步检测冲刺路径上的碰撞
                     float step_size = 5.0f; // 每步5像素
                     float current_distance = 0.0f;
@@ -471,12 +494,18 @@ void GameModel::useSkill(int skill_index) {
                             break;
                         }
                         
-                        // 检查与平台的碰撞
+                        // 检查与平台的碰撞（忽略当前站立的平台）
                         bool collision = false;
                         sf::FloatRect player_rect(test_pos.x, test_pos.y, player_size.x, player_size.y);
                         
                         for (const auto& platform_pair : platforms) {
                             Entities::Platform* platform = platform_pair.second;
+                            
+                            // 忽略当前站立的平台，允许在其上移动
+                            if (current_platform_id != -1 && platform->id == current_platform_id) {
+                                continue;
+                            }
+                            
                             sf::Vector2f platform_pos = platform->getPosition();
                             sf::Vector2f platform_size = platform->getSize();
                             sf::FloatRect platform_rect(platform_pos.x, platform_pos.y, platform_size.x, platform_size.y);

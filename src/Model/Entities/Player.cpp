@@ -119,7 +119,22 @@ void Player::updateVelocity(float delta_time) {
     velocity += acceleration * delta_time;
     
     if (on_platform) {
-        velocity.y = game_model->getPlatformById(on_platform_id)->getVelocity().y;
+        Platform* current_platform = game_model->getPlatformById(on_platform_id);
+        
+        // 检查脆弱平台是否已经破碎
+        if (current_platform->isBroken()) {
+            // 平台已破碎，玩家开始下落
+            on_platform = false;
+            on_platform_id = -1;
+            velocity.y = 0; // 开始下落
+        } else if (current_platform->type == Entities::PlatformType::ROLLING) {
+            // 滚动平台：玩家跟随平台滚动
+            sf::Vector2f rolling_vel = current_platform->getRollingVelocity();
+            velocity = rolling_vel;
+        } else {
+            // 普通平台或其他类型平台
+            velocity.y = current_platform->getVelocity().y;
+        }
     } else {
         if (collision_direction == CollisionDirection::UP) {
             velocity.y = 0;
@@ -227,6 +242,10 @@ void Player::handleCollision(Platform* platform, sf::Vector2f prev_position, flo
         setPosition(p);
         on_platform = true;
         on_platform_id = platform->id;
+        
+        // 处理平台特殊效果
+        handlePlatformEffects(platform);
+        
         if (state == PlayerState::JUMPING_WALKING) {
             // std::cout << "Player landed on platform" << std::endl;
             state = PlayerState::WALKING;
@@ -261,5 +280,47 @@ void Player::handleCollision(Platform* platform, sf::Vector2f prev_position, flo
         on_platform = false;
         on_platform_id = -1;
         collision_direction = CollisionDirection::LEFT;
+    }
+}
+
+void Player::handlePlatformEffects(Platform* platform) {
+    // 通知平台玩家已经踩到
+    platform->onPlayerLanded();
+    
+    switch (platform->type) {
+        case Entities::PlatformType::SPIKED:
+            // 带刺平台：玩家死亡
+            kill();
+            break;
+            
+        case Entities::PlatformType::BOUNCY:
+            // 弹跳平台：给玩家施加向上的力
+            // std::cout << "Bouncy platform triggered! Force: " << platform->getBounceForce() << std::endl;
+            bounce(platform->getBounceForce());
+            // 弹跳平台需要让玩家立即离开平台，不能停留在上面
+            on_platform = false;
+            on_platform_id = -1;
+            break;
+
+        case Entities::PlatformType::ROLLING:
+        case Entities::PlatformType::FRAGILE:
+        case Entities::PlatformType::NORMAL:
+        default:
+            // 普通平台、滚动平台、脆弱平台不需要立即效果
+            // 滚动平台的效果在updateVelocity中处理
+            break;
+    }
+}
+
+void Player::bounce(float bounce_force) {
+    // std::cout << "Bouncing with force: " << bounce_force << ", current velocity.y: " << velocity.y << std::endl;
+    velocity.y = -bounce_force; // 向上弹跳
+    // std::cout << "New velocity.y: " << velocity.y << std::endl;
+    
+    // 设置跳跃状态
+    if (state == PlayerState::IDLE) {
+        state = PlayerState::JUMPING_IDLE;
+    } else if (state == PlayerState::WALKING) {
+        state = PlayerState::JUMPING_WALKING;
     }
 }
