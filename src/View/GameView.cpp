@@ -226,6 +226,9 @@ void GameView::handleInput(const sf::Event& event) {
             case sf::Keyboard::J:
                 view_model->useSkill(0); // 使用第一个技能（箭矢）
                 break;
+            case sf::Keyboard::U:
+                view_model->useSkill(1); // 使用第二个技能（瞬移）
+                break;
             default:
                 break;
         }

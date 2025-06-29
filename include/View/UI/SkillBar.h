@@ -12,10 +12,11 @@ namespace View {
             sf::Vector2f skill_icon_size;
             float skill_icon_spacing;
             std::vector<sf::CircleShape> skill_icons;
-            std::vector<sf::Sprite> skill_sprites; // 用于显示纹理图标
-            std::vector<sf::ConvexShape> skill_arrows; // 用于显示程序化箭头
-            std::vector<sf::ConvexShape> cooldown_overlays; // 改为ConvexShape以支持扇形
+            std::vector<sf::Sprite> skill_sprites;
+            std::vector<sf::ConvexShape> skill_shapes;  // 程序化技能图标形状
+            std::vector<sf::ConvexShape> cooldown_overlays;
             sf::Texture* arrow_texture;
+            sf::Texture* sprint_texture;
             
         public:
             SkillBar(sf::Vector2f position);

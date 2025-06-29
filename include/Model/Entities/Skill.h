@@ -5,7 +5,8 @@
 namespace Model {
     namespace Entities {
         enum class SkillType {
-            ARROW_SHOT
+            ARROW_SHOT,
+            SPRINT
         };
         
         class Skill {

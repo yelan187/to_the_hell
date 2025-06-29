@@ -416,6 +416,8 @@ void GameModel::createArrow(sf::Vector2f position, sf::Vector2f velocity) {
 void GameModel::initSkills() {
     // 初始化箭矢技能，冷却时间3秒
     skills.push_back(new Entities::Skill(Entities::SkillType::ARROW_SHOT, 3.0f));
+    // 初始化瞬移技能，冷却时间5秒
+    skills.push_back(new Entities::Skill(Entities::SkillType::SPRINT, 5.0f));
 }
 
 void GameModel::useSkill(int skill_index) {
@@ -448,6 +450,65 @@ void GameModel::useSkill(int skill_index) {
                     }
                     
                     createArrow(arrow_pos, arrow_velocity);
+                    break;
+                }
+                case Entities::SkillType::SPRINT: {
+                    // 冲刺技能：向玩家面向的方向冲刺一段距离，遇到平台时停止
+                    sf::Vector2f player_pos = player->getPosition();
+                    float sprint_distance = 150.0f; // 冲刺距离150像素
+                    float direction = (player->getFacingDirection() == Entities::FacingDirection::RIGHT) ? 1.0f : -1.0f;
+                    
+                    // 分步检测冲刺路径上的碰撞
+                    float step_size = 5.0f; // 每步5像素
+                    float current_distance = 0.0f;
+                    sf::Vector2f final_pos = player_pos;
+                    
+                    while (current_distance < sprint_distance) {
+                        sf::Vector2f test_pos = player_pos + sf::Vector2f(direction * (current_distance + step_size), 0.0f);
+                        
+                        // 检查窗口边界
+                        if (test_pos.x < 0 || test_pos.x + player_size.x > window_size.x) {
+                            break;
+                        }
+                        
+                        // 检查与平台的碰撞
+                        bool collision = false;
+                        sf::FloatRect player_rect(test_pos.x, test_pos.y, player_size.x, player_size.y);
+                        
+                        for (const auto& platform_pair : platforms) {
+                            Entities::Platform* platform = platform_pair.second;
+                            sf::Vector2f platform_pos = platform->getPosition();
+                            sf::Vector2f platform_size = platform->getSize();
+                            sf::FloatRect platform_rect(platform_pos.x, platform_pos.y, platform_size.x, platform_size.y);
+                            
+                            if (player_rect.intersects(platform_rect)) {
+                                collision = true;
+                                break;
+                            }
+                        }
+                        
+                        if (collision) {
+                            break;
+                        }
+                        
+                        final_pos = test_pos;
+                        current_distance += step_size;
+                    }
+                    
+                    // 确保最终位置不会超出窗口边界
+                    if (final_pos.x < 0) {
+                        final_pos.x = 0;
+                    } else if (final_pos.x + player_size.x > window_size.x) {
+                        final_pos.x = window_size.x - player_size.x;
+                    }
+                    
+                    if (final_pos.y < 0) {
+                        final_pos.y = 0;
+                    } else if (final_pos.y + player_size.y > window_size.y) {
+                        final_pos.y = window_size.y - player_size.y;
+                    }
+                    
+                    player->setPosition(final_pos);
                     break;
                 }
             }
