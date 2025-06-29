@@ -9,6 +9,7 @@
 #include "View/UI/Platform.h"
 #include "View/UI/Enemy.h"
 #include "View/UI/Bullet.h"
+#include "View/UI/Pickup.h"
 #include "ViewModel/GameViewModel.h"
 
 namespace View {
@@ -37,6 +38,7 @@ private:
     std::vector<View::UI::Platform> platforms;
     std::vector<std::pair<int, View::UI::Enemy>> enemies;
     std::vector<std::pair<int, View::UI::Bullet>> bullets;
+    std::vector<std::pair<int, View::UI::Pickup>> pickups;
 };
 
 }

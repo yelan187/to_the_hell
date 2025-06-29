@@ -4,6 +4,7 @@
 #include "Model/Entities/Platform.h"
 #include "Model/Entities/Enemy.h"
 #include "Model/Entities/Bullet.h"
+#include "Model/Entities/Pickup.h"
 #include <chrono>
 
 namespace Model {
@@ -52,12 +53,14 @@ public:
     // 敌人和子弹相关方法
     std::map<int, Entities::Enemy*> getEnemies() const { return enemies; }
     std::map<int, Entities::Bullet*> getBullets() const { return bullets; }
+    std::map<int, Entities::Pickup*> getPickups() const { return pickups; }
     void createBullet(sf::Vector2f position, sf::Vector2f velocity);
 
     sf::Vector2f platform_size = sf::Vector2f(100, 12);
     sf::Vector2f player_size = sf::Vector2f(30, 60);
     sf::Vector2f enemy_size = sf::Vector2f(40, 40);
     sf::Vector2f bullet_size = sf::Vector2f(8, 8);
+    sf::Vector2f pickup_size = sf::Vector2f(20, 20);
     
 private:
     bool init;
@@ -77,12 +80,18 @@ private:
     std::map<int, Entities::Bullet*> bullets;
     int next_bullet_id;
     
+    std::map<int, Entities::Pickup*> pickups;
+    int next_pickup_id;
+    float pickup_generate_interval;
+    
     Entities::Player* player;
 
     void resetPlatformGenerateInterval();
     void generatePlatform();
     void generateEnemy();
     void resetEnemyGenerateInterval();
+    void generatePickup();
+    void resetPickupGenerateInterval();
     Entities::PlatformType getPlatformTypeRand();
     void initPlatforms();
     void initPlayer();

@@ -1,4 +1,6 @@
 #include <iostream>
+#include <algorithm>
+#include <vector>
 #include "Model/GameModel.h"
 #include "Core/Engine.h"
 
@@ -37,6 +39,13 @@ GameModel::~GameModel() {
         }
     }
     bullets.clear();
+    
+    for (auto& pair : pickups) {
+        if (pair.second) {
+            delete pair.second;
+        }
+    }
+    pickups.clear();
 }
 
 void GameModel::update(float delta_time) {
@@ -67,7 +76,6 @@ void GameModel::update(float delta_time) {
         init = true;
         return;
     }
-    // std::cout << "GameModel update start" << std::endl;
     game_time += delta_time;
 
     platform_generate_interval -= delta_time;
@@ -81,6 +89,13 @@ void GameModel::update(float delta_time) {
     if (enemy_generate_interval <= 0.0f) {
         resetEnemyGenerateInterval();
         generateEnemy();
+    }
+
+    // 更新豆子生成
+    pickup_generate_interval -= delta_time;
+    if (pickup_generate_interval <= 0.0f) {
+        resetPickupGenerateInterval();
+        generatePickup();
     }
 
     for (auto it = platforms.begin(); it != platforms.end(); ) {
@@ -120,6 +135,18 @@ void GameModel::update(float delta_time) {
         if (bullet->outOfWindow(window_size)) {
             delete bullet;
             it = bullets.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    
+    // 更新豆子
+    for (auto it = pickups.begin(); it != pickups.end(); ) {
+        Entities::Pickup* pickup = it->second;
+        pickup->update(delta_time);
+        if (pickup->outOfWindow(window_size)) {
+            delete pickup;
+            it = pickups.erase(it);
         } else {
             ++it;
         }
@@ -189,8 +216,10 @@ void GameModel::initGame() {
     game_time = 0;
     next_enemy_id = 0;
     next_bullet_id = 0;
+    next_pickup_id = 0;
     resetPlatformGenerateInterval();
     resetEnemyGenerateInterval();
+    resetPickupGenerateInterval();
     initPlatforms();
     initPlayer();
 }
@@ -232,6 +261,66 @@ void GameModel::createBullet(sf::Vector2f position, sf::Vector2f velocity) {
     next_bullet_id++;
 }
 
+void GameModel::generatePickup() {
+    Entities::PickupType type;
+    sf::Vector2f position;
+    int target_platform_id = -1;
+    
+    if (rand() % 100 < 75) {
+        // 普通豆子 - 优先选择ID值高的平台
+        type = Entities::PickupType::NORMAL_DOT;
+        
+        if (!platforms.empty()) {
+            // 收集所有平台ID并按降序排序
+            std::vector<int> platform_ids;
+            for (const auto& platform_pair : platforms) {
+                platform_ids.push_back(platform_pair.first);
+            }
+            
+            std::sort(platform_ids.begin(), platform_ids.end(), 
+                     [](int a, int b) { return a > b; });
+            
+            // 从前30%的高ID平台中随机选择一个
+            int top_count = std::max(1, static_cast<int>(platform_ids.size() * 0.3));
+            int selected_index = rand() % top_count;
+            target_platform_id = platform_ids[selected_index];
+            
+            // 在选中的平台上方生成豆子
+            auto platform_it = platforms.find(target_platform_id);
+            if (platform_it != platforms.end()) {
+                sf::Vector2f platform_pos = platform_it->second->getPosition();
+                sf::Vector2f platform_size = platform_it->second->getSize();
+                
+                position = sf::Vector2f(
+                    platform_pos.x + rand() % static_cast<int>(platform_size.x - pickup_size.x),
+                    platform_pos.y - pickup_size.y - 10
+                );
+            }
+        } else {
+            position = sf::Vector2f(
+                rand() % static_cast<int>(window_size.x - pickup_size.x),
+                window_size.y + pickup_size.y
+            );
+        }
+    } else {
+        // 五角星豆子 - 从底部空中生成
+        type = Entities::PickupType::STAR_DOT;
+        position = sf::Vector2f(
+            rand() % static_cast<int>(window_size.x - pickup_size.x),
+            window_size.y + pickup_size.y
+        );
+    }
+    
+    pickups[next_pickup_id] = new Entities::Pickup(
+        next_pickup_id, type, position, pickup_size, this, target_platform_id
+    );
+    next_pickup_id++;
+}
+
+void GameModel::resetPickupGenerateInterval() {
+    pickup_generate_interval = 0.8f + static_cast<float>(rand() % 10) / 10.0f; // 0.8-1.8秒
+}
+
 void GameModel::checkCollisions() {
     // 检查子弹与玩家的碰撞
     for (auto& bullet_pair : bullets) {
@@ -240,6 +329,19 @@ void GameModel::checkCollisions() {
             // 玩家被击中，游戏结束
             engine.requestEndGame(total_score, getDuration());
             return;
+        }
+    }
+    
+    // 检查豆子与玩家的碰撞
+    for (auto it = pickups.begin(); it != pickups.end(); ) {
+        Entities::Pickup* pickup = it->second;
+        if (pickup->collidesWith(player->getPosition(), player->getSize())) {
+            // 玩家吃到豆子，加分
+            total_score += pickup->getScore();
+            delete pickup;
+            it = pickups.erase(it);
+        } else {
+            ++it;
         }
     }
 }

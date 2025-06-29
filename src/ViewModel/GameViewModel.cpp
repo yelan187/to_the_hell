@@ -199,3 +199,28 @@ sf::Vector2f GameViewModel::getBulletPositionById(int id) {
     }
     return sf::Vector2f(0, 0);
 }
+
+std::vector<int> GameViewModel::getPickupsId() {
+    std::map<int, Model::Entities::Pickup*> pickups = model->getPickups();
+    std::vector<int> pickup_ids;
+    for (const auto& pair : pickups) {
+        pickup_ids.push_back(pair.first);
+    }
+    return pickup_ids;
+}
+
+View::UI::PickupType GameViewModel::getPickupTypeById(int id) {
+    Model::Entities::Pickup* pickup = model->getPickups().at(id);
+    if (pickup) {
+        return static_cast<View::UI::PickupType>(pickup->getType());
+    }
+    return View::UI::PickupType::NORMAL_DOT;
+}
+
+sf::Vector2f GameViewModel::getPickupPositionById(int id) {
+    Model::Entities::Pickup* pickup = model->getPickups().at(id);
+    if (pickup) {
+        return pickup->getPosition();
+    }
+    return sf::Vector2f(0, 0);
+}

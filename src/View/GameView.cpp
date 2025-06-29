@@ -113,6 +113,33 @@ void GameView::update(float deltaTime) {
             it->second.update(deltaTime);
         }
     }
+    
+    // 更新豆子 - 同样的逻辑
+    std::vector<int> current_pickup_ids = view_model->getPickupsId();
+    
+    // 移除不存在的豆子
+    pickups.erase(std::remove_if(pickups.begin(), pickups.end(), 
+        [&current_pickup_ids](const std::pair<int, View::UI::Pickup>& pickup_pair) {
+            return std::find(current_pickup_ids.begin(), current_pickup_ids.end(), pickup_pair.first) == current_pickup_ids.end();
+        }), pickups.end());
+    
+    // 添加新豆子并更新现有豆子
+    for (int id : current_pickup_ids) {
+        auto it = std::find_if(pickups.begin(), pickups.end(), 
+            [id](const std::pair<int, View::UI::Pickup>& pickup_pair) {
+                return pickup_pair.first == id;
+            });
+        
+        if (it == pickups.end()) {
+            // 新豆子，添加到列表
+            View::UI::Pickup new_pickup;
+            new_pickup.init(view_model, id);
+            pickups.push_back(std::make_pair(id, new_pickup));
+        } else {
+            // 现有豆子，只更新
+            it->second.update(deltaTime);
+        }
+    }
 }
 
 void GameView::render(sf::RenderWindow& window) {
@@ -135,6 +162,9 @@ void GameView::render(sf::RenderWindow& window) {
         
     for (auto &bullet_pair: bullets)
         bullet_pair.second.render(window);
+        
+    for (auto &pickup_pair: pickups)
+        pickup_pair.second.render(window);
 
     window.display();
 }
