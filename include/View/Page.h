@@ -7,9 +7,9 @@
 namespace View {
 
 enum class PAGE_STATE {
-    MAIN_MENU,
     GAME,
-    SCORE
+    SCORE,
+    MAIN_MENU
 };
 class Page {
 public:

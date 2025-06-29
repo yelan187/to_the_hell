@@ -40,7 +40,8 @@ void MainMenuView::handleInput(const sf::Event& event) {
                 break;
             case sf::Keyboard::Enter:
             case sf::Keyboard::J:
-                change_page_param.value = current_selection;
+                change_page_param.value.new_page_state = static_cast<View::PAGE_STATE>(current_selection);
+                change_page_param.value.deferred = false;
                 confirmSelection_command->execute(change_page_param);
                 break;
             default:
