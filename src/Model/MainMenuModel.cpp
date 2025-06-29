@@ -1,11 +1,11 @@
-#include "Model/MainMenuModel.h"
+// #include "Model/MainMenuModel.h"
 
-using namespace Model;
+// using namespace Model;
 
-void MainMenuModel::startGame() {
-    engine.startGame();
-}
+// void MainMenuModel::startGame() {
+//     engine.startGame();
+// }
 
-void MainMenuModel::exitGame() {
-    engine.exitGame();
-}
+// void MainMenuModel::exitGame() {
+//     engine.exitGame();
+// }

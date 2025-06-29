@@ -34,7 +34,7 @@ typedef CommandTypeParam<float> UpdateParam;
 
 typedef struct {
     View::PAGE_STATE new_page_state;
-    bool deferred;
+    bool init;
 } ChangePageParamValue;
 typedef CommandTypeParam<ChangePageParamValue> ChangePageParam;
 

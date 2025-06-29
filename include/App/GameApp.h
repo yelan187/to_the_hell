@@ -1,23 +1,22 @@
 #pragma once
 
 // include View/ViewModel/Model
+#include <memory>
 #include "Common/CommandBase.h"
 #include "View/MainMenuView.h"
 #include "ViewModel/MainMenuViewModel.h"
-#include "Model/MainMenuModel.h"
 
 namespace App {
 class GameApp {
 public:    
     GameApp(std::string game_title, sf::Vector2u window_size, int fps);
     void run();
-    void changePage(View::PAGE_STATE new_page_state, bool deferred = false);
+    void changePage(View::PAGE_STATE new_page_state, bool init = true);
 
 private:
     // Main Menu Page
     std::shared_ptr<View::MainMenuView> mainmenu_view;
     std::shared_ptr<ViewModel::MainMenuViewModel> mainmenu_view_model;
-    std::shared_ptr<Model::MainMenuModel> mainmenu_model;
     void initMainMenu();
 
     // current page
@@ -25,6 +24,7 @@ private:
     std::shared_ptr<View::Page> page;
 
     // game info
+    sf::RenderWindow window;
     std::string game_title;
     sf::Vector2u window_size;
     int fps;
