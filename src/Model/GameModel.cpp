@@ -46,6 +46,20 @@ GameModel::~GameModel() {
         }
     }
     pickups.clear();
+    
+    for (auto& pair : arrows) {
+        if (pair.second) {
+            delete pair.second;
+        }
+    }
+    arrows.clear();
+    
+    for (auto* skill : skills) {
+        if (skill) {
+            delete skill;
+        }
+    }
+    skills.clear();
 }
 
 void GameModel::update(float delta_time) {
@@ -151,6 +165,23 @@ void GameModel::update(float delta_time) {
             ++it;
         }
     }
+    
+    // 更新箭矢
+    for (auto it = arrows.begin(); it != arrows.end(); ) {
+        Entities::Arrow* arrow = it->second;
+        arrow->update(delta_time);
+        if (arrow->outOfWindow(window_size) || arrow->isExpired()) {
+            delete arrow;
+            it = arrows.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    
+    // 更新技能
+    for (auto* skill : skills) {
+        skill->update(delta_time);
+    }
 
     // std::cout << "player update start" << std::endl;
     player->update(delta_time);
@@ -217,11 +248,13 @@ void GameModel::initGame() {
     next_enemy_id = 0;
     next_bullet_id = 0;
     next_pickup_id = 0;
+    next_arrow_id = 0;
     resetPlatformGenerateInterval();
     resetEnemyGenerateInterval();
     resetPickupGenerateInterval();
     initPlatforms();
     initPlayer();
+    initSkills();
 }
 
 void GameModel::generateEnemy() {
@@ -342,6 +375,82 @@ void GameModel::checkCollisions() {
             it = pickups.erase(it);
         } else {
             ++it;
+        }
+    }
+    
+    // 检查箭矢与敌人的碰撞
+    for (auto arrow_it = arrows.begin(); arrow_it != arrows.end(); ) {
+        Entities::Arrow* arrow = arrow_it->second;
+        bool arrow_hit = false;
+        
+        for (auto enemy_it = enemies.begin(); enemy_it != enemies.end(); ) {
+            Entities::Enemy* enemy = enemy_it->second;
+            if (arrow->collidesWith(enemy->getPosition(), enemy->getSize())) {
+                // 箭矢击中敌人，删除敌人和箭矢
+                total_score += 5; // 击杀敌人得5分
+                delete enemy;
+                enemy_it = enemies.erase(enemy_it);
+                arrow_hit = true;
+                break;
+            } else {
+                ++enemy_it;
+            }
+        }
+        
+        if (arrow_hit) {
+            delete arrow;
+            arrow_it = arrows.erase(arrow_it);
+        } else {
+            ++arrow_it;
+        }
+    }
+}
+
+void GameModel::createArrow(sf::Vector2f position, sf::Vector2f velocity) {
+    arrows[next_arrow_id] = new Entities::Arrow(
+        next_arrow_id, position, velocity, arrow_size, this
+    );
+    next_arrow_id++;
+}
+
+void GameModel::initSkills() {
+    // 初始化箭矢技能，冷却时间3秒
+    skills.push_back(new Entities::Skill(Entities::SkillType::ARROW_SHOT, 3.0f));
+}
+
+void GameModel::useSkill(int skill_index) {
+    if (skill_index >= 0 && skill_index < skills.size()) {
+        Entities::Skill* skill = skills[skill_index];
+        if (skill->canUse()) {
+            skill->use();
+            
+            // 根据技能类型执行对应效果
+            switch (skill->getType()) {
+                case Entities::SkillType::ARROW_SHOT: {
+                    // 从玩家位置发射箭矢
+                    sf::Vector2f player_pos = player->getPosition();
+                    sf::Vector2f arrow_pos;
+                    sf::Vector2f arrow_velocity;
+                    
+                    // 根据玩家朝向决定箭矢发射方向
+                    if (player->getFacingDirection() == Entities::FacingDirection::RIGHT) {
+                        arrow_pos = sf::Vector2f(
+                            player_pos.x + player_size.x,
+                            player_pos.y + player_size.y / 2 - arrow_size.y / 2
+                        );
+                        arrow_velocity = sf::Vector2f(300.0f, 0.0f); // 水平向右
+                    } else {
+                        arrow_pos = sf::Vector2f(
+                            player_pos.x - arrow_size.x,
+                            player_pos.y + player_size.y / 2 - arrow_size.y / 2
+                        );
+                        arrow_velocity = sf::Vector2f(-300.0f, 0.0f); // 水平向左
+                    }
+                    
+                    createArrow(arrow_pos, arrow_velocity);
+                    break;
+                }
+            }
         }
     }
 }

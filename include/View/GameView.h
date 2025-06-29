@@ -10,6 +10,8 @@
 #include "View/UI/Enemy.h"
 #include "View/UI/Bullet.h"
 #include "View/UI/Pickup.h"
+#include "View/UI/Arrow.h"
+#include "View/UI/SkillBar.h"
 #include "ViewModel/GameViewModel.h"
 
 namespace View {
@@ -34,11 +36,13 @@ private:
     sf::Text debug_info_text;
 
     View::UI::Player player;
+    View::UI::SkillBar skill_bar;
     
     std::vector<View::UI::Platform> platforms;
     std::vector<std::pair<int, View::UI::Enemy>> enemies;
     std::vector<std::pair<int, View::UI::Bullet>> bullets;
     std::vector<std::pair<int, View::UI::Pickup>> pickups;
+    std::vector<std::pair<int, View::UI::Arrow>> arrows;
 };
 
 }

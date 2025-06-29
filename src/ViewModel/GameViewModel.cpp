@@ -224,3 +224,45 @@ sf::Vector2f GameViewModel::getPickupPositionById(int id) {
     }
     return sf::Vector2f(0, 0);
 }
+
+std::vector<int> GameViewModel::getArrowsId() {
+    std::map<int, Model::Entities::Arrow*> arrows = model->getArrows();
+    std::vector<int> arrow_ids;
+    for (const auto& pair : arrows) {
+        arrow_ids.push_back(pair.first);
+    }
+    return arrow_ids;
+}
+
+sf::Vector2f GameViewModel::getArrowPosition(int id) {
+    auto arrows = model->getArrows();
+    if (arrows.find(id) != arrows.end()) {
+        return arrows[id]->getPosition();
+    }
+    return sf::Vector2f(0, 0);
+}
+
+sf::Vector2f GameViewModel::getArrowSize(int id) {
+    auto arrows = model->getArrows();
+    if (arrows.find(id) != arrows.end()) {
+        return arrows[id]->getSize();
+    }
+    return model->arrow_size;
+}
+
+bool GameViewModel::getArrowFacingRight(int id) {
+    auto arrows = model->getArrows();
+    if (arrows.find(id) != arrows.end()) {
+        sf::Vector2f velocity = arrows[id]->getVelocity();
+        return velocity.x > 0; // 如果水平速度大于0，则向右
+    }
+    return true; // 默认向右
+}
+
+std::vector<Model::Entities::Skill*> GameViewModel::getSkills() {
+    return model->getSkills();
+}
+
+void GameViewModel::useSkill(int skill_index) {
+    model->useSkill(skill_index);
+}

@@ -5,6 +5,8 @@
 #include "Model/Entities/Enemy.h"
 #include "Model/Entities/Bullet.h"
 #include "Model/Entities/Pickup.h"
+#include "Model/Entities/Arrow.h"
+#include "Model/Entities/Skill.h"
 #include <chrono>
 
 namespace Model {
@@ -26,6 +28,7 @@ public:
     }
     std::chrono::seconds getDuration() { return std::chrono::seconds(static_cast<int>(game_time)); }
     sf::Vector2f getPlayerPosition() const { return player->getPosition(); }
+    Entities::FacingDirection getPlayerFacingDirection() const { return player->getFacingDirection(); }
 
     void update(float delta_time) override;
 
@@ -55,12 +58,19 @@ public:
     std::map<int, Entities::Bullet*> getBullets() const { return bullets; }
     std::map<int, Entities::Pickup*> getPickups() const { return pickups; }
     void createBullet(sf::Vector2f position, sf::Vector2f velocity);
+    
+    // 技能和箭矢相关方法
+    std::map<int, Entities::Arrow*> getArrows() const { return arrows; }
+    std::vector<Entities::Skill*> getSkills() const { return skills; }
+    void useSkill(int skill_index);
+    float getScrollSpeed() const { return scroll_speed; }
 
     sf::Vector2f platform_size = sf::Vector2f(100, 12);
     sf::Vector2f player_size = sf::Vector2f(30, 60);
     sf::Vector2f enemy_size = sf::Vector2f(40, 40);
     sf::Vector2f bullet_size = sf::Vector2f(8, 8);
     sf::Vector2f pickup_size = sf::Vector2f(20, 20);
+    sf::Vector2f arrow_size = sf::Vector2f(30, 8);
     
 private:
     bool init;
@@ -84,6 +94,11 @@ private:
     int next_pickup_id;
     float pickup_generate_interval;
     
+    std::map<int, Entities::Arrow*> arrows;
+    int next_arrow_id;
+    
+    std::vector<Entities::Skill*> skills;
+    
     Entities::Player* player;
 
     void resetPlatformGenerateInterval();
@@ -92,6 +107,8 @@ private:
     void resetEnemyGenerateInterval();
     void generatePickup();
     void resetPickupGenerateInterval();
+    void createArrow(sf::Vector2f position, sf::Vector2f velocity);
+    void initSkills();
     Entities::PlatformType getPlatformTypeRand();
     void initPlatforms();
     void initPlayer();

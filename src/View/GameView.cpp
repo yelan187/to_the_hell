@@ -3,7 +3,7 @@
 
 using View::GameView;
 
-GameView::GameView(Core::Engine &engine) : View::Page(engine), debug(true) {
+GameView::GameView(Core::Engine &engine) : View::Page(engine), debug(true), skill_bar(sf::Vector2f(20, 100)) {
     if (!font.loadFromFile("assets/fonts/fusion.ttf")) {
         std::cerr << "Error loading font!" << std::endl;
         return;
@@ -140,6 +140,39 @@ void GameView::update(float deltaTime) {
             it->second.update(deltaTime);
         }
     }
+    
+    // 更新箭矢
+    std::vector<int> current_arrow_ids = view_model->getArrowsId();
+    
+    // 移除不存在的箭矢
+    arrows.erase(std::remove_if(arrows.begin(), arrows.end(), 
+        [&current_arrow_ids](const std::pair<int, View::UI::Arrow>& arrow_pair) {
+            return std::find(current_arrow_ids.begin(), current_arrow_ids.end(), arrow_pair.first) == current_arrow_ids.end();
+        }), arrows.end());
+    
+    // 添加新箭矢并更新现有箭矢
+    for (int id : current_arrow_ids) {
+        auto it = std::find_if(arrows.begin(), arrows.end(), 
+            [id](const std::pair<int, View::UI::Arrow>& arrow_pair) {
+                return arrow_pair.first == id;
+            });
+        
+        if (it == arrows.end()) {
+            // 新箭矢，添加到列表
+            View::UI::Arrow new_arrow;
+            new_arrow.setPosition(view_model->getArrowPosition(id));
+            new_arrow.setSize(view_model->getArrowSize(id));
+            new_arrow.setFacingRight(view_model->getArrowFacingRight(id));
+            arrows.push_back(std::make_pair(id, new_arrow));
+        } else {
+            // 现有箭矢，更新位置和朝向
+            it->second.setPosition(view_model->getArrowPosition(id));
+            it->second.setFacingRight(view_model->getArrowFacingRight(id));
+        }
+    }
+    
+    // 更新技能栏
+    skill_bar.updateSkills(view_model->getSkills());
 }
 
 void GameView::render(sf::RenderWindow& window) {
@@ -151,6 +184,9 @@ void GameView::render(sf::RenderWindow& window) {
     if (debug) {
         window.draw(debug_info_text);
     }
+
+    // 渲染技能栏
+    skill_bar.draw(window);
 
     player.render(window);
 
@@ -165,6 +201,9 @@ void GameView::render(sf::RenderWindow& window) {
         
     for (auto &pickup_pair: pickups)
         pickup_pair.second.render(window);
+        
+    for (auto &arrow_pair: arrows)
+        arrow_pair.second.draw(window);
 
     window.display();
 }
@@ -183,6 +222,9 @@ void GameView::handleInput(const sf::Event& event) {
                 break;
             case sf::Keyboard::D:
                 view_model->playerWalkRight();
+                break;
+            case sf::Keyboard::J:
+                view_model->useSkill(0); // 使用第一个技能（箭矢）
                 break;
             default:
                 break;
@@ -203,6 +245,14 @@ void GameView::handleInput(const sf::Event& event) {
                 break;
             default:
                 break;
+        }
+    } else if (event.type == sf::Event::MouseButtonPressed) {
+        if (event.mouseButton.button == sf::Mouse::Left) {
+            sf::Vector2f mouse_pos(event.mouseButton.x, event.mouseButton.y);
+            int skill_index;
+            if (skill_bar.isSkillClicked(mouse_pos, skill_index)) {
+                view_model->useSkill(skill_index);
+            }
         }
     }
 }

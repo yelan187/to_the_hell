@@ -49,6 +49,7 @@ public:
     sf::Vector2f getEnemySize() { return model->enemy_size; }
     sf::Vector2f getBulletSize() { return model->bullet_size; }
     sf::Vector2f getPickupSize() { return model->pickup_size; }
+    sf::Vector2f getArrowSize() { return model->arrow_size; }
 
     void playerJump();
     void playerDown();
@@ -72,6 +73,16 @@ public:
     std::vector<int> getPickupsId();
     View::UI::PickupType getPickupTypeById(int id);
     sf::Vector2f getPickupPositionById(int id);
+    
+    // 箭矢相关方法
+    std::vector<int> getArrowsId();
+    sf::Vector2f getArrowPosition(int id);
+    sf::Vector2f getArrowSize(int id);
+    bool getArrowFacingRight(int id);
+    
+    // 技能相关方法
+    std::vector<Model::Entities::Skill*> getSkills();
+    void useSkill(int skill_index);
 
 private:
     std::shared_ptr<Model::GameModel> model;

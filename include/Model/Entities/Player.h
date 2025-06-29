@@ -27,6 +27,11 @@ enum class CollisionDirection {
     RIGHT
 };// which direction **of** player is colliding with the platform
 
+enum class FacingDirection {
+    LEFT,
+    RIGHT
+};
+
 class Player {
 public:
     Player(sf::Vector2f position,sf::Vector2f size,GameModel* game_model)
@@ -36,6 +41,7 @@ public:
             gravity = sf::Vector2f(0,500.0f);
             collision_direction = CollisionDirection::NONE;
             prev_collision_direction = CollisionDirection::NONE;
+            facing_direction = FacingDirection::RIGHT; // 默认面向右
         }
 
     void updatePosition(float delta_time);
@@ -65,6 +71,7 @@ public:
     PlayerState getState() const {return state;}
     sf::Vector2f getPosition() const { return position; }
     sf::Vector2f getSize() const { return size; }
+    FacingDirection getFacingDirection() const { return facing_direction; }
 
     int getOnPlatformId() const {
         return on_platform_id;
@@ -94,6 +101,8 @@ private:
 
     CollisionDirection collision_direction;
     CollisionDirection prev_collision_direction;
+    
+    FacingDirection facing_direction;
 
     float walking_speed;
     float jumping_speed;
