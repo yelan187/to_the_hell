@@ -3,7 +3,7 @@
 #include <functional>
 #include <string>
 #include <unordered_map>
-
+#include <memory>
 #include "Model/Model.h"
 
 namespace ViewModel {

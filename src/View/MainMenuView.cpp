@@ -3,16 +3,7 @@
 
 using View::MainMenuView;
 
-void MainMenuView::initMenu() {
-    if (!font.loadFromFile("assets/fonts/fusion.ttf")) {
-        std::cerr << "Error loading font!" << std::endl;
-        return;
-    }    
-    if (!title_texture.loadFromFile("assets/images/title.png")) {
-        std::cerr << "Error loading title image!" << std::endl;
-        return;
-    }
-    
+void MainMenuView::init() {
     title_sprite.setTexture(title_texture);
     title_sprite.setScale(0.4f, 0.4f);
     sf::FloatRect bounds = title_sprite.getLocalBounds();
@@ -20,10 +11,11 @@ void MainMenuView::initMenu() {
     title_sprite.setPosition(window_size.x / 2, window_size.y / 4);
 
     option_pointer.setPointCount(3);
-    option_pointer.setRadius(menu_options[0].getCharacterSize() / 3);
+    option_pointer.setRadius(menu_options[current_selection].getCharacterSize() / 3);
     option_pointer.setFillColor(sf::Color::Red);
     option_pointer.setOrigin(option_pointer.getRadius(), option_pointer.getRadius());
     option_pointer.rotate(90);
+    updateCurrentSelection();
 }
 
 void MainMenuView::handleInput(const sf::Event& event) {
@@ -41,7 +33,7 @@ void MainMenuView::handleInput(const sf::Event& event) {
             case sf::Keyboard::Enter:
             case sf::Keyboard::J:
                 change_page_param.value.new_page_state = static_cast<View::PAGE_STATE>(current_selection);
-                change_page_param.value.deferred = false;
+                change_page_param.value.init = true;
                 confirmSelection_command->execute(change_page_param);
                 break;
             default:
@@ -50,7 +42,7 @@ void MainMenuView::handleInput(const sf::Event& event) {
     }
 }
 
-void MainMenuView::updateCurrentSelection(int selection) {
+void MainMenuView::updateCurrentSelection() {
     for (int i = 0; i < menu_options.size(); ++i) {
         if (i == current_selection) {
             menu_options[i].setFillColor(sf::Color::Yellow);
@@ -75,13 +67,13 @@ void MainMenuView::updateBackgroundParticles(std::vector<sf::Vector2f>* particle
     }
 }
 
-static void notification_callback(Common::NotificationParam* param, void* view) {
+void MainMenuView::notification_callback(Common::NotificationParam* param, void* view) {
     if (!view) return;
     MainMenuView* main_menu_view = static_cast<MainMenuView*>(view);
     switch (param->id) {
         case Common::NotificationId::ChangeCurrentSelection:
-            int selection = dynamic_cast<Common::ChangeCurrentSelectionParam*>(param)->value;
-            main_menu_view->updateCurrentSelection(selection);
+            main_menu_view->current_selection = dynamic_cast<Common::ChangeCurrentSelectionParam*>(param)->value;
+            main_menu_view->updateCurrentSelection();
             break;
         case Common::NotificationId::ChangeBackgroundParticles:
             std::vector<sf::Vector2f>* particles = dynamic_cast<Common::ChangeBackgroundParticlesParam*>(param)->value;

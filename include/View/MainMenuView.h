@@ -1,13 +1,21 @@
 #pragma once
 
 #include "View/Page.h"
+#include <iostream>
 
 namespace View {
 
 class MainMenuView : public Page {
 public:
-    MainMenuView(std::string game_title, sf::Vector2u window_size, int fps) : Page(game_title, window_size, fps) {
-        initMenu();
+    MainMenuView(std::string game_title, sf::Vector2u window_size, int fps, sf::RenderWindow& window) : Page(game_title, window_size, fps, window) {
+        if (!font.loadFromFile("assets/fonts/fusion.ttf")) {
+            std::cerr << "Error loading font!" << std::endl;
+            return;
+        }    
+        if (!title_texture.loadFromFile("assets/images/title.png")) {
+            std::cerr << "Error loading title image!" << std::endl;
+            return;
+        }
     }
     // properties
     void setCurrentSelection(int selection) {
@@ -44,15 +52,14 @@ public:
         return &notification_callback;
     }
     // update
-    void updateCurrentSelection(int selection);
+    void updateCurrentSelection();
     void updateBackgroundParticles(std::vector<sf::Vector2f>* particles);
 
-protected:
+    void init() override;
     void render() override;
     void handleInput(const sf::Event& event) override;
 
 private:
-    void initMenu();
     static void notification_callback(Common::NotificationParam* param, void* view);
     // menu info
     sf::Texture title_texture;

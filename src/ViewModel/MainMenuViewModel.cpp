@@ -80,17 +80,11 @@ std::vector<sf::Vector2f> MainMenuViewModel::getBackgroundParticles() const {
     return background_particles;
 }
 
-class MainMenuViewModel::UpdateCommand : public Common::CommandBase {
-public:
-    UpdateCommand(MainMenuViewModel* view_model) : view_model(view_model) {}
-    void execute(Common::CommandParam& delta_time) override {
-        auto& update_param = dynamic_cast<Common::UpdateParam&>(delta_time);
-        view_model->updateAnimationState(update_param.value);
-        Common::ChangeBackgroundParticlesParam* param = new Common::ChangeBackgroundParticlesParam();
-        param->value = &view_model->background_particles;
-        view_model->trigger.fire(param);
-    }
-
-private:
-    MainMenuViewModel* view_model;
-};
+void MainMenuViewModel::UpdateCommand::execute(Common::CommandParam& delta_time) {
+    auto& update_param = dynamic_cast<Common::UpdateParam&>(delta_time);
+    view_model->updateAnimationState(update_param.value);
+    Common::ChangeBackgroundParticlesParam* param = new Common::ChangeBackgroundParticlesParam();
+    param->id = Common::NotificationId::ChangeBackgroundParticles;
+    param->value = &view_model->background_particles;
+    view_model->trigger.fire(param);
+}

@@ -1,6 +1,7 @@
 #pragma once
 
 // include View/ViewModel/Model
+#include <memory>
 #include "Common/CommandBase.h"
 #include "View/MainMenuView.h"
 #include "ViewModel/MainMenuViewModel.h"
@@ -11,7 +12,7 @@ class GameApp {
 public:    
     GameApp(std::string game_title, sf::Vector2u window_size, int fps);
     void run();
-    void changePage(View::PAGE_STATE new_page_state, bool deferred = false);
+    void changePage(View::PAGE_STATE new_page_state, bool init = true);
 
 private:
     // Main Menu Page
@@ -25,6 +26,7 @@ private:
     std::shared_ptr<View::Page> page;
 
     // game info
+    sf::RenderWindow window;
     std::string game_title;
     sf::Vector2u window_size;
     int fps;
