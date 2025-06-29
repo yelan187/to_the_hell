@@ -52,7 +52,7 @@ cd build/bin
 现版本（C++重写）作为浙江大学计算机学院"课程综合实践II"的项目，由以下成员共同开发：
 - [yelan](https://github.com/yelan187)
 - [WuYan](https://github.com/wuyan1345)
-- [XueBaStudy](https://github.com/XueBaStudy)
+- [XuebaStudy](https://github.com/XuebaStudy)
 
 ## 👏🏻 致谢
 

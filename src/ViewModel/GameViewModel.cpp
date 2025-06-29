@@ -58,6 +58,8 @@ View::UI::PlayerState GameViewModel::getPlayerState() {
                 return View::UI::PlayerState::JUMPING_R;
             }
         
+        // // Default
+        // return View::UI::PlayerState::IDLE_R;
     }
 }
 
@@ -77,7 +79,7 @@ void GameViewModel::playerJump() {
 
 void GameViewModel::playerDown() {
     if (!key_state[sf::Keyboard::S]) {
-        std::cout << "Press S to go down" << std::endl;
+        // std::cout << "Press S to go down" << std::endl;
         model->playerDown();
         key_state[sf::Keyboard::S] = true;
     }
@@ -85,7 +87,7 @@ void GameViewModel::playerDown() {
 
 void GameViewModel::playerWalkLeft() {
     if (!key_state[sf::Keyboard::A]) {
-        std::cout << "Press A to walk left" << std::endl;
+        // std::cout << "Press A to walk left" << std::endl;
         key_state[sf::Keyboard::A] = true;
         if (!key_state[sf::Keyboard::D]) {
             player_towards = towards::LEFT;
@@ -96,7 +98,7 @@ void GameViewModel::playerWalkLeft() {
 
 void GameViewModel::playerWalkRight() {
     if (!key_state[sf::Keyboard::D]) {
-        std::cout << "Press D to walk right" << std::endl;
+        // std::cout << "Press D to walk right" << std::endl;
         key_state[sf::Keyboard::D] = true;
         if (!key_state[sf::Keyboard::A]) {
             player_towards = towards::RIGHT;
@@ -106,7 +108,7 @@ void GameViewModel::playerWalkRight() {
 }
 
 void GameViewModel::playerStopLeft() {
-    std::cout << "Release A" << std::endl;
+    // std::cout << "Release A" << std::endl;
     key_state[sf::Keyboard::A] = false;
     if (key_state[sf::Keyboard::D]) {
         player_towards = towards::RIGHT;
@@ -115,7 +117,7 @@ void GameViewModel::playerStopLeft() {
 }
 
 void GameViewModel::playerStopRight() {
-    std::cout << "Release D" << std::endl;
+    // std::cout << "Release D" << std::endl;
     key_state[sf::Keyboard::D] = false;
     if (key_state[sf::Keyboard::A]) {
         player_towards = towards::LEFT;

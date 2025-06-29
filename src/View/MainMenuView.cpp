@@ -4,12 +4,13 @@
 using View::MainMenuView;
 
 MainMenuView::MainMenuView(Core::Engine &engine) : View::Page(engine) {
+
+    view_model = std::make_shared<ViewModel::MainMenuViewModel>(engine,window_size);
+
     if (!font.loadFromFile("assets/fonts/fusion.ttf")) {
         std::cerr << "Error loading font!" << std::endl;
         return;
-    }
-    view_model = std::make_shared<ViewModel::MainMenuViewModel>(engine,window_size);
-
+    }    
     if (!title_texture.loadFromFile("assets/images/title.png")) {
         std::cerr << "Error loading title image!" << std::endl;
         return;
@@ -33,7 +34,7 @@ MainMenuView::MainMenuView(Core::Engine &engine) : View::Page(engine) {
             window_size.x / 2,
             window_size.y / 2 + (menu_options.size() * text.getCharacterSize() * 1.5f)
         );
-        std::cout << text.getString().toAnsiString() << std::endl;
+        // std::cout << text.getString().toAnsiString() << std::endl;
         menu_options.push_back(text);
     }
 
@@ -99,15 +100,15 @@ void MainMenuView::render(sf::RenderWindow& window) {
 void MainMenuView::handleInput(const sf::Event& event) {
     if (event.type == sf::Event::KeyPressed) {
         switch (event.key.code) {
+            case sf::Keyboard::Up:
             case sf::Keyboard::W:
                 view_model->navigateUp();
                 break;
+            case sf::Keyboard::Down:
             case sf::Keyboard::S:
                 view_model->navigateDown();
                 break;
             case sf::Keyboard::Enter:
-                view_model->confirmSelection();
-                break;
             case sf::Keyboard::J:
                 view_model->confirmSelection();
                 break;

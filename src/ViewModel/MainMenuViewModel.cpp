@@ -68,11 +68,9 @@ void MainMenuViewModel::confirmSelection() {
 
     switch (selected) {
         case MenuOption::START_GAME:
-            std::cout << "开始游戏" << std::endl;
             model->startGame();
             break;
         case MenuOption::EXIT:
-            std::cout << "退出游戏" << std::endl;
             model->exitGame();
             break;
     }

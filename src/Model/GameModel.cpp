@@ -1,11 +1,28 @@
 #include <iostream>
 #include "Model/GameModel.h"
+#include "Core/Engine.h"
 
 using Model::GameModel;
 using Model::Entities::PlatformType;
 
 GameModel::GameModel(Core::Engine &engine, sf::Vector2u window_size) : 
     Model(engine, window_size), init(false) {
+    initGame();
+    init = true;
+}
+
+GameModel::~GameModel() {
+    
+    if (player) {
+        delete player;
+        player = nullptr;
+    }
+    for (auto& pair : platforms) {
+        if (pair.second) {
+            delete pair.second;
+        }
+    }
+    platforms.clear();
 }
 
 void GameModel::update(float delta_time) {
@@ -36,7 +53,7 @@ void GameModel::update(float delta_time) {
         init = true;
         return;
     }
-
+    // std::cout << "GameModel update start" << std::endl;
     game_time += delta_time;
 
     platform_generate_interval -= delta_time;
@@ -50,15 +67,19 @@ void GameModel::update(float delta_time) {
         platform->update(delta_time);
         if (platform->outOfWindow(window_size)) {
             delete platform;
-            std::cout << "Platform " << it->first << " removed." << std::endl;
+            // std::cout << "Platform " << it->first << " removed." << std::endl;
             it = platforms.erase(it);
         } else {
             ++it;
         }
     }
-    std::cout << "player update start" << std::endl;
+    // std::cout << "player update start" << std::endl;
     player->update(delta_time);
-    std::cout << "player update end" << std::endl;
+    // std::cout << "player update end" << std::endl;
+
+    if (player->getPosition().y < 0 || player->getPosition().y > window_size.y) {
+        engine.requestEndGame(total_score, getDuration());
+    }
 }
 
 PlatformType GameModel::getPlatformTypeRand() {
