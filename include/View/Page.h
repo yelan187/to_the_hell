@@ -1,25 +1,53 @@
 #pragma once
 
-#include "Core/Engine.h"
-#include "ViewModel/ViewModel.h"
 #include <SFML/Graphics.hpp>
+#include "Common/CommandBase.h"
+#include "Common/NotificationBase.h"
 
 namespace View {
+
+enum class PAGE_STATE {
+    MAIN_MENU,
+    GAME,
+    SCORE
+};
 class Page {
 public:
-    Page(Core::Engine &engine) :engine(engine) {
-        this->window_size = engine.getWindowSize();
-        // std::cout << "Page initialized with window size: " << window_size.x << "x" << window_size.y << std::endl;
+    Page(std::string game_title, sf::Vector2u window_size, int fps) :game_title(std::move(game_title)), window_size(window_size), fps(fps) {
+        window.create(sf::VideoMode(window_size.x, window_size.y), game_title, sf::Style::Default);
+        window.setFramerateLimit(fps);
     }
-    virtual void update(float deltaTime) {}
-    virtual void render(sf::RenderWindow& window) {}
-    virtual void handleInput(const sf::Event& event) {}
+    void set_updateCommand(Common::CommandBase* command) {
+        update_command = command;
+    }
+    void run(){
+        while (window.isOpen()) {
+            sf::Event event;
+            while (window.pollEvent(event)) {
+                if (event.type == sf::Event::Closed) {
+                    window.close();
+                } else if (event.type == sf::Event::KeyPressed || event.type == sf::Event::KeyReleased) {
+                    handleInput(event);
+                }
+            }
+            Common::UpdateParam param;
+            param.value = 1.0f / fps;
+            update_command->execute(param);
+            render();
+        }
+    }
 
 protected:
-    Core::Engine& engine;
-    sf::Vector2u window_size;
+    // command
+    Common::CommandBase* update_command;
 
-private:
-    std::shared_ptr<ViewModel::ViewModel> view_model;
+    virtual void render() {}
+    virtual void handleInput(const sf::Event& event) {}
+    
+    // game info
+    sf::RenderWindow window;
+    std::string game_title;
+    sf::Vector2u window_size;
+    int fps;
 };
 }

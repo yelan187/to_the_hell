@@ -1,36 +1,71 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
-#include <memory>
-#include <vector>
 #include "View/Page.h"
-#include "ViewModel/MainMenuViewModel.h"
 
 namespace View {
 
 class MainMenuView : public Page {
 public:
+    MainMenuView(std::string game_title, sf::Vector2u window_size, int fps) : Page(game_title, window_size, fps) {
+        initMenu();
+    }
+    // properties
+    void setCurrentSelection(int selection) {
+        current_selection = selection;
+    }
+    void setMenuOptions(const std::vector<std::string>& options) {
+        menu_options.clear();
+        for (const auto& option : options) {
+            sf::Text text;
+            text.setString(option);
+            text.setCharacterSize(50);
+            text.setFillColor(sf::Color::White);
+            text.setFont(font);
+            text.setOrigin(text.getLocalBounds().width / 2, text.getLocalBounds().height / 2);
+            text.setPosition(
+                window_size.x / 2,
+                window_size.y / 2 + (menu_options.size() * text.getCharacterSize() * 1.5f)
+            );
+            menu_options.push_back(text);
+        }
+    }
+    // commands
+    void set_NavigateUpCommand(Common::CommandBase* command) {
+        navigateUp_command = command;
+    }
+    void set_NavigateDownCommand(Common::CommandBase* command) {
+        navigateDown_command = command;
+    }
+    void set_ConfirmSelectionCommand(Common::CommandBase* command) {
+        confirmSelection_command = command;
+    }
+    // notification
+    Common::NotificationFunc getNotificationCallback() {
+        return &notification_callback;
+    }
+    // update
+    void updateCurrentSelection(int selection);
+    void updateBackgroundParticles(std::vector<sf::Vector2f>* particles);
 
-    MainMenuView(Core::Engine& engine);
-
-    void update(float deltaTime) override;
-    void render(sf::RenderWindow& window) override;
+protected:
+    void render() override;
     void handleInput(const sf::Event& event) override;
-    void updateBackgroundParticles();
 
 private:
-    std::shared_ptr<ViewModel::MainMenuViewModel> view_model;
-    
+    void initMenu();
+    static void notification_callback(Common::NotificationParam* param, void* view);
+    // menu info
     sf::Texture title_texture;
     sf::Sprite title_sprite;
-
     std::vector<sf::Text> menu_options;
     int current_selection;
     sf::Font font;
-
     sf::CircleShape option_pointer;
-
     std::vector<sf::CircleShape> background_particles;
+    // command
+    Common::CommandBase* navigateUp_command;
+    Common::CommandBase* navigateDown_command;
+    Common::CommandBase* confirmSelection_command;
 };
 
 }
