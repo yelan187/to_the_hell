@@ -1,6 +1,7 @@
 #include "Model/Entities/Player.h"
 #include "Model/Entities/Platform.h"
 #include "Model/GameModel.h" // Include the definition of GameModel
+#include "Utils/Config.h"
 
 using Model::Entities::Player;
 
@@ -89,7 +90,7 @@ void Player::stopRight() {
 void Player::updatePosition(float delta_time) {
     sf::Vector2f prev_position = position;
     position += velocity * delta_time + 0.5f * acceleration * delta_time * delta_time;
-    std::cout << "Updating position: " << position.x << ", " << position.y << std::endl;
+    // std::cout << "Updating position: " << position.x << ", " << position.y << std::endl;
 
     int prev_on_platform_id = on_platform_id;
     on_platform = false;
@@ -98,7 +99,7 @@ void Player::updatePosition(float delta_time) {
         Platform* platform = platform_pair.second;
         bool res = collisionDetection(platform);
         if (res) {
-            std::cout << "Collision detected with platform ID: " << platform->id << std::endl;
+            // std::cout << "Collision detected with platform ID: " << platform->id << std::endl;
 
             if (prev_on_platform_id == platform->id) {
                 on_platform = true;
@@ -148,12 +149,12 @@ void Player::updateAcceleration(float delta_time) {
 }
 
 void Player::update(float delta_time) {
-    std::cout << sf::Keyboard::isKeyPressed(sf::Keyboard::A) << std::endl;
+    // std::cout << sf::Keyboard::isKeyPressed(sf::Keyboard::A) << std::endl;
     auto platforms = game_model->getPlatforms();
     // cout velocity and acceleration
-    std::cout << "Velocity: " << velocity.x << ", " << velocity.y << std::endl;
-    std::cout << "position: " << position.x << ", " << position.y << std::endl;
-    std::cout << "on_platform_id: " << on_platform_id << std::endl;
+    // std::cout << "Velocity: " << velocity.x << ", " << velocity.y << std::endl;
+    // std::cout << "position: " << position.x << ", " << position.y << std::endl;
+    // std::cout << "on_platform_id: " << on_platform_id << std::endl;
     
     updatePosition(delta_time);
     updateVelocity(delta_time);
@@ -213,29 +214,29 @@ sf::Vector2f Player::findCollisionPosition(Platform* platform,
 }
 
 void Player::handleCollision(Platform* platform, sf::Vector2f prev_position, float delta_time) {
-    std::cout << "Handling collision with platform ID: " << platform->id << std::endl;
+    // std::cout << "Handling collision with platform ID: " << platform->id << std::endl;
     sf::Vector2f p = findCollisionPosition(platform, prev_position, delta_time);
     if ((p.y + getSize().y) <= (platform->getPosition().y + 2)) {
         /*
          * player is above the platform
          */
         // std::cout << "Player is above the platform" << std::endl;
-        std::cout << "Player is above the platform" << std::endl;
+        // std::cout << "Player is above the platform" << std::endl;
         setPosition(p);
         on_platform = true;
         on_platform_id = platform->id;
         if (state == PlayerState::JUMPING_WALKING) {
-            std::cout << "Player landed on platform" << std::endl;
+            // std::cout << "Player landed on platform" << std::endl;
             state = PlayerState::WALKING;
         } else if (state == PlayerState::JUMPING_IDLE) {
-            std::cout << "Player landed on platform" << std::endl;
+            // std::cout << "Player landed on platform" << std::endl;
             state = PlayerState::IDLE;
         }
     } else if (p.y >= (platform->getPosition().y + platform->getSize().y - 1)) {
         /*
          * player is below the platform
          */
-        std::cout << "Player is below the platform" << std::endl;
+        // std::cout << "Player is below the platform" << std::endl;
         setPosition(p);
         on_platform = false;
         on_platform_id = -1;
@@ -244,7 +245,7 @@ void Player::handleCollision(Platform* platform, sf::Vector2f prev_position, flo
         /*
          * player is to the left of the platform
          */
-        std::cout << "Player is to the left of the platform" << std::endl;
+        // std::cout << "Player is to the left of the platform" << std::endl;
         setPosition(p.x, getPosition().y);
         on_platform = false;
         on_platform_id = -1;
@@ -253,7 +254,7 @@ void Player::handleCollision(Platform* platform, sf::Vector2f prev_position, flo
         /*
          * player is to the right of the platform
          */
-        std::cout << "Player is to the right of the platform" << std::endl;
+        // std::cout << "Player is to the right of the platform" << std::endl;
         setPosition(p.x, getPosition().y);
         on_platform = false;
         on_platform_id = -1;

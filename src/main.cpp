@@ -1,13 +1,13 @@
 #include <vector>
 #include <string>
-
+#include "Utils/Config.h"
 #include <SFML/Graphics.hpp>
 #include "Core/Engine.h"
 
 int main() {
     Core::Engine engine(
-        std::string("To The Hell"),
-        sf::Vector2u(800,600),
+        Utils::WINDOW_TITLE,
+        sf::Vector2u(Utils::WINDOW_WIDTH, Utils::WINDOW_HEIGHT),
         60
     );
     engine.run();
