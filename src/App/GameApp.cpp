@@ -63,6 +63,7 @@ void GameApp::initMainMenu() {
     // properties
     mainmenu_view->setCurrentSelection(mainmenu_view_model->getCurrentSelectionIndex());
     mainmenu_view->setMenuOptions(mainmenu_view_model->getMenuOptions());
+    mainmenu_view_model->setModel(mainmenu_model);
     // commands
     mainmenu_view->setUpdateCommand(mainmenu_view_model->getUpdateCommand());
     mainmenu_view->setNavigateUpCommand(mainmenu_view_model->getNavigateUpCommand());

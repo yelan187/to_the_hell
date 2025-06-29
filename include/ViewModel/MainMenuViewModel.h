@@ -52,7 +52,7 @@ private:
     void updateAnimationState(float delta_time);
     void updateAvailableOptions();
     // notification
-	static void notification_callback(Common::NotificationParam* param, void* view_model);
+	static void notification_callback(Common::NotificationParam* param, void* view_model) {};
 
 private:
     // model
