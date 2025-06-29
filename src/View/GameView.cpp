@@ -51,11 +51,67 @@ void GameView::update(float deltaTime) {
     }
 
     player.update(deltaTime);
+    
+    // 更新平台
     platforms.clear();
     for (int id : view_model->getPlatformsId()){
         View::UI::Platform p;
         p.init(view_model,id);
         platforms.push_back(p);
+    }
+    
+    // 更新敌人 - 只更新现有敌人，添加新敌人，移除不存在的敌人
+    std::vector<int> current_enemy_ids = view_model->getEnemiesId();
+    
+    // 移除不存在的敌人
+    enemies.erase(std::remove_if(enemies.begin(), enemies.end(), 
+        [&current_enemy_ids](const std::pair<int, View::UI::Enemy>& enemy_pair) {
+            return std::find(current_enemy_ids.begin(), current_enemy_ids.end(), enemy_pair.first) == current_enemy_ids.end();
+        }), enemies.end());
+    
+    // 添加新敌人并更新现有敌人
+    for (int id : current_enemy_ids) {
+        auto it = std::find_if(enemies.begin(), enemies.end(), 
+            [id](const std::pair<int, View::UI::Enemy>& enemy_pair) {
+                return enemy_pair.first == id;
+            });
+        
+        if (it == enemies.end()) {
+            // 新敌人，添加到列表
+            View::UI::Enemy new_enemy;
+            new_enemy.init(view_model, id);
+            enemies.push_back(std::make_pair(id, new_enemy));
+        } else {
+            // 现有敌人，只更新
+            it->second.update(deltaTime);
+        }
+    }
+    
+    // 更新子弹 - 同样的逻辑
+    std::vector<int> current_bullet_ids = view_model->getBulletsId();
+    
+    // 移除不存在的子弹
+    bullets.erase(std::remove_if(bullets.begin(), bullets.end(), 
+        [&current_bullet_ids](const std::pair<int, View::UI::Bullet>& bullet_pair) {
+            return std::find(current_bullet_ids.begin(), current_bullet_ids.end(), bullet_pair.first) == current_bullet_ids.end();
+        }), bullets.end());
+    
+    // 添加新子弹并更新现有子弹
+    for (int id : current_bullet_ids) {
+        auto it = std::find_if(bullets.begin(), bullets.end(), 
+            [id](const std::pair<int, View::UI::Bullet>& bullet_pair) {
+                return bullet_pair.first == id;
+            });
+        
+        if (it == bullets.end()) {
+            // 新子弹，添加到列表
+            View::UI::Bullet new_bullet;
+            new_bullet.init(view_model, id);
+            bullets.push_back(std::make_pair(id, new_bullet));
+        } else {
+            // 现有子弹，只更新
+            it->second.update(deltaTime);
+        }
     }
 }
 
@@ -73,6 +129,12 @@ void GameView::render(sf::RenderWindow& window) {
 
     for (auto &p: platforms)
         p.render(window);
+        
+    for (auto &enemy_pair: enemies)
+        enemy_pair.second.render(window);
+        
+    for (auto &bullet_pair: bullets)
+        bullet_pair.second.render(window);
 
     window.display();
 }

@@ -13,9 +13,12 @@ namespace View{
 namespace UI{
     class Player;
     class Platform;
+    class Enemy;
+    class Bullet;
     
     enum class PlayerState;
     enum class PlatformType;
+    enum class EnemyType;
 }
 }
 
@@ -41,6 +44,8 @@ public:
     sf::Vector2f getPlayerPosition(sf::Vector2f view_playersize);
     sf::Vector2f getPlayerSize() { return model->player_size; }
     sf::Vector2f getPlatformSize() { return model->platform_size; }
+    sf::Vector2f getEnemySize() { return model->enemy_size; }
+    sf::Vector2f getBulletSize() { return model->bullet_size; }
 
     void playerJump();
     void playerDown();
@@ -53,7 +58,14 @@ public:
 
     std::vector<int> getPlatformsId();
     View::UI::PlatformType getPlatformTypeById(int id);
-    sf::Vector2f getPlatformPositionById(int id);    
+    sf::Vector2f getPlatformPositionById(int id);
+    
+    std::vector<int> getEnemiesId();
+    View::UI::EnemyType getEnemyTypeById(int id);
+    sf::Vector2f getEnemyPositionById(int id);
+    
+    std::vector<int> getBulletsId();
+    sf::Vector2f getBulletPositionById(int id);    
 
 private:
     std::shared_ptr<Model::GameModel> model;

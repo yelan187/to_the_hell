@@ -157,3 +157,45 @@ sf::Vector2f GameViewModel::getPlatformPositionById(int id) {
     }
     return sf::Vector2f(0, 0);
 }
+
+std::vector<int> GameViewModel::getEnemiesId() {
+    std::map<int, Model::Entities::Enemy*> enemies = model->getEnemies();
+    std::vector<int> enemy_ids;
+    for (const auto& pair : enemies) {
+        enemy_ids.push_back(pair.first);
+    }
+    return enemy_ids;
+}
+
+View::UI::EnemyType GameViewModel::getEnemyTypeById(int id) {
+    Model::Entities::Enemy* enemy = model->getEnemies().at(id);
+    if (enemy) {
+        return static_cast<View::UI::EnemyType>(enemy->getType());
+    }
+    return View::UI::EnemyType::GHOST;
+}
+
+sf::Vector2f GameViewModel::getEnemyPositionById(int id) {
+    Model::Entities::Enemy* enemy = model->getEnemies().at(id);
+    if (enemy) {
+        return enemy->getPosition();
+    }
+    return sf::Vector2f(0, 0);
+}
+
+std::vector<int> GameViewModel::getBulletsId() {
+    std::map<int, Model::Entities::Bullet*> bullets = model->getBullets();
+    std::vector<int> bullet_ids;
+    for (const auto& pair : bullets) {
+        bullet_ids.push_back(pair.first);
+    }
+    return bullet_ids;
+}
+
+sf::Vector2f GameViewModel::getBulletPositionById(int id) {
+    Model::Entities::Bullet* bullet = model->getBullets().at(id);
+    if (bullet) {
+        return bullet->getPosition();
+    }
+    return sf::Vector2f(0, 0);
+}

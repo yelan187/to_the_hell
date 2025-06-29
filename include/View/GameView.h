@@ -3,9 +3,12 @@
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include <vector>
+#include <algorithm>
 #include "View/Page.h"
 #include "View/UI/Player.h"
 #include "View/UI/Platform.h"
+#include "View/UI/Enemy.h"
+#include "View/UI/Bullet.h"
 #include "ViewModel/GameViewModel.h"
 
 namespace View {
@@ -32,6 +35,8 @@ private:
     View::UI::Player player;
     
     std::vector<View::UI::Platform> platforms;
+    std::vector<std::pair<int, View::UI::Enemy>> enemies;
+    std::vector<std::pair<int, View::UI::Bullet>> bullets;
 };
 
 }

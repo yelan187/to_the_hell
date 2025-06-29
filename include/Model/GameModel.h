@@ -2,6 +2,8 @@
 #include "Model/Model.h"
 #include "Model/Entities/Player.h"
 #include "Model/Entities/Platform.h"
+#include "Model/Entities/Enemy.h"
+#include "Model/Entities/Bullet.h"
 #include <chrono>
 
 namespace Model {
@@ -46,9 +48,16 @@ public:
     }
     Entities::Platform* getPlatformById(int id) const { return platforms.at(id); }
     std::map<int, Entities::Platform*> getPlatforms() const { return platforms; }
+    
+    // 敌人和子弹相关方法
+    std::map<int, Entities::Enemy*> getEnemies() const { return enemies; }
+    std::map<int, Entities::Bullet*> getBullets() const { return bullets; }
+    void createBullet(sf::Vector2f position, sf::Vector2f velocity);
 
     sf::Vector2f platform_size = sf::Vector2f(100, 12);
     sf::Vector2f player_size = sf::Vector2f(30, 60);
+    sf::Vector2f enemy_size = sf::Vector2f(40, 40);
+    sf::Vector2f bullet_size = sf::Vector2f(8, 8);
     
 private:
     bool init;
@@ -61,13 +70,23 @@ private:
     int next_platform_id;
     float platform_generate_interval;
     
+    std::map<int, Entities::Enemy*> enemies;
+    int next_enemy_id;
+    float enemy_generate_interval;
+    
+    std::map<int, Entities::Bullet*> bullets;
+    int next_bullet_id;
+    
     Entities::Player* player;
 
     void resetPlatformGenerateInterval();
     void generatePlatform();
+    void generateEnemy();
+    void resetEnemyGenerateInterval();
     Entities::PlatformType getPlatformTypeRand();
     void initPlatforms();
     void initPlayer();
     void initGame();
+    void checkCollisions();
 };
 }
