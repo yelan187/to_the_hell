@@ -2,6 +2,7 @@
 
 #include <ViewModel/ViewModel.h>
 #include <Model/GameModel.h>
+#include <Model/GameConfig.h>
 #include <functional>
 #include <vector>
 #include <string>
@@ -45,12 +46,12 @@ public:
     View::UI::PlayerState getPlayerState();
     sf::Vector2f getPlayerPosition(sf::Vector2f view_playersize);
     bool isPlayerDead() { return model->isPlayerDead(); } // 新增：检查玩家死亡状态
-    sf::Vector2f getPlayerSize() { return model->player_size; }
-    sf::Vector2f getPlatformSize() { return model->platform_size; }
-    sf::Vector2f getEnemySize() { return model->enemy_size; }
-    sf::Vector2f getBulletSize() { return model->bullet_size; }
-    sf::Vector2f getPickupSize() { return model->pickup_size; }
-    sf::Vector2f getArrowSize() { return model->arrow_size; }
+    sf::Vector2f getPlayerSize() { return Model::GameConfig::PLAYER_SIZE; }
+    sf::Vector2f getPlatformSize() { return Model::GameConfig::PLATFORM_SIZE; }
+    sf::Vector2f getEnemySize() { return Model::GameConfig::ENEMY_SIZE; }
+    sf::Vector2f getBulletSize() { return Model::GameConfig::BULLET_SIZE; }
+    sf::Vector2f getPickupSize() { return Model::GameConfig::PICKUP_SIZE; }
+    sf::Vector2f getArrowSize() { return Model::GameConfig::ARROW_SIZE; }
 
     void playerJump();
     void playerDown();

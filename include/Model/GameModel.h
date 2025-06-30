@@ -1,13 +1,13 @@
 #pragma once
 #include "Model/Model.h"
 #include "Model/Entities/Player.h"
-#include "Model/Entities/Platform.h"
-#include "Model/Entities/Enemy.h"
-#include "Model/Entities/Bullet.h"
-#include "Model/Entities/Pickup.h"
-#include "Model/Entities/Arrow.h"
-#include "Model/Entities/Skill.h"
+#include "Model/Managers/EntityManager.h"
+#include "Model/Managers/GeneratorManager.h"
+#include "Model/Managers/CollisionManager.h"
+#include "Model/Managers/SkillManager.h"
+#include "Model/GameConfig.h"
 #include <chrono>
+#include <memory>
 
 namespace Model {
 class GameModel : public Model {
@@ -51,27 +51,22 @@ public:
     void playerStopRight() {
         player->stopRight();
     }
-    Entities::Platform* getPlatformById(int id) const { return platforms.at(id); }
-    std::map<int, Entities::Platform*> getPlatforms() const { return platforms; }
+    Entities::Platform* getPlatformById(int id) const { return entity_manager->getPlatformById(id); }
+    std::map<int, Entities::Platform*> getPlatforms() const { return entity_manager->getPlatforms(); }
     
     // 敌人和子弹相关方法
-    std::map<int, Entities::Enemy*> getEnemies() const { return enemies; }
-    std::map<int, Entities::Bullet*> getBullets() const { return bullets; }
-    std::map<int, Entities::Pickup*> getPickups() const { return pickups; }
-    void createBullet(sf::Vector2f position, sf::Vector2f velocity);
+    std::map<int, Entities::Enemy*> getEnemies() const { return entity_manager->getEnemies(); }
+    std::map<int, Entities::Bullet*> getBullets() const { return entity_manager->getBullets(); }
+    std::map<int, Entities::Pickup*> getPickups() const { return entity_manager->getPickups(); }
+    void createBullet(sf::Vector2f position, sf::Vector2f velocity) {
+        entity_manager->addBullet(position, velocity, GameConfig::BULLET_SIZE);
+    }
     
     // 技能和箭矢相关方法
-    std::map<int, Entities::Arrow*> getArrows() const { return arrows; }
-    std::vector<Entities::Skill*> getSkills() const { return skills; }
-    void useSkill(int skill_index);
+    std::map<int, Entities::Arrow*> getArrows() const { return entity_manager->getArrows(); }
+    std::vector<Entities::Skill*> getSkills() const { return skill_manager->getSkills(); }
+    void useSkill(int skill_index) { skill_manager->useSkill(skill_index, player, window_size); }
     float getScrollSpeed() const { return scroll_speed; }
-
-    sf::Vector2f platform_size = sf::Vector2f(100, 12);
-    sf::Vector2f player_size = sf::Vector2f(30, 60);
-    sf::Vector2f enemy_size = sf::Vector2f(40, 40);
-    sf::Vector2f bullet_size = sf::Vector2f(8, 8);
-    sf::Vector2f pickup_size = sf::Vector2f(20, 20);
-    sf::Vector2f arrow_size = sf::Vector2f(30, 8);
     
 private:
     bool init;
@@ -79,41 +74,16 @@ private:
     int total_score;
     float game_time;
     float scroll_speed;
-
-    std::map<int, Entities::Platform*> platforms;
-    int next_platform_id;
-    float platform_generate_interval;
     
-    std::map<int, Entities::Enemy*> enemies;
-    int next_enemy_id;
-    float enemy_generate_interval;
-    
-    std::map<int, Entities::Bullet*> bullets;
-    int next_bullet_id;
-    
-    std::map<int, Entities::Pickup*> pickups;
-    int next_pickup_id;
-    float pickup_generate_interval;
-    
-    std::map<int, Entities::Arrow*> arrows;
-    int next_arrow_id;
-    
-    std::vector<Entities::Skill*> skills;
+    // 管理器
+    std::unique_ptr<Managers::EntityManager> entity_manager;
+    std::unique_ptr<Managers::GeneratorManager> generator_manager;
+    std::unique_ptr<Managers::CollisionManager> collision_manager;
+    std::unique_ptr<Managers::SkillManager> skill_manager;
     
     Entities::Player* player;
 
-    void resetPlatformGenerateInterval();
-    void generatePlatform();
-    void generateEnemy();
-    void resetEnemyGenerateInterval();
-    void generatePickup();
-    void resetPickupGenerateInterval();
-    void createArrow(sf::Vector2f position, sf::Vector2f velocity);
-    void initSkills();
-    Entities::PlatformType getPlatformTypeRand();
-    void initPlatforms();
     void initPlayer();
     void initGame();
-    void checkCollisions();
 };
 }

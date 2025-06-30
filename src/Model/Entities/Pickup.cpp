@@ -1,5 +1,6 @@
 #include "Model/Entities/Pickup.h"
 #include "Model/GameModel.h"
+#include "Model/Entities/Platform.h"
 
 using Model::Entities::Pickup;
 

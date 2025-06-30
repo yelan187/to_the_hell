@@ -1,6 +1,12 @@
 #include <iostream>
 #include "ViewModel/GameViewModel.h"
 #include "Model/GameModel.h"
+#include "Model/Entities/Platform.h"
+#include "Model/Entities/Enemy.h"
+#include "Model/Entities/Bullet.h"
+#include "Model/Entities/Pickup.h"
+#include "Model/Entities/Arrow.h"
+#include "Model/GameConfig.h"
 #include "View/GameView.h"
 
 using ViewModel::GameViewModel;
@@ -58,8 +64,8 @@ View::UI::PlayerState GameViewModel::getPlayerState() {
                 return View::UI::PlayerState::JUMPING_R;
             }
         
-        // // Default
-        // return View::UI::PlayerState::IDLE_R;
+        default:
+            return View::UI::PlayerState::IDLE_R;
     }
 }
 
@@ -255,7 +261,7 @@ sf::Vector2f GameViewModel::getArrowSize(int id) {
     if (arrows.find(id) != arrows.end()) {
         return arrows[id]->getSize();
     }
-    return model->arrow_size;
+    return Model::GameConfig::ARROW_SIZE;
 }
 
 bool GameViewModel::getArrowFacingRight(int id) {
