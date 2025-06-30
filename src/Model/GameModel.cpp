@@ -41,6 +41,14 @@ void GameModel::fire() {
     trigger.fire(param);
 }
 
+void GameModel::gameOver() {
+    Common::GameOverNotificationParam* param = new Common::GameOverNotificationParam();
+    param->id = Common::NotificationId::GameOver;
+    param->value.total_score = total_score;
+    param->value.game_time = std::chrono::seconds(static_cast<int>(game_time));
+    trigger.fire(param);
+}
+
 void GameModel::update(float delta_time) {
     /*
      *
@@ -96,6 +104,11 @@ void GameModel::update(float delta_time) {
     player->update(delta_time);
     // std::cout << "player update end" << std::endl;
     fire();
+    if (player->getPosition().y <= 0 || player->getPosition().y + player->getSize().y >= window_size.y) {
+        // Player is out of bounds, reset the game
+        std::cout << "Player out of bounds, resetting game." << std::endl;
+        gameOver();
+    }
 }
 
 PlatformType GameModel::getPlatformTypeRand() {

@@ -35,7 +35,12 @@ public:
     int getCurrentSelectionIndex() const {
         return current_selection_index;
     }
-
+    int getTotalScore() const {
+        return model->getScore();
+    }
+    std::chrono::seconds getGameTime() const {
+        return model->getTime();
+    }
     // notification
     Common::NotificationFunc getNotificationCallback() {
         return &notification_callback;
@@ -83,7 +88,7 @@ public:
     class UpdateCommand : public Common::CommandBase {
     public:
         UpdateCommand(ScoreViewModel* view_model) : view_model(view_model) {}
-        void execute(Common::CommandParam& delta_time) override;
+        void execute(Common::CommandParam& delta_time) override {}
     private:
         ScoreViewModel* view_model;
     };

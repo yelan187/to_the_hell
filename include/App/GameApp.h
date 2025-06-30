@@ -11,12 +11,16 @@
 #include "ViewModel/GameViewModel.h"
 #include "Model/GameModel.h"
 
+#include "View/ScoreView.h"
+#include "ViewModel/ScoreViewModel.h"
+#include "Model/ScoreModel.h"
+
 namespace App {
 class GameApp {
 public:    
     GameApp(std::string game_title, sf::Vector2u window_size, int fps, bool debug=false);
     void run();
-    void changePage(View::PAGE_STATE new_page_state, bool init = true);
+    void changePage(View::PAGE_STATE new_page_state, bool init = true, void* info = nullptr);
 
 private:
     // Main Menu Page
@@ -30,6 +34,16 @@ private:
     std::shared_ptr<ViewModel::GameViewModel> game_view_model;
     std::shared_ptr<Model::GameModel> game_model;
     void initGame();
+
+    // Score Page
+    typedef struct scoreInfo {
+        int total_score;
+        std::chrono::seconds game_time;
+    } ScoreInfo;
+    std::shared_ptr<View::ScoreView> score_view;
+    std::shared_ptr<ViewModel::ScoreViewModel> score_view_model;
+    std::shared_ptr<Model::ScoreModel> score_model;
+    void initScore(void* info);
 
     // current page
     View::PAGE_STATE current_page_state = View::PAGE_STATE::MAIN_MENU;
@@ -50,8 +64,16 @@ public:
     private:
         GameApp* app;
     };
+    class GameOverCommand : public Common::CommandBase {
+    public:
+        GameOverCommand(GameApp* app) : app(app) {}
+        void execute(Common::CommandParam& params) override;
+    private:
+        GameApp* app;
+    };
 private:
     ChangePageCommand change_page_command;
+    GameOverCommand gameover_command;
 };
 
 }

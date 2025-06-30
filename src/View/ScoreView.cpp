@@ -13,11 +13,11 @@ void ScoreView::init() {
     option_pointer.setFillColor(sf::Color::Red);
     option_pointer.setOrigin(option_pointer.getRadius(), option_pointer.getRadius());
     option_pointer.rotate(90);
-
     updateCurrentSelection();
 }
 
 void ScoreView::updateCurrentSelection() {
+    std::cout << "Updating current selection to: " << current_selection << std::endl;
     for (int i = 0; i < menu_options.size(); ++i) {
         if (i == current_selection) {
             menu_options[i].setFillColor(sf::Color::Yellow);
@@ -25,7 +25,7 @@ void ScoreView::updateCurrentSelection() {
             menu_options[i].setFillColor(sf::Color::White);
         }
     }
-
+    
     sf::Text& selected_text = menu_options[current_selection];
     sf::FloatRect text_rect = selected_text.getGlobalBounds();
     float pointer_x = window_size.x / 2 - selected_text.getCharacterSize() * 3;

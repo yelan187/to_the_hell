@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Common/ParamBase.h"
+#include <chrono>
 
 namespace View {
     enum class PAGE_STATE;
@@ -34,5 +35,9 @@ typedef struct {
 } ChangePageParamValue;
 typedef CommandTypeParam<ChangePageParamValue> ChangePageParam;
 
-
+typedef struct {
+    int total_score;
+    std::chrono::seconds game_time;
+} GameOverParamValue;
+typedef CommandTypeParam<GameOverParamValue> GameOverCommandParam;
 }

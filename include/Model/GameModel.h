@@ -19,6 +19,7 @@ public:
         }
         return debug_info;
     }
+    void gameOver();
     int getTotalScore() { return total_score; }
     std::chrono::seconds getDuration() { return std::chrono::seconds(static_cast<int>(game_time)); }
     std::map<int, Entities::Platform*> getPlatforms() const { return platforms; }

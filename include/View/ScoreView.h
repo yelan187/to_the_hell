@@ -7,7 +7,7 @@ namespace View {
 
 class ScoreView : public Page {
 public:
-    ScoreView(std::string game_title, sf::Vector2u window_size, int fps, sf::RenderWindow& window) : Page(game_title, window_size, fps, window) {
+    ScoreView(std::string game_title, sf::Vector2u window_size, int fps, sf::RenderWindow& window) : Page(game_title, window_size, fps, window){
         if (!font.loadFromFile("assets/fonts/fusion.ttf")) {
             std::cerr << "Error loading font!" << std::endl;
             return;
@@ -34,17 +34,7 @@ public:
             menu_options.push_back(text);
         }
     }
-    // commands
-    void setNavigateUpCommand(Common::CommandBase* command) {
-        navigateUp_command = command;
-    }
-    void setNavigateDownCommand(Common::CommandBase* command) {
-        navigateDown_command = command;
-    }
-    void setConfirmSelectionCommand(Common::CommandBase* command) {
-        confirmSelection_command = command;
-    }
-    void setScoreText(int score) {
+    void setTotalScoreText(int score) {
         score_text.setFont(font);
         score_text.setString("Score: " + std::to_string(score));
         score_text.setCharacterSize(50);
@@ -61,7 +51,17 @@ public:
         sf::FloatRect textRect = time_text.getLocalBounds();
         time_text.setOrigin(textRect.left + textRect.width/2.0f, textRect.top + textRect.height/2.0f);
         time_text.setPosition(window_size.x / 2.0f, window_size.y / 2.0f - 50.f);
-}
+    }
+    // commands
+    void setNavigateUpCommand(Common::CommandBase* command) {
+        navigateUp_command = command;
+    }
+    void setNavigateDownCommand(Common::CommandBase* command) {
+        navigateDown_command = command;
+    }
+    void setConfirmSelectionCommand(Common::CommandBase* command) {
+        confirmSelection_command = command;
+    }
     // notification
     Common::NotificationFunc getNotificationCallback() {
         return &notification_callback;

@@ -186,13 +186,15 @@ Common::FrameInfo::PlatformInfo GameViewModel::getPlatformInfo(Common::_FrameInf
     return platform_info;
 }
 
-void GameViewModel::notification_callback(Common::NotificationParam* param, void* viewmodel) {
-    if (!viewmodel) return;
-    GameViewModel* game_view_model = static_cast<GameViewModel*>(viewmodel);
+void GameViewModel::notification_callback(Common::NotificationParam* param, void* view_model) {
+    if (!view_model) return;
+    GameViewModel* game_view_model = static_cast<GameViewModel*>(view_model);
     switch (param->id) {
         case Common::NotificationId::_ChangeGameFrame:
-            Common::_FrameInfo frame_info = dynamic_cast<Common::_ChangeGameFrameParam*>(param)->value;
-            game_view_model->forwarding(frame_info);
+            game_view_model->forwarding(dynamic_cast<Common::_ChangeGameFrameParam*>(param)->value);
+            break;
+        case Common::NotificationId::GameOver: 
+            game_view_model->trigger.fire(param);
             break;
     }
 }

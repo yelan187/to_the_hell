@@ -5,7 +5,8 @@ using App::GameApp;
 // public methods
 GameApp::GameApp(std::string game_title, sf::Vector2u window_size, int fps, bool debug) 
     : game_title(std::move(game_title)), window_size(window_size), fps(fps), debug(debug),
-      change_page_command(this) {
+      change_page_command(this),
+      gameover_command(this) {
     window.create(sf::VideoMode(window_size.x, window_size.y), game_title, sf::Style::Default);
     window.setFramerateLimit(fps);
     changePage(View::PAGE_STATE::MAIN_MENU);
@@ -28,7 +29,7 @@ void GameApp::run() {
     }
 }
 
-void GameApp::changePage(View::PAGE_STATE new_page_state, bool init) {
+void GameApp::changePage(View::PAGE_STATE new_page_state, bool init, void* info) {
     // update the page
     current_page_state = new_page_state;
     switch (new_page_state) {
@@ -42,7 +43,10 @@ void GameApp::changePage(View::PAGE_STATE new_page_state, bool init) {
             page->exit();
             break;
         case View::PAGE_STATE::SCORE:
-            // change to score view
+            if (init) {
+                initScore(info);
+            }
+            page = score_view;
             break;
         case View::PAGE_STATE::MAIN_MENU:
             if (init) {
@@ -58,6 +62,19 @@ void GameApp::ChangePageCommand::execute(Common::CommandParam& params) {
     app->changePage(
         change_page_param.value.new_page_state,
         change_page_param.value.init
+    );
+}
+
+void GameApp::GameOverCommand::execute(Common::CommandParam& params) {
+    Common::GameOverCommandParam& game_over_param = dynamic_cast<Common::GameOverCommandParam&>(params);
+    ScoreInfo score_info = {
+        game_over_param.value.total_score,
+        game_over_param.value.game_time
+    };
+    app->changePage(
+        View::PAGE_STATE::SCORE,
+        true,
+        static_cast<void*>(&score_info)  
     );
 }
 
@@ -111,6 +128,7 @@ void GameApp::initGame() {
     game_view->setPlayerStopJumpCommand(game_view_model->getPlayerStopJumpCommand());
     game_view->setPlayerStopDownCommand(game_view_model->getPlayerStopDownCommand());
     game_view->setUpdateCommand(game_view_model->getUpdateCommand());
+    game_view->setGameOverCommand(&gameover_command);
     // notification
     game_view_model->getTrigger().add(
         game_view->getNotificationCallback(),
@@ -118,4 +136,33 @@ void GameApp::initGame() {
     );
     
     game_view->init();
+}
+
+void GameApp::initScore(void* info) {
+    ScoreInfo* score_info = static_cast<ScoreInfo*>(info);
+    score_view = std::make_shared<View::ScoreView>(
+        game_title, window_size, fps, window
+    );
+    score_view_model = std::make_shared<ViewModel::ScoreViewModel>(window_size);
+    score_model = std::make_shared<Model::ScoreModel>(window_size, 0, std::chrono::seconds(0));
+    score_model->setScore(score_info->total_score);
+    score_model->setTime(score_info->game_time);
+    // set model
+    score_view_model->setModel(score_model);
+    // properties
+    score_view->setCurrentSelection(score_view_model->getCurrentSelectionIndex());
+    score_view->setMenuOptions(score_view_model->getMenuOptions());
+    score_view->setTotalScoreText(score_view_model->getTotalScore());
+    score_view->setTimeText(score_view_model->getGameTime());
+    // commands
+    score_view->setNavigateUpCommand(score_view_model->getNavigateUpCommand());
+    score_view->setNavigateDownCommand(score_view_model->getNavigateDownCommand());
+    score_view->setUpdateCommand(score_view_model->getUpdateCommand());
+    score_view->setConfirmSelectionCommand(&change_page_command);
+    // notification
+    score_view_model->getTrigger().add(
+        score_view->getNotificationCallback(),
+        score_view.get()
+    );
+    score_view->init();
 }

@@ -97,7 +97,7 @@ public:
     class UpdateCommand : public Common::CommandBase {
     public:
         UpdateCommand(MainMenuViewModel* view_model) : view_model(view_model) {}
-        void execute() {}
+        void execute(Common::CommandParam& delta_time) override;
     private:
         MainMenuViewModel* view_model;
     };

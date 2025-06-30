@@ -61,6 +61,9 @@ public:
     void setPlayerStopDownCommand(Common::CommandBase* command) {
         playerStopDownCommand = command;
     }
+    void setGameOverCommand(Common::CommandBase* command) {
+        gameover_command = command;
+    }
     // notification
     Common::NotificationFunc getNotificationCallback() {
         return &notification_callback;
@@ -72,6 +75,7 @@ public:
     void render() override;
     void handleInput(const sf::Event& event) override;
 private:
+    void gameOver(Common::GameOver value);
     static void notification_callback(Common::NotificationParam* param, void* view);
     // game info
     bool debug;
@@ -95,6 +99,8 @@ private:
     Common::CommandBase* playerStopRightCommand;
     Common::CommandBase* playerStopJumpCommand;
     Common::CommandBase* playerStopDownCommand;
+
+    Common::CommandBase* gameover_command;
 };
 
 }

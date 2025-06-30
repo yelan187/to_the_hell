@@ -25,13 +25,22 @@ void GameView::init() {
     player.init();
 }
 
+void GameView::gameOver(Common::GameOver value) {
+    Common::GameOverCommandParam param;
+    param.value.total_score = value.total_score;
+    param.value.game_time = value.game_time;
+    gameover_command->execute(param);
+}
+
 void GameView::notification_callback(Common::NotificationParam* param, void* view) {
     if (!view) return;
     GameView* game_view = static_cast<GameView*>(view);
     switch (param->id) {
         case Common::NotificationId::ChangeGameFrame:
-            Common::FrameInfo frame_info = dynamic_cast<Common::ChangeGameFrameParam*>(param)->value;
-            game_view->updateframe(frame_info);
+            game_view->updateframe(dynamic_cast<Common::ChangeGameFrameParam*>(param)->value);
+            break;
+        case Common::NotificationId::GameOver:
+            game_view->gameOver(dynamic_cast<Common::GameOverNotificationParam*>(param)->value);
             break;
     }
 }

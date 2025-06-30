@@ -21,7 +21,8 @@ enum class NotificationId {
     ChangeBackgroundParticles,
     // game
     ChangeGameFrame,
-    _ChangeGameFrame  // model -> viewmodel
+    _ChangeGameFrame,   // model -> viewmodel
+    GameOver
 };
 
 class NotificationParam : public Param {
@@ -44,7 +45,7 @@ public:
 typedef NotificationTypeParam<int> ChangeCurrentSelectionParam;
 typedef NotificationTypeParam<std::vector<sf::Vector2f>*> ChangeBackgroundParticlesParam;
 // game
-typedef struct {
+typedef struct frameInfo{
     std::string total_score_text;
     std::string game_time_text;
     std::string debug_info_text;
@@ -65,7 +66,7 @@ typedef struct {
 } FrameInfo;
 typedef NotificationTypeParam<FrameInfo> ChangeGameFrameParam;
 
-typedef struct {    
+typedef struct _frameInfo{    
     struct PlayerInfo {
         sf::Vector2f position;
         sf::Vector2f size;
@@ -81,4 +82,9 @@ typedef struct {
 } _FrameInfo;
 typedef NotificationTypeParam<_FrameInfo> _ChangeGameFrameParam;
 
+typedef struct gameOver {
+    int total_score;
+    std::chrono::seconds game_time;
+} GameOver;
+typedef NotificationTypeParam<GameOver> GameOverNotificationParam;
 }
