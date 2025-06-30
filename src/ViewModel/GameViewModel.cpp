@@ -1,7 +1,6 @@
 #include <iostream>
 #include "ViewModel/GameViewModel.h"
 
-
 using ViewModel::GameViewModel;
 
 GameViewModel::GameViewModel(sf::Vector2u window_size) : 
@@ -15,7 +14,8 @@ GameViewModel::GameViewModel(sf::Vector2u window_size) :
     playerStopRight_command(this),
     playerStopJump_command(this),
     playerStopDown_command(this),
-    update_command(this)
+    update_command(this),
+    playerSkill_command(this)
 {
     init_keystate();
     loadPlayerTextures();
@@ -100,6 +100,11 @@ void GameViewModel::playerStopJump() {
 
 void GameViewModel::playerStopDown() {
     key_state[sf::Keyboard::S] = false;
+}
+
+// 统一的技能方法实现
+void GameViewModel::playerUseSkill(int skill_id, sf::Vector2f direction) {
+    model->playerUseSkill(skill_id, direction);
 }
 
 void GameViewModel::loadPlayerTextures() {
@@ -208,12 +213,61 @@ void GameViewModel::forwarding(const Common::_FrameInfo& frame_info) {
     change_frame_param->value.player_info.position = frame_info.player_info.position;
     change_frame_param->value.player_info.size = frame_info.player_info.size;
     change_frame_param->value.player_info.texture = getPlayerTexture(frame_info.player_info.state);
+    
+    // 平台信息转换
     std::map<int, Common::FrameInfo::PlatformInfo> platforms_info;
     for (const auto& [id, info] : frame_info.platforms_info) {
         platforms_info[id] = getPlatformInfo(info);
     }
     change_frame_param->value.platforms_info = platforms_info;
     change_frame_param->value.platforms_id = frame_info.platforms_id;
+    
+    // 新增：敌人信息转换
+    std::map<int, Common::FrameInfo::EnemyInfo> enemies_info;
+    for (const auto& [id, info] : frame_info.enemies_info) {
+        enemies_info[id].position = info.position;
+        enemies_info[id].size = info.size;
+        enemies_info[id].color = sf::Color::Red; // 敌人显示为红色
+        enemies_info[id].facing_direction = info.facing_direction; // 传递面向方向
+    }
+    change_frame_param->value.enemies_info = enemies_info;
+    change_frame_param->value.enemies_id = frame_info.enemies_id;
+    
+    // 新增：子弹信息转换
+    std::map<int, Common::FrameInfo::BulletInfo> bullets_info;
+    for (const auto& [id, info] : frame_info.bullets_info) {
+        bullets_info[id].position = info.position;
+        bullets_info[id].size = info.size;
+        bullets_info[id].is_player_bullet = info.is_player_bullet;
+        // 玩家箭矢为黄色，敌人子弹为白色
+        bullets_info[id].color = info.is_player_bullet ? sf::Color::Yellow : sf::Color::White;
+    }
+    change_frame_param->value.bullets_info = bullets_info;
+    change_frame_param->value.bullets_id = frame_info.bullets_id;
+    
+    // 新增：豆子信息转换
+    std::map<int, Common::FrameInfo::PickupInfo> pickups_info;
+    for (const auto& [id, info] : frame_info.pickups_info) {
+        pickups_info[id].position = info.position;
+        pickups_info[id].size = info.size;
+        pickups_info[id].color = sf::Color::Yellow; // 豆子显示为黄色
+        pickups_info[id].pickup_type = static_cast<int>(info.type); // 转换枚举为整数
+    }
+    change_frame_param->value.pickups_info = pickups_info;
+    change_frame_param->value.pickups_id = frame_info.pickups_id;
+    
+    // 新增：技能信息转换
+    std::vector<Common::FrameInfo::SkillInfo> skills_info;
+    auto skills = model->getSkills();
+    for (auto* skill : skills) {
+        Common::FrameInfo::SkillInfo skill_info;
+        skill_info.skill_type = static_cast<int>(skill->getType());
+        skill_info.cooldown_progress = skill->getCooldownProgress();
+        skill_info.is_available = skill->isAvailable();
+        skills_info.push_back(skill_info);
+    }
+    change_frame_param->value.skills_info = skills_info;
+    
     trigger.fire(change_frame_param);
     delete change_frame_param;
 }

@@ -25,17 +25,19 @@ enum class CollisionDirection {
     DOWN,
     LEFT,
     RIGHT
-};// which direction **of** player is colliding with the platform
+};
 
 class Player {
 public:
-    Player(sf::Vector2f position,sf::Vector2f size,GameModel* game_model)
-        : position(position),size(size),on_platform(false),on_platform_id(-1),state(PlayerState::IDLE),game_model(game_model) {
+    Player(sf::Vector2f position, sf::Vector2f size, GameModel* game_model)
+        : position(position), size(size), on_platform(false), on_platform_id(-1), 
+          state(PlayerState::IDLE), game_model(game_model), is_dead(false) {
             walking_speed = 150.0f;
             jumping_speed = 350.0f;
-            gravity = sf::Vector2f(0,500.0f);
+            gravity = sf::Vector2f(0, 500.0f);
             collision_direction = CollisionDirection::NONE;
             prev_collision_direction = CollisionDirection::NONE;
+            facing_direction = sf::Vector2f(1.0f, 0.0f);  // 默认面向右侧
         }
 
     void updatePosition(float delta_time);
@@ -49,6 +51,7 @@ public:
     void setAcceleration(sf::Vector2f a) {
         acceleration = a;
     }
+    
     void update(float delta_time);
     
     sf::Vector2f findCollisionPosition(Platform* platform, sf::Vector2f prev_position, float delta_time, bool by_time = true);
@@ -62,9 +65,16 @@ public:
     void stopLeft();
     void stopRight();
 
-    PlayerState getState() const {return state;}
+    PlayerState getState() const { return state; }
     sf::Vector2f getPosition() const { return position; }
     sf::Vector2f getSize() const { return size; }
+    
+    // 添加面向方向支持
+    sf::Vector2f getFacingDirection() const { return facing_direction; }
+    void setFacingDirection(sf::Vector2f direction) { facing_direction = direction; }
+    
+    bool isDead() const { return is_dead; }
+    void setDead(bool dead) { is_dead = dead; }
 
     int getOnPlatformId() const {
         return on_platform_id;
@@ -83,6 +93,7 @@ private:
 
     bool on_platform;
     int on_platform_id;
+    bool is_dead;
 
     PlayerState state;
 
@@ -91,6 +102,9 @@ private:
     sf::Vector2f acceleration;
     sf::Vector2f velocity;
     sf::Vector2f gravity;
+
+    // 添加面向方向
+    sf::Vector2f facing_direction;
 
     CollisionDirection collision_direction;
     CollisionDirection prev_collision_direction;

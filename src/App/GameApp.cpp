@@ -129,6 +129,10 @@ void GameApp::initGame() {
     game_view->setPlayerStopDownCommand(game_view_model->getPlayerStopDownCommand());
     game_view->setUpdateCommand(game_view_model->getUpdateCommand());
     game_view->setGameOverCommand(&gameover_command);
+    
+    // 技能命令绑定
+    game_view->setPlayerSkillCommand(game_view_model->getPlayerSkillCommand());
+    
     // notification
     game_view_model->getTrigger().add(
         game_view->getNotificationCallback(),

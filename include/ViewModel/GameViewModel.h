@@ -75,6 +75,11 @@ public:
     Common::CommandBase* getUpdateCommand() {
         return &update_command;
     }
+    
+    // 技能命令
+    Common::CommandBase* getPlayerSkillCommand() {
+        return &playerSkill_command;
+    }
 
     void playerJump();
     void playerDown();
@@ -85,7 +90,10 @@ public:
     void playerStopJump();
     void playerStopDown();
 
-    void forwarding(const Common::_FrameInfo& frame_info); 
+    void forwarding(const Common::_FrameInfo& frame_info);
+    
+    // 技能方法
+    void playerUseSkill(int skill_id, sf::Vector2f direction = sf::Vector2f(1.0f, 0.0f));
 
 private:
     static void notification_callback(Common::NotificationParam* param, void* viewmodel);
@@ -185,6 +193,22 @@ public:
     private:
         GameViewModel* view_model;
     };
+    
+    // 技能命令类
+    class PlayerSkillCommand : public Common::CommandBase {
+    public:
+        PlayerSkillCommand(GameViewModel* view_model) : view_model(view_model) {}
+        void execute() override {
+            // 默认使用技能0 (箭矢射击)，向右发射
+            view_model->playerUseSkill(0, sf::Vector2f(1.0f, 0.0f));
+        }
+        void execute(Common::CommandParam& params) override {
+            auto& skill_param = dynamic_cast<Common::PlayerSkillParam&>(params);
+            view_model->playerUseSkill(skill_param.value.skill_id, skill_param.value.direction);
+        }
+    private:
+        GameViewModel* view_model;
+    };
 
 private:
     PlayerLeftCommand playerLeft_command;
@@ -196,6 +220,9 @@ private:
     PlayerStopJumpCommand playerStopJump_command;
     PlayerStopDownCommand playerStopDown_command;
     UpdateCommand update_command;
+    
+    // 技能命令实例
+    PlayerSkillCommand playerSkill_command;
 };
 
 }

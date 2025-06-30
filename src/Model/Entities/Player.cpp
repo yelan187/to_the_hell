@@ -25,6 +25,7 @@ void Player::fall() {
     }
 }
 void Player::walkLeft() {
+    facing_direction = sf::Vector2f(-1.0f, 0.0f);  // 设置面向左侧
     if (state == PlayerState::IDLE) {
         state = PlayerState::WALKING;
         velocity.x -= walking_speed;
@@ -41,6 +42,7 @@ void Player::walkLeft() {
 }
 
 void Player::walkRight() {
+    facing_direction = sf::Vector2f(1.0f, 0.0f);  // 设置面向右侧
     if (state == PlayerState::IDLE) {
         state = PlayerState::WALKING;
         velocity.x += walking_speed;

@@ -7,6 +7,10 @@
 #include "View/Page.h"
 #include "View/UI/Player.h"
 #include "View/UI/Platform.h"
+#include "View/UI/Enemy.h"     // 敌人UI组件
+#include "View/UI/Bullet.h"    // 子弹UI组件
+#include "View/UI/Pickup.h"    // 豆子UI组件
+#include "View/UI/SkillBar.h"  // 技能栏UI组件
 
 namespace View {
 
@@ -16,7 +20,8 @@ public:
     GameView(std::string game_title, sf::Vector2u window_size, int fps, sf::RenderWindow& window, bool debug = false) : 
         Page(game_title, window_size, fps, window), 
         debug(debug),
-        player(window, Utils::PLAYER_SIZE)
+        player(window, Utils::PLAYER_SIZE),
+        skill_bar(sf::Vector2f(10.0f, 100.0f), sf::Vector2f(50.0f, 50.0f)) // 左侧位置
     {
         if (!font.loadFromFile("assets/fonts/fusion.ttf")) {
             std::cerr << "Error loading font!" << std::endl;
@@ -64,6 +69,12 @@ public:
     void setGameOverCommand(Common::CommandBase* command) {
         gameover_command = command;
     }
+    
+    // 统一的技能命令设置（包含射击）
+    void setPlayerSkillCommand(Common::CommandBase* command) {
+        playerSkillCommand = command;
+    }
+    
     // notification
     Common::NotificationFunc getNotificationCallback() {
         return &notification_callback;
@@ -88,6 +99,14 @@ private:
     
     std::vector<int> platforms_id;
     std::vector<View::UI::Platform> platforms;
+    
+    // 游戏实体容器
+    std::vector<View::UI::Enemy> enemies;
+    std::vector<View::UI::Bullet> bullets;
+    std::vector<View::UI::Pickup> pickups;
+    
+    // 技能栏
+    View::UI::SkillBar skill_bar;
 
     // commands
     Common::CommandBase* playerLeftCommand;
@@ -101,6 +120,9 @@ private:
     Common::CommandBase* playerStopDownCommand;
 
     Common::CommandBase* gameover_command;
+    
+    // 技能命令
+    Common::CommandBase* playerSkillCommand;
 };
 
 }

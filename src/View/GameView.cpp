@@ -63,6 +63,32 @@ void GameView::updateframe(Common::FrameInfo frame_info) {
         platform.update(frame_info.platforms_info[id]);
         platforms.push_back(platform);
     }
+    
+    // 新增：更新敌人
+    enemies.clear();
+    for (int id : frame_info.enemies_id) {
+        View::UI::Enemy enemy(id, window);
+        enemy.update(frame_info.enemies_info.at(id));
+        enemies.push_back(enemy);
+    }
+    
+    // 新增：更新子弹
+    bullets.clear();
+    for (int id : frame_info.bullets_id) {
+        View::UI::Bullet bullet(id, window);
+        bullet.update(frame_info.bullets_info.at(id));
+        bullets.push_back(bullet);
+    }
+    
+    // 新增：更新豆子
+    pickups.clear();
+    for (int id : frame_info.pickups_id) {
+        pickups.emplace_back(id, window);
+        pickups.back().update(frame_info.pickups_info.at(id));
+    }
+    
+    // 更新技能栏
+    skill_bar.updateSkills(frame_info.skills_info);
 }
 
 void GameView::render() {
@@ -79,7 +105,22 @@ void GameView::render() {
 
     for (auto &p: platforms)
         p.render();
-
+        
+    // 新增：渲染敌人
+    for (auto &e: enemies)
+        e.render();
+        
+    // 新增：渲染子弹
+    for (auto &b: bullets)
+        b.render();
+        
+    // 新增：渲染豆子
+    for (auto &pickup: pickups)
+        pickup.render();
+        
+    // 渲染技能栏
+    skill_bar.render(window);
+    
     window.display();
 }
 
@@ -98,8 +139,53 @@ void GameView::handleInput(const sf::Event& event) {
             case sf::Keyboard::D:
                 playerRightCommand->execute();
                 break;
+            case sf::Keyboard::J: // 箭矢射击技能（技能ID = 0）
+                {
+                    Common::PlayerSkillParam skill_param;
+                    skill_param.value.skill_id = 0;
+                    skill_param.value.direction = sf::Vector2f(1.0f, 0.0f);
+                    playerSkillCommand->execute(skill_param);
+                }
+                break;
+            case sf::Keyboard::U: // 冲刺技能（技能ID = 1）
+                {
+                    Common::PlayerSkillParam skill_param;
+                    skill_param.value.skill_id = 1;
+                    skill_param.value.direction = sf::Vector2f(1.0f, 0.0f);
+                    playerSkillCommand->execute(skill_param);
+                }
+                break;
             default:
                 break;
+        }
+    } else if (event.type == sf::Event::KeyReleased) {
+        switch (event.key.code) {
+            case sf::Keyboard::A:
+                playerStopLeftCommand->execute();
+                break;
+            case sf::Keyboard::D:
+                playerStopRightCommand->execute();
+                break;
+            case sf::Keyboard::W:
+                playerStopJumpCommand->execute();
+                break;
+            case sf::Keyboard::S:
+                playerStopDownCommand->execute();
+                break;
+            default:
+                break;
+        }
+    } else if (event.type == sf::Event::MouseButtonPressed) {
+        if (event.mouseButton.button == sf::Mouse::Left) {
+            sf::Vector2f mouse_pos(static_cast<float>(event.mouseButton.x), static_cast<float>(event.mouseButton.y));
+            int clicked_skill = skill_bar.getClickedSkill(mouse_pos);
+            
+            if (clicked_skill >= 0) {
+                Common::PlayerSkillParam skill_param;
+                skill_param.value.skill_id = clicked_skill;
+                skill_param.value.direction = sf::Vector2f(1.0f, 0.0f); // 默认方向
+                playerSkillCommand->execute(skill_param);
+            }
         }
     } else if (event.type == sf::Event::KeyReleased) {
         switch (event.key.code) {
