@@ -29,7 +29,8 @@ public:
             text.setCharacterSize(50);
             text.setFillColor(sf::Color::White);
             text.setFont(font);
-            text.setOrigin(text.getLocalBounds().width / 2, text.getLocalBounds().height / 2);
+            auto textRect = text.getLocalBounds();
+            text.setOrigin(textRect.width / 2, textRect.height / 2);
             text.setPosition(
                 window_size.x / 2,
                 window_size.y / 2 + (menu_options.size() * text.getCharacterSize() * 1.5f)
@@ -55,7 +56,7 @@ public:
     void updateCurrentSelection();
     void updateBackgroundParticles(std::vector<sf::Vector2f>* particles);
 
-    void init() override;
+    void init();
     void render() override;
     void handleInput(const sf::Event& event) override;
 

@@ -15,10 +15,11 @@ enum class PAGE_STATE {
 class Page {
 public:
     Page(std::string game_title, sf::Vector2u window_size, int fps, sf::RenderWindow& window) :game_title(game_title.data()), window_size(window_size), fps(fps), window(window) {}
+    
     void setUpdateCommand(Common::CommandBase* command) {
         update_command = command;
     }
-    virtual void init() {}
+
     void exit() {
         window.close();
     }

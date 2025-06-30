@@ -31,7 +31,7 @@ public:
         return &notification_callback;
     }
     void handleInput(const sf::Event& event) override;
-    void init() override;
+    void init();
     void render() override;
     void handleInput(const sf::Event& event) override;
 private:
