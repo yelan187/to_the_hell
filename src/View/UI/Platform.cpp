@@ -1,22 +1,21 @@
-// #include <View/UI/Platform.h>
-// #include <ViewModel/GameViewModel.h>
+#include <View/UI/Platform.h>
 
-// using View::UI::Platform;
+using View::UI::Platform;
 
-// void Platform::init(std::shared_ptr<ViewModel::GameViewModel> view_model,int id) {
-//     this->id = id;
-//     size = view_model->getPlatformSize();
+void Platform::init() {
+    size = sf::Vector2f(100, 20);
+    rect.setSize(size);
+}
 
-//     switch (view_model->getPlatformTypeById(id)) {
-//         case View::UI::PlatformType::NORMAL:
-//             rect.setFillColor(sf::Color::Green);
-//             break;
-//     }
+void Platform::render(){
+    window.draw(rect);
+}
 
-//     rect.setPosition(view_model->getPlatformPositionById(id));
-//     rect.setSize(size);
-// }
-
-// void Platform::render(sf::RenderWindow& window){
-//     window.draw(rect);
-// }
+void Platform::update(Common::FrameInfo::PlatformInfo platform_info) {
+    switch (platform_info.type) {
+        case Utils::PlatformType::NORMAL:
+            rect.setFillColor(sf::Color::Green);
+            break;
+    }
+    rect.setPosition(platform_info.position);
+}

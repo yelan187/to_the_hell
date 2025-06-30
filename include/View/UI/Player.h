@@ -1,37 +1,27 @@
-// #pragma once
-// #include <SFML/Graphics.hpp>
-// #include <map>
-// #include <memory>
+#pragma once
+#include <SFML/Graphics.hpp>
+#include <map>
+#include <memory>
+#include "Common/NotificationBase.h"
 
-// namespace ViewModel {
-//     class GameViewModel;
-// }
+namespace View{
+namespace UI {
 
-// namespace View{
-// namespace UI {
+class Player {
+public:
+    Player(sf::RenderWindow& window): window(window) {}
+    void init();
+    void render();
+    void update(Common::FrameInfo::PlayerInfo player_info);
 
-// enum class PlayerState {
-//     IDLE_L,
-//     IDLE_R,
-//     WALKING_L,
-//     WALKING_R,
-//     JUMPING_L,
-//     JUMPING_R
-// };
-// class Player {
-// public:
-//     void init(std::shared_ptr<ViewModel::GameViewModel> view_model);
-//     void render(sf::RenderWindow& window);
-//     void update(float delta_time);
+    sf::Vector2f size;
+    std::map<Utils::GameViewModelPlayerState,sf::Texture> texture_map;
+    sf::RectangleShape rect;
+private:
+    void loadTextures();
+    void setTexture(Utils::GameViewModelPlayerState state);
+    sf::RenderWindow& window;
+};
 
-//     std::shared_ptr<ViewModel::GameViewModel> view_model;
-//     sf::Vector2f size;
-//     std::map<PlayerState,sf::Texture> texture_map;
-//     sf::RectangleShape rect;
-// private:
-//     void loadTextures();
-//     void setTexture(PlayerState state);
-// };
-
-// }
-// }
+}
+}
