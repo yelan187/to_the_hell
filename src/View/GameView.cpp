@@ -8,6 +8,26 @@ GameView::GameView(Core::Engine &engine) : View::Page(engine), debug(true), skil
         std::cerr << "Error loading font!" << std::endl;
         return;
     }
+    
+    // 加载背景图片
+    if (!background_texture.loadFromFile("assets/images/background/galaxy_1.jpg")) {
+        std::cerr << "Error loading background image!" << std::endl;
+    } else {
+        background_sprite.setTexture(background_texture);
+        
+        // 获取窗口尺寸来缩放背景
+        sf::Vector2u window_size = engine.getWindowSize();
+        sf::Vector2u texture_size = background_texture.getSize();
+        
+        // 计算缩放比例以适应窗口
+        float scaleX = static_cast<float>(window_size.x) / texture_size.x;
+        float scaleY = static_cast<float>(window_size.y) / texture_size.y;
+        background_sprite.setScale(scaleX, scaleY);
+        
+        // 设置背景透明度（淡化效果）
+        background_sprite.setColor(sf::Color(255, 255, 255, 128)); // 50% 透明度
+    }
+    
     view_model = std::make_shared<ViewModel::GameViewModel>(engine,window_size);
     
     total_score_text.setString(view_model->getTotalScore());
@@ -177,6 +197,9 @@ void GameView::update(float deltaTime) {
 
 void GameView::render(sf::RenderWindow& window) {
     window.clear(sf::Color::Black);
+    
+    // 绘制背景图片（淡化）
+    window.draw(background_sprite);
     
     window.draw(game_time_text);
     window.draw(total_score_text);

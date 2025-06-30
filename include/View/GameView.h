@@ -31,6 +31,10 @@ private:
     sf::Font font;
     sf::Text game_time_text;
     sf::Text total_score_text;
+    
+    // 背景相关
+    sf::Texture background_texture;
+    sf::Sprite background_sprite;
 
     bool debug;
     sf::Text debug_info_text;
