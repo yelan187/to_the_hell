@@ -194,10 +194,7 @@ void GameViewModel::notification_callback(Common::NotificationParam* param, void
             game_view_model->forwarding(dynamic_cast<Common::_ChangeGameFrameParam*>(param)->value);
             break;
         case Common::NotificationId::GameOver: 
-            Common::GameOverNotificationParam* new_param = new Common::GameOverNotificationParam();
-            new_param->id = Common::NotificationId::GameOver;
-            new_param->value = dynamic_cast<Common::GameOverNotificationParam*>(param)->value; // avoid double free
-            game_view_model->trigger.fire(new_param);
+            game_view_model->trigger.fire(param);
             break;
     }
 }
@@ -218,6 +215,7 @@ void GameViewModel::forwarding(const Common::_FrameInfo& frame_info) {
     change_frame_param->value.platforms_info = platforms_info;
     change_frame_param->value.platforms_id = frame_info.platforms_id;
     trigger.fire(change_frame_param);
+    delete change_frame_param;
 }
 
 void GameViewModel::UpdateCommand::execute(Common::CommandParam& delta_time) {

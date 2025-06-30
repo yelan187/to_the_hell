@@ -39,6 +39,7 @@ void GameModel::fire() {
     param->value.platforms_id = platforms_id;
     param->value.platforms_info = platforms_info;
     trigger.fire(param);
+    delete param;
 }
 
 void GameModel::gameOver() {
@@ -47,6 +48,7 @@ void GameModel::gameOver() {
     param->value.total_score = total_score;
     param->value.game_time = std::chrono::seconds(static_cast<int>(game_time));
     trigger.fire(param);
+    delete param;
 }
 
 void GameModel::update(float delta_time) {

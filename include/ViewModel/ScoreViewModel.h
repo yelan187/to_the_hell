@@ -66,6 +66,7 @@ public:
             param->id = Common::NotificationId::ChangeCurrentSelection;
             param->value = view_model->getCurrentSelectionIndex();
             view_model->trigger.fire(param);
+            delete param;
         }
     private:
         ScoreViewModel* view_model;
@@ -80,6 +81,7 @@ public:
             param->id = Common::NotificationId::ChangeCurrentSelection;
             param->value = view_model->getCurrentSelectionIndex();
             view_model->trigger.fire(param);
+            delete param;
         }
     private:
         ScoreViewModel* view_model;

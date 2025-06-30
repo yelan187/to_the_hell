@@ -87,4 +87,5 @@ void MainMenuViewModel::UpdateCommand::execute(Common::CommandParam& delta_time)
     param->id = Common::NotificationId::ChangeBackgroundParticles;
     param->value = &view_model->background_particles;
     view_model->trigger.fire(param);
+    delete param;
 }

@@ -15,5 +15,4 @@ void Trigger::fire(NotificationParam *param) {
             receiver.notification_func(param, receiver.self);
         }
     }
-    delete param;
 }
