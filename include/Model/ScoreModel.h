@@ -1,21 +1,17 @@
-// #pragma once
-// #include "Model/Model.h"
-// #include <chrono>
+#pragma once
+#include "Model/Model.h"
+#include <chrono>
 
-// namespace Model {
-// class ScoreModel : public Model {
-// public:
-//     ScoreModel(Core::Engine &engine, int score, std::chrono::seconds time);
+namespace Model {
+class ScoreModel : public Model {
+public:
+    ScoreModel(sf::Vector2u window_size,int score, std::chrono::seconds time) : Model(window_size), score(score), time(time) {};
     
-//     int getScore() const;
-//     std::chrono::seconds getTime() const;
+    int getScore() const;
+    std::chrono::seconds getTime() const;
 
-//     void restartGame();
-//     void backToMainMenu();
-//     void exitGame();
-
-// private:
-//     int score;
-//     std::chrono::seconds time;
-// };
-// }
+private:
+    int score;
+    std::chrono::seconds time;
+};
+}

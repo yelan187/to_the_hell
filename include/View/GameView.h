@@ -67,8 +67,8 @@ public:
     }
     // update
     void updateframe(Common::FrameInfo frame_info);
-
-    void init() override;
+    
+    void init();
     void render() override;
     void handleInput(const sf::Event& event) override;
 private:
