@@ -1,22 +1,14 @@
 #pragma once
 #include <string>
+#include <SFML/Graphics.hpp>
 
 namespace Utils {
     const std::string WINDOW_TITLE = "To The Hell";
     constexpr int WINDOW_WIDTH = 800;
     constexpr int WINDOW_HEIGHT = 600;
     constexpr int FPS = 60;
-    enum class GameViewModelPlayerState {
-        IDLE_L,
-        IDLE_R,
-        WALKING_L,
-        WALKING_R,
-        JUMPING_L,
-        JUMPING_R
-    };
+    constexpr bool DEBUG_MODE = true;
 
-
-    enum class PlatformType {
-        NORMAL
-    };
+    const sf::Vector2f PLAYER_SIZE(60, 60);
+    const sf::Vector2f PLATFORM_SIZE(100, 12);
 }

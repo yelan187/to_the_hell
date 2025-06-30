@@ -11,6 +11,9 @@ namespace ViewModel {
 class ViewModel {
 public:
     ViewModel(sf::Vector2u window_size) : window_size(window_size) {}
+    Common::Trigger& getTrigger() {
+        return trigger;
+    }
 
 protected:
     // trigger

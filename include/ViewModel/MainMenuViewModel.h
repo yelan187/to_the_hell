@@ -35,9 +35,7 @@ public:
     Common::CommandBase* getUpdateCommand() {
         return &update_command;
     }
-    Common::Trigger& getTrigger() {
-        return trigger;
-    }
+
     int getCurrentSelectionIndex() const {
         return current_selection_index;
     }
@@ -65,6 +63,8 @@ private:
 
     std::vector<MenuOption> available_options;
     int current_selection_index;
+
+// commands
 public:
     class NavigateUpCommand : public Common::CommandBase {
     public:

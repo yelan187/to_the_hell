@@ -4,13 +4,11 @@
 using View::GameView;
 
 void GameView::init() {
-    // total_score_text.setString(view_model->getTotalScore());
     total_score_text.setCharacterSize(24);
     total_score_text.setFillColor(sf::Color::White);
     total_score_text.setFont(font);
     total_score_text.setPosition(15,15);
 
-    // game_time_text.setString(view_model->getGameTime());
     game_time_text.setCharacterSize(24);
     game_time_text.setFillColor(sf::Color::White);
     game_time_text.setFont(font);
@@ -18,7 +16,6 @@ void GameView::init() {
 
     if (debug) {
         std::cout << "Debug mode is ON" << std::endl;
-        // debug_info_text.setString(view_model->getDebugInfo());
         debug_info_text.setCharacterSize(24);
         debug_info_text.setFillColor(sf::Color::White);
         debug_info_text.setFont(font);
@@ -26,24 +23,20 @@ void GameView::init() {
     }
 
     player.init();
-
 }
 
 void GameView::notification_callback(Common::NotificationParam* param, void* view) {
     if (!view) return;
     GameView* game_view = static_cast<GameView*>(view);
     switch (param->id) {
-        case Common::NotificationId::ChangePlatformsId:
-            game_view->platforms_id = dynamic_cast<Common::ChangePlatformsIdParam*>(param)->value;
-            break;
         case Common::NotificationId::ChangeGameFrame:
             Common::FrameInfo frame_info = dynamic_cast<Common::ChangeGameFrameParam*>(param)->value;
-            game_view->update(frame_info);
+            game_view->updateframe(frame_info);
             break;
     }
 }
 
-void GameView::update(Common::FrameInfo frame_info) {
+void GameView::updateframe(Common::FrameInfo frame_info) {
 
     total_score_text.setString(frame_info.total_score_text);
 
@@ -56,9 +49,8 @@ void GameView::update(Common::FrameInfo frame_info) {
     player.update(frame_info.player_info);
     platforms.clear();
 
-    for (int id : platforms_id) {
-        View::UI::Platform platform(id,window);
-        platform.init();
+    for (int id : frame_info.platforms_id) {
+        View::UI::Platform platform(id, window);
         platform.update(frame_info.platforms_info[id]);
         platforms.push_back(platform);
     }

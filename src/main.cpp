@@ -8,7 +8,8 @@ int main() {
     App::GameApp game_app(
         Utils::WINDOW_TITLE,
         sf::Vector2u(Utils::WINDOW_WIDTH, Utils::WINDOW_HEIGHT),
-        Utils::FPS
+        Utils::FPS,
+        Utils::DEBUG_MODE
     );
     game_app.run();
     return 0;

@@ -3,8 +3,8 @@
 using App::GameApp;
 
 // public methods
-GameApp::GameApp(std::string game_title, sf::Vector2u window_size, int fps) 
-    : game_title(std::move(game_title)), window_size(window_size), fps(fps),
+GameApp::GameApp(std::string game_title, sf::Vector2u window_size, int fps, bool debug) 
+    : game_title(std::move(game_title)), window_size(window_size), fps(fps), debug(debug),
       change_page_command(this) {
     window.create(sf::VideoMode(window_size.x, window_size.y), game_title, sf::Style::Default);
     window.setFramerateLimit(fps);
@@ -33,7 +33,10 @@ void GameApp::changePage(View::PAGE_STATE new_page_state, bool init) {
     current_page_state = new_page_state;
     switch (new_page_state) {
         case View::PAGE_STATE::GAME:
-            // change to game view
+            if (init) {
+                initGame();
+            }
+            page = game_view;
             break;
         case View::PAGE_STATE::EXIT:
             page->exit();
@@ -67,10 +70,11 @@ void GameApp::initMainMenu() {
         window_size
     );
     mainmenu_model = std::make_shared<Model::MainMenuModel>();
+    // set model
+    mainmenu_view_model->setModel(mainmenu_model);
     // properties
     mainmenu_view->setCurrentSelection(mainmenu_view_model->getCurrentSelectionIndex());
     mainmenu_view->setMenuOptions(mainmenu_view_model->getMenuOptions());
-    mainmenu_view_model->setModel(mainmenu_model);
     // commands
     mainmenu_view->setUpdateCommand(mainmenu_view_model->getUpdateCommand());
     mainmenu_view->setNavigateUpCommand(mainmenu_view_model->getNavigateUpCommand());
@@ -83,4 +87,35 @@ void GameApp::initMainMenu() {
     );
 
     mainmenu_view->init();
+}
+
+void GameApp::initGame() {
+    game_view = std::make_shared<View::GameView>(
+        game_title, window_size, fps, window, debug
+    );
+    game_view_model = std::make_shared<ViewModel::GameViewModel>(window_size);
+    game_model = std::make_shared<Model::GameModel>(window_size);
+    // set model
+    game_view_model->setModel(game_model);
+    // properties
+    game_view->setTotalScoreText(game_view_model->getTotalScoreText());
+    game_view->setGameTimeText(game_view_model->getGameTimeText());
+    game_view->setDebugInfoText(game_view_model->getDebugInfoText());
+    // commands
+    game_view->setPlayerLeftCommand(game_view_model->getPlayerLeftCommand());
+    game_view->setPlayerRightCommand(game_view_model->getPlayerRightCommand());
+    game_view->setPlayerJumpCommand(game_view_model->getPlayerJumpCommand());
+    game_view->setPlayerDownCommand(game_view_model->getPlayerDownCommand());
+    game_view->setPlayerStopLeftCommand(game_view_model->getPlayerStopLeftCommand());
+    game_view->setPlayerStopRightCommand(game_view_model->getPlayerStopRightCommand());
+    game_view->setPlayerStopJumpCommand(game_view_model->getPlayerStopJumpCommand());
+    game_view->setPlayerStopDownCommand(game_view_model->getPlayerStopDownCommand());
+    game_view->setUpdateCommand(game_view_model->getUpdateCommand());
+    // notification
+    game_view_model->getTrigger().add(
+        game_view->getNotificationCallback(),
+        game_view.get()
+    );
+    
+    game_view->init();
 }

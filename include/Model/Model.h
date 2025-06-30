@@ -7,13 +7,15 @@ class Model {
 public:
     Model() = default;
     Model(sf::Vector2u window_size) : window_size(window_size){};
-
-    virtual void update(float delta_time) {};
+    Common::Trigger& getTrigger() {
+        return trigger;
+    }
     
     virtual ~Model() {}; 
     
 protected:
     sf::Vector2u window_size;
+    Common::Trigger trigger;
 };
 
 };

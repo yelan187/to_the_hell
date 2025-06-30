@@ -2,10 +2,6 @@
 
 #include "Common/ParamBase.h"
 
-namespace ViewModel {
-    class ViewModel;
-}
-
 namespace View {
     enum class PAGE_STATE;
 }
