@@ -4,7 +4,7 @@
 #include "Model/GameModel.h"
 #include "Model/Entities/Platform.h"
 #include "Model/Entities/Player.h"
-#include "Model/GameConfig.h"
+#include "Utils/GameConfig.h"
 #include "Core/Engine.h"
 
 using Model::GameModel;
@@ -83,25 +83,27 @@ void GameModel::update(float delta_time) {
 }
 
 void GameModel::initPlayer() {
+    auto& config = Utils::GameConfig::getInstance();
     // 获取第一个平台来放置玩家
     auto& platforms = entity_manager->getPlatforms();
     if (!platforms.empty()) {
         auto first_platform = platforms.begin()->second;
         sf::Vector2f player_position = sf::Vector2f(
-            first_platform->getPosition().x + first_platform->getSize().x / 2 - GameConfig::PLAYER_SIZE.x / 2,
+            first_platform->getPosition().x + first_platform->getSize().x / 2 - config.PLAYER_SIZE.x / 2,
             window_size.y / 5
         );
-        player = new Entities::Player(player_position, GameConfig::PLAYER_SIZE, this);
+        player = new Entities::Player(player_position, config.PLAYER_SIZE, this);
     } else {
         // 如果没有平台，使用默认位置
         sf::Vector2f player_position = sf::Vector2f(window_size.x / 2, window_size.y / 2);
-        player = new Entities::Player(player_position, GameConfig::PLAYER_SIZE, this);
+        player = new Entities::Player(player_position, config.PLAYER_SIZE, this);
     }
 }
 
 void GameModel::initGame() {
+    auto& config = Utils::GameConfig::getInstance();
     total_score = 0;
-    scroll_speed = GameConfig::DEFAULT_SCROLL_SPEED;
+    scroll_speed = config.DEFAULT_SCROLL_SPEED;
     game_time = 0;
     
     // 初始化生成器管理器

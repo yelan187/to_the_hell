@@ -5,7 +5,7 @@
 #include "Model/Managers/GeneratorManager.h"
 #include "Model/Managers/CollisionManager.h"
 #include "Model/Managers/SkillManager.h"
-#include "Model/GameConfig.h"
+#include "Utils/GameConfig.h"
 #include <chrono>
 #include <memory>
 
@@ -59,7 +59,7 @@ public:
     std::map<int, Entities::Bullet*> getBullets() const { return entity_manager->getBullets(); }
     std::map<int, Entities::Pickup*> getPickups() const { return entity_manager->getPickups(); }
     void createBullet(sf::Vector2f position, sf::Vector2f velocity) {
-        entity_manager->addBullet(position, velocity, GameConfig::BULLET_SIZE);
+        entity_manager->addBullet(position, velocity, Utils::GameConfig::getInstance().BULLET_SIZE);
     }
     
     // 技能和箭矢相关方法

@@ -5,7 +5,7 @@
 #include "Model/Entities/Pickup.h"
 #include "Model/Entities/Arrow.h"
 #include "Model/Entities/Skill.h"
-#include "Model/GameConfig.h"
+#include "Utils/GameConfig.h"
 #include <iostream>
 
 using namespace Model::Managers;
@@ -121,10 +121,11 @@ void EntityManager::addArrow(sf::Vector2f position, sf::Vector2f velocity, sf::V
 }
 
 void EntityManager::initSkills() {
+    auto& config = Utils::GameConfig::getInstance();
     // 初始化箭矢技能，冷却时间3秒
-    skills.push_back(new Skill(SkillType::ARROW_SHOT, Model::GameConfig::ARROW_SKILL_COOLDOWN));
+    skills.push_back(new Skill(SkillType::ARROW_SHOT, config.ARROW_SKILL_COOLDOWN));
     // 初始化瞬移技能，冷却时间5秒
-    skills.push_back(new Skill(SkillType::SPRINT, Model::GameConfig::SPRINT_SKILL_COOLDOWN));
+    skills.push_back(new Skill(SkillType::SPRINT, config.SPRINT_SKILL_COOLDOWN));
 }
 
 void EntityManager::clearAll() {

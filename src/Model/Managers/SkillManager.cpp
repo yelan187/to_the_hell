@@ -3,7 +3,7 @@
 #include "Model/Entities/Skill.h"
 #include "Model/Entities/Player.h"
 #include "Model/Entities/Platform.h"
-#include "Model/GameConfig.h"
+#include "Utils/GameConfig.h"
 #include <SFML/Graphics.hpp>
 
 using namespace Model::Managers;
@@ -55,6 +55,7 @@ std::vector<Skill*>& SkillManager::getSkills() {
 }
 
 void SkillManager::executeArrowShot(Player* player) {
+    auto& config = Utils::GameConfig::getInstance();
     sf::Vector2f player_pos = player->getPosition();
     sf::Vector2f arrow_pos;
     sf::Vector2f arrow_velocity;
@@ -62,24 +63,25 @@ void SkillManager::executeArrowShot(Player* player) {
     // 根据玩家朝向决定箭矢发射方向
     if (player->getFacingDirection() == FacingDirection::RIGHT) {
         arrow_pos = sf::Vector2f(
-            player_pos.x + Model::GameConfig::PLAYER_SIZE.x,
-            player_pos.y + Model::GameConfig::PLAYER_SIZE.y / 2 - Model::GameConfig::ARROW_SIZE.y / 2
+            player_pos.x + config.PLAYER_SIZE.x,
+            player_pos.y + config.PLAYER_SIZE.y / 2 - config.ARROW_SIZE.y / 2
         );
-        arrow_velocity = sf::Vector2f(Model::GameConfig::ARROW_SPEED, 0.0f); // 水平向右
+        arrow_velocity = sf::Vector2f(config.ARROW_SPEED, 0.0f); // 水平向右
     } else {
         arrow_pos = sf::Vector2f(
-            player_pos.x - Model::GameConfig::ARROW_SIZE.x,
-            player_pos.y + Model::GameConfig::PLAYER_SIZE.y / 2 - Model::GameConfig::ARROW_SIZE.y / 2
+            player_pos.x - config.ARROW_SIZE.x,
+            player_pos.y + config.PLAYER_SIZE.y / 2 - config.ARROW_SIZE.y / 2
         );
-        arrow_velocity = sf::Vector2f(-Model::GameConfig::ARROW_SPEED, 0.0f); // 水平向左
+        arrow_velocity = sf::Vector2f(-config.ARROW_SPEED, 0.0f); // 水平向左
     }
     
-    entity_manager->addArrow(arrow_pos, arrow_velocity, Model::GameConfig::ARROW_SIZE, game_model);
+    entity_manager->addArrow(arrow_pos, arrow_velocity, config.ARROW_SIZE, game_model);
 }
 
 void SkillManager::executeSprint(Player* player, sf::Vector2u window_size) {
+    auto& config = Utils::GameConfig::getInstance();
     sf::Vector2f player_pos = player->getPosition();
-    float sprint_distance = Model::GameConfig::SPRINT_DISTANCE; // 冲刺距离150像素
+    float sprint_distance = config.SPRINT_DISTANCE; // 冲刺距离
     float direction = (player->getFacingDirection() == FacingDirection::RIGHT) ? 1.0f : -1.0f;
     
     // 获取玩家当前所在的平台ID（如果有的话）
@@ -96,13 +98,13 @@ void SkillManager::executeSprint(Player* player, sf::Vector2u window_size) {
         sf::Vector2f test_pos = player_pos + sf::Vector2f(direction * (current_distance + step_size), 0.0f);
         
         // 检查窗口边界
-        if (test_pos.x < 0 || test_pos.x + Model::GameConfig::PLAYER_SIZE.x > window_size.x) {
+        if (test_pos.x < 0 || test_pos.x + config.PLAYER_SIZE.x > window_size.x) {
             break;
         }
         
         // 检查与平台的碰撞（忽略当前站立的平台）
         bool collision = false;
-        sf::FloatRect player_rect(test_pos.x, test_pos.y, Model::GameConfig::PLAYER_SIZE.x, Model::GameConfig::PLAYER_SIZE.y);
+        sf::FloatRect player_rect(test_pos.x, test_pos.y, config.PLAYER_SIZE.x, config.PLAYER_SIZE.y);
         
         for (const auto& platform_pair : platforms) {
             Platform* platform = platform_pair.second;
@@ -133,14 +135,14 @@ void SkillManager::executeSprint(Player* player, sf::Vector2u window_size) {
     // 确保最终位置不会超出窗口边界
     if (final_pos.x < 0) {
         final_pos.x = 0;
-    } else if (final_pos.x + Model::GameConfig::PLAYER_SIZE.x > window_size.x) {
-        final_pos.x = window_size.x - Model::GameConfig::PLAYER_SIZE.x;
+    } else if (final_pos.x + config.PLAYER_SIZE.x > window_size.x) {
+        final_pos.x = window_size.x - config.PLAYER_SIZE.x;
     }
     
     if (final_pos.y < 0) {
         final_pos.y = 0;
-    } else if (final_pos.y + Model::GameConfig::PLAYER_SIZE.y > window_size.y) {
-        final_pos.y = window_size.y - Model::GameConfig::PLAYER_SIZE.y;
+    } else if (final_pos.y + config.PLAYER_SIZE.y > window_size.y) {
+        final_pos.y = window_size.y - config.PLAYER_SIZE.y;
     }
     
     player->setPosition(final_pos);

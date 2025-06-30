@@ -6,7 +6,7 @@
 #include "Model/Entities/Bullet.h"
 #include "Model/Entities/Pickup.h"
 #include "Model/Entities/Arrow.h"
-#include "Model/GameConfig.h"
+#include "Utils/GameConfig.h"
 #include "View/GameView.h"
 
 using ViewModel::GameViewModel;
@@ -261,7 +261,7 @@ sf::Vector2f GameViewModel::getArrowSize(int id) {
     if (arrows.find(id) != arrows.end()) {
         return arrows[id]->getSize();
     }
-    return Model::GameConfig::ARROW_SIZE;
+    return Utils::GameConfig::getInstance().ARROW_SIZE;
 }
 
 bool GameViewModel::getArrowFacingRight(int id) {
