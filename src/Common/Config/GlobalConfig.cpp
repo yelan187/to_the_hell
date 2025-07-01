@@ -13,7 +13,7 @@ const int GlobalConfig::WINDOW_WIDTH = 800;
 const int GlobalConfig::WINDOW_HEIGHT = 600;
 const int GlobalConfig::FPS = 60;
 
-// 调试配置（可运行时修改）
+// 调试配置
 bool GlobalConfig::DEBUG_MODE = true;
 
 // 资源路径配置
@@ -25,16 +25,6 @@ const std::string GlobalConfig::SOUNDS_PATH = "assets/sounds/";
 // 基础UI配置
 const sf::Color GlobalConfig::DEFAULT_TEXT_COLOR = sf::Color::White;
 const sf::Color GlobalConfig::DEFAULT_BACKGROUND_COLOR = sf::Color::Black;
-
-// 获取窗口大小
-sf::Vector2u GlobalConfig::getWindowSize() {
-    return sf::Vector2u(WINDOW_WIDTH, WINDOW_HEIGHT);
-}
-
-// 运行时修改方法
-void GlobalConfig::setDebugMode(bool debug) {
-    DEBUG_MODE = debug;
-}
 
 }
 }

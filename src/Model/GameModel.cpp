@@ -314,18 +314,11 @@ void GameModel::initPlayer() {
         platform_pos.y - player_size.y  // 玩家底部与平台顶部对齐
     );
     
-    std::cout << "Platform 0 position: (" << platform_pos.x << ", " << platform_pos.y << ")" << std::endl;
-    std::cout << "Platform 0 size: (" << platform_size.x << ", " << platform_size.y << ")" << std::endl;
-    std::cout << "Player initial position: (" << player_position.x << ", " << player_position.y << ")" << std::endl;
-    std::cout << "Player size: (" << player_size.x << ", " << player_size.y << ")" << std::endl;
-    
     player = new Entities::Player(player_position, player_size, this);
     
     
     // 重要：设置玩家的初始速度为平台速度，避免相对运动
     player->setVelocity(platforms[0]->getVelocity());
-    
-    std::cout << "Player set on platform 0 with velocity: (" << platforms[0]->getVelocity().x << ", " << platforms[0]->getVelocity().y << ")" << std::endl;
 }
 
 void GameModel::resetPlatformGenerateInterval() {
@@ -388,8 +381,6 @@ void GameModel::generatePickup() {
     int random_chance = rand() % 100;
     bool is_star = random_chance < (Common::Config::GameConfig::PICKUP_STAR_PROBABILITY * 100); // 使用配置的概率
     
-    std::cout << "Pickup generation: random=" << random_chance << ", is_star=" << is_star << std::endl;
-    
     if (is_star) {
         // 星形豆子从下方进入页面，像平台一样
         sf::Vector2f position(
@@ -400,7 +391,6 @@ void GameModel::generatePickup() {
             next_pickup_id, Entities::PickupType::STAR_DOT, position, pickup_size, this, -1
         );
         next_pickup_id++;
-        std::cout << "Generated star pickup at (" << position.x << ", " << position.y << ") with ID " << (next_pickup_id-1) << std::endl;
     } else {
         if (!platforms.empty()) {
             // 寻找位置最低的平台（y坐标最大的）
@@ -428,12 +418,7 @@ void GameModel::generatePickup() {
                     next_pickup_id, Entities::PickupType::NORMAL_DOT, position, pickup_size, this, selected_platform_id
                 );
                 next_pickup_id++;
-                std::cout << "Generated normal pickup at (" << position.x << ", " << position.y << ") with ID " << (next_pickup_id-1) << std::endl;
-            } else {
-                std::cout << "No platform found for normal pickup" << std::endl;
             }
-        } else {
-            std::cout << "No platforms available for pickup generation" << std::endl;
         }
     }
 }

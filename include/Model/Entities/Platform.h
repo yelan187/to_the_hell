@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include "Common/Config/Config.h"
 
 namespace Model{
 namespace Entities {
@@ -49,7 +50,6 @@ private:
     // 脆弱平台相关
     bool is_broken;
     float break_timer;
-    static constexpr float BREAK_DELAY = 0.3f; // 0.3秒后破碎
 
     // 弹跳平台相关
     float bounce_force;

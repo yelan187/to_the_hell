@@ -1,5 +1,6 @@
 #include "Model/Entities/Enemy.h"
 #include "Model/GameModel.h"
+#include "Common/Config/Config.h"
 #include <cmath>
 
 using Model::Entities::Enemy;
@@ -8,8 +9,8 @@ Enemy::Enemy(int id, EnemyType type, sf::Vector2f position, sf::Vector2f size, G
     : id(id), type(type), position(position), size(size), game_model(game_model) {
     
     shoot_timer = 0.0f;
-    shoot_interval = 2.0f; // 每2秒射击一次
-    move_speed = 50.0f;    // 移动速度50像素/秒
+    shoot_interval = Common::Config::GameConfig::ENEMY_SHOOT_INTERVAL; // 敌人射击间隔时间
+    move_speed = Common::Config::GameConfig::ENEMY_SPEED; // 敌人移动速度
     velocity = sf::Vector2f(0, 0);
     facing_direction = sf::Vector2f(1.0f, 0.0f);  // 默认面向右侧
 }
@@ -59,7 +60,7 @@ void Enemy::shoot() {
             direction.x /= length;
             direction.y /= length;
             
-            sf::Vector2f bullet_velocity = direction * 200.0f;
+            sf::Vector2f bullet_velocity = direction * Common::Config::GameConfig::ENEMY_BULLET_SPEED;
             sf::Vector2f bullet_pos = position + size / 2.0f;
             
             game_model->createBullet(bullet_pos, bullet_velocity, false);  // 敌人子弹

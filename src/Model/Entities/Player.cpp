@@ -21,7 +21,7 @@ void Player::jump(float scroll_speed) {
 }
 void Player::fall() {
     if (!on_platform) {
-        velocity.y += 300.0f;
+        velocity.y += Common::Config::GameConfig::PLAYER_FALL_ACCELERATION;
     }
 }
 void Player::walkLeft() {

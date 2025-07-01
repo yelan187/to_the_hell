@@ -17,7 +17,6 @@ void ScoreView::init() {
 }
 
 void ScoreView::updateCurrentSelection() {
-    std::cout << "Updating current selection to: " << current_selection << std::endl;
     for (int i = 0; i < menu_options.size(); ++i) {
         if (i == current_selection) {
             menu_options[i].setFillColor(sf::Color::Yellow);

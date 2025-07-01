@@ -1,6 +1,7 @@
 #include "Model/Entities/Pickup.h"
 #include "Model/GameModel.h"
 #include "Model/Entities/Platform.h"
+#include "Common/Config/Config.h"
 
 using Model::Entities::Pickup;
 
@@ -69,9 +70,9 @@ void Pickup::updateMovement(float delta_time) {
 int Pickup::getScore() const {
     switch (type) {
         case PickupType::NORMAL_DOT:
-            return 2;
+            return Common::Config::GameConfig::PICKUP_NORMAL_SCORE;
         case PickupType::STAR_DOT:
-            return 5;
+            return Common::Config::GameConfig::PICKUP_STAR_SCORE;
         default:
             return 0;
     }

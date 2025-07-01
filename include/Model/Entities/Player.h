@@ -3,6 +3,8 @@
 #include <SFML/Graphics.hpp>
 #include <memory>
 
+#include "Common/Config/Config.h"
+
 namespace Model {
     class GameModel;
 }
@@ -32,9 +34,9 @@ public:
     Player(sf::Vector2f position, sf::Vector2f size, GameModel* game_model)
         : position(position), size(size), on_platform(false), on_platform_id(-1), 
           state(PlayerState::IDLE), game_model(game_model), is_dead(false) {
-            walking_speed = 150.0f;
-            jumping_speed = 350.0f;
-            gravity = sf::Vector2f(0, 500.0f);
+            walking_speed = Common::Config::GameConfig::PLAYER_WALK_SPEED;
+            jumping_speed = Common::Config::GameConfig::PLAYER_JUMP_FORCE;
+            gravity = sf::Vector2f(0, Common::Config::GameConfig::PLAYER_GRAVITY);
             collision_direction = CollisionDirection::NONE;
             prev_collision_direction = CollisionDirection::NONE;
             facing_direction = sf::Vector2f(1.0f, 0.0f);  // 默认面向右侧

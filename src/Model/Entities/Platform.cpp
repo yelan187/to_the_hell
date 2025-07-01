@@ -1,4 +1,5 @@
 #include "Model/Entities/Platform.h"
+#include "Common/Config/Config.h"
 #include <cstdlib>
 
 using Model::Entities::Platform;
@@ -20,8 +21,13 @@ Platform::Platform(int id, PlatformType type, sf::Vector2f position, sf::Vector2
     // 根据平台类型初始化特有属性
     switch (type) {
         case PlatformType::ROLLING:
-            rolling_speed = 80.0f + static_cast<float>(rand() % 40); // 80-120的随机速度
-            rolling_direction_right = (rand() % 2 == 0); // 随机方向
+            // 使用配置的基础速度，添加随机变化（±20%）
+            {
+                float base_speed = Common::Config::GameConfig::PLATFORM_ROLLING_SPEED;
+                float variation = base_speed * 0.2f; // 20%变化
+                rolling_speed = base_speed + (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f) * variation;
+                rolling_direction_right = (rand() % 2 == 0); // 随机方向
+            }
             break;
             
         case PlatformType::FRAGILE:
@@ -30,7 +36,7 @@ Platform::Platform(int id, PlatformType type, sf::Vector2f position, sf::Vector2
             break;
             
         case PlatformType::BOUNCY:
-            bounce_force = 500.0f; // 增强弹跳力，确保明显的弹跳效果
+            bounce_force = Common::Config::GameConfig::PLATFORM_BOUNCY_FORCE;
             break;
             
         default:
@@ -62,7 +68,7 @@ void Platform::onPlayerLanded() {
     switch (type) {
         case PlatformType::FRAGILE:
             if (!is_broken && break_timer <= 0) {
-                break_timer = BREAK_DELAY; // 开始倒计时
+                break_timer = Common::Config::GameConfig::PLATFORM_FRAGILE_BREAK_DELAY; // 开始倒计时
             }
             break;
             

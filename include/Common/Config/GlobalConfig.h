@@ -29,12 +29,6 @@ public:
     static const sf::Color DEFAULT_TEXT_COLOR;
     static const sf::Color DEFAULT_BACKGROUND_COLOR;
     
-    // 获取窗口大小
-    static sf::Vector2u getWindowSize();
-    
-    // 运行时修改方法
-    static void setDebugMode(bool debug);
-    
 private:
     GlobalConfig() = default; // 静态类，禁止实例化
 };

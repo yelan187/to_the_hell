@@ -13,10 +13,11 @@ public:
     // 玩家配置
     // ====================================
     static sf::Vector2f PLAYER_SIZE;
-    static float PLAYER_SPEED;
+    static float PLAYER_WALK_SPEED;
     static float PLAYER_JUMP_FORCE;
     static float PLAYER_GRAVITY;
     static float PLAYER_MAX_FALL_SPEED;
+    static float PLAYER_FALL_ACCELERATION;       // 玩家手动下落时的额外加速度
     static float PLAYER_INITIAL_Y_RATIO;         // 玩家初始Y位置比例（相对窗口高度）
     static float PLAYER_COLLISION_SHRINK_RATIO;  // 玩家碰撞框水平方向缩小比例（0-1）
     
@@ -25,12 +26,16 @@ public:
     // ====================================
     static sf::Vector2f PLATFORM_SIZE;
     static float PLATFORM_GENERATE_INTERVAL;     // 平台生成间隔时间(秒)
+
     static float PLATFORM_NORMAL_PROBABILITY;    // 普通平台生成概率
     static float PLATFORM_ROLLING_PROBABILITY;   // 滚动平台生成概率
     static float PLATFORM_BOUNCY_PROBABILITY;    // 弹跳平台生成概率
     static float PLATFORM_FRAGILE_PROBABILITY;   // 脆弱平台生成概率
     static float PLATFORM_SPIKED_PROBABILITY;    // 带刺平台生成概率
+
     static float PLATFORM_ROLLING_SPEED;         // 滚动平台速度
+    static float PLATFORM_BOUNCY_FORCE;         // 弹跳平台的弹跳力
+    static float PLATFORM_FRAGILE_BREAK_DELAY;  // 脆弱平台破碎延迟时间(秒)
     static int PLATFORM_GENERATION_MAX_ATTEMPTS; // 平台生成最大尝试次数
     
     // ====================================
@@ -38,8 +43,10 @@ public:
     // ====================================
     static sf::Vector2f ENEMY_SIZE;
     static float ENEMY_SPEED;
-    static float ENEMY_GENERATE_INTERVAL;        // 敌人生成间隔时间(秒)
-    static float ENEMY_GENERATE_PROBABILITY;     // 敌人生成概率
+    static float ENEMY_SHOOT_INTERVAL;           // 敌人射击间隔时间(秒)
+    static float ENEMY_BULLET_SPEED;             // 敌人子弹速度
+
+    static float ENEMY_GENERATE_INTERVAL;        // 敌人生成间隔时间(秒)，用于初始设置
     static float ENEMY_SPAWN_MIN_INTERVAL;       // 敌人生成最小间隔
     static float ENEMY_SPAWN_MAX_INTERVAL;       // 敌人生成最大间隔
     static int ENEMY_SCORE_VALUE;                // 击败敌人得分
@@ -97,14 +104,7 @@ public:
     // ====================================
     // 运行时修改方法
     // ====================================
-    static void setPlayerSpeed(float speed);
-    static void setEnemyGenerateRate(float interval);
-    static void setPlatformGenerateRate(float interval);
-    static void setPickupGenerateRate(float interval);
-    static void setDifficultyScale(float factor);
-    
-    // 重置为默认值
-    static void resetToDefaults();
+
     
 private:
     GameConfig() = default; // 静态类，禁止实例化

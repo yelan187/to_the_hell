@@ -15,7 +15,6 @@ void GameView::init() {
     game_time_text.setPosition(15,40);
 
     if (debug) {
-        std::cout << "Debug mode is ON" << std::endl;
         debug_info_text.setCharacterSize(24);
         debug_info_text.setFillColor(sf::Color::White);
         debug_info_text.setFont(font);
