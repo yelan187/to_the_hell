@@ -12,6 +12,10 @@ public:
     void render();
 
 private:
+    // 豆子类型常量定义（避免依赖Model层枚举）
+    static const int NORMAL_DOT_TYPE = 0;
+    static const int STAR_DOT_TYPE = 1;
+    
     int id;
     sf::RenderWindow& window;
     sf::CircleShape normal_shape;    // 圆形豆子

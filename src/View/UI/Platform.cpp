@@ -5,11 +5,11 @@ using View::UI::Platform;
 
 void Platform::render(){
     // 根据平台类型使用不同的渲染方式
-    if (platform_type == static_cast<int>(Model::Entities::PlatformType::FRAGILE)) {
+    if (platform_type == PLATFORM_FRAGILE) {
         renderFragilePlatform();
-    } else if (platform_type == static_cast<int>(Model::Entities::PlatformType::ROLLING)) {
+    } else if (platform_type == PLATFORM_ROLLING) {
         renderRollingPlatform();
-    } else if (platform_type == static_cast<int>(Model::Entities::PlatformType::BOUNCY)) {
+    } else if (platform_type == PLATFORM_BOUNCY) {
         renderBouncyPlatform();
     } else {
         // 普通平台和带刺平台使用标准矩形渲染
@@ -27,7 +27,7 @@ void Platform::update(Common::FrameInfo::PlatformInfo platform_info) {
     this->platform_type = platform_info.platform_type;
     
     // 为弹跳平台设置椭圆
-    if (platform_type == static_cast<int>(Model::Entities::PlatformType::BOUNCY)) {
+    if (platform_type == PLATFORM_BOUNCY) {
         setupEllipse(platform_info);
     }
 }

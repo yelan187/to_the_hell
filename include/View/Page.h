@@ -3,15 +3,12 @@
 #include <SFML/Graphics.hpp>
 #include "Common/CommandBase.h"
 #include "Common/NotificationBase.h"
+#include "Common/PageState.h"
 
 namespace View {
 
-enum class PAGE_STATE {
-    GAME,
-    EXIT,
-    SCORE,
-    MAIN_MENU
-};
+// 使用Common层定义的PAGE_STATE
+using Common::PAGE_STATE;
 class Page {
 public:
     Page(std::string game_title, sf::Vector2u window_size, int fps, sf::RenderWindow& window) :game_title(game_title.data()), window_size(window_size), fps(fps), window(window) {}

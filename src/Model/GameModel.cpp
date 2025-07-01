@@ -4,6 +4,8 @@
 #include "Model/Entities/Bullet.h"
 #include "Model/Entities/Pickup.h"
 #include "Model/Entities/Skill.h"
+#include "Common/InternalNotification.h"
+#include "Common/Config/Config.h"
 
 using Model::GameModel;
 using Model::Entities::PlatformType;
@@ -178,7 +180,8 @@ void GameModel::update(float delta_time) {
     enemy_generate_interval -= delta_time;
     if (enemy_generate_interval <= 0.0f) {
         generateEnemy();
-        enemy_generate_interval = 3.0f + static_cast<float>(rand() % 3);
+        enemy_generate_interval = Common::Config::GameConfig::ENEMY_SPAWN_MIN_INTERVAL + 
+                                 static_cast<float>(rand() % static_cast<int>(Common::Config::GameConfig::ENEMY_SPAWN_MAX_INTERVAL - Common::Config::GameConfig::ENEMY_SPAWN_MIN_INTERVAL));
     }
     
     for (auto it = enemies.begin(); it != enemies.end(); ) {
@@ -211,7 +214,9 @@ void GameModel::update(float delta_time) {
     pickup_generate_interval -= delta_time;
     if (pickup_generate_interval <= 0.0f) {
         generatePickup();
-        pickup_generate_interval = 0.8f + static_cast<float>(rand() % 8) / 10.0f; // 0.8-1.6秒间隔，提高生成频率
+        pickup_generate_interval = Common::Config::GameConfig::PICKUP_SPAWN_MIN_INTERVAL + 
+                                  static_cast<float>(rand()) / RAND_MAX * 
+                                  (Common::Config::GameConfig::PICKUP_SPAWN_MAX_INTERVAL - Common::Config::GameConfig::PICKUP_SPAWN_MIN_INTERVAL);
     }
     
     for (auto it = pickups.begin(); it != pickups.end(); ) {
@@ -257,19 +262,31 @@ void GameModel::update(float delta_time) {
 }
 
 void GameModel::generatePlatform() {
-    sf::Vector2f position(
-        static_cast<float>(rand() % static_cast<int>(window_size.x - platform_size.x)),
-        window_size.y
-    );
+    int max_attempts = Common::Config::GameConfig::PLATFORM_GENERATION_MAX_ATTEMPTS;
     
-    PlatformType type = getPlatformTypeRand();
+    for (int attempt = 0; attempt < max_attempts; ++attempt) {
+        // 随机生成位置
+        sf::Vector2f position(
+            static_cast<float>(rand() % static_cast<int>(window_size.x - platform_size.x)),
+            window_size.y
+        );
+        
+        // 检查位置是否有效（无碰撞）
+        if (isPlatformPositionValid(position, platform_size)) {
+            PlatformType type = getPlatformTypeRand();
+            
+            platforms[next_platform_id++] = new Entities::Platform(
+                next_platform_id, type, position, platform_size, scroll_speed);
+            return; // 成功生成平台，退出
+        }
+    }
     
-    platforms[next_platform_id++] = new Entities::Platform(
-        next_platform_id, type, position, platform_size, scroll_speed);
+    // 如果所有尝试都失败，本次不生成平台
+    // 可以在这里添加日志记录，表示平台生成失败
 }
 
 void GameModel::initPlatforms() {
-    const int initial_platforms = 3;
+    const int initial_platforms = Common::Config::GameConfig::INITIAL_PLATFORM_COUNT;
     for (int i = 0; i < initial_platforms; ++i) {
         int id = i;
         
@@ -288,24 +305,41 @@ void GameModel::initPlatforms() {
 }
 
 void GameModel::initPlayer() {
+    sf::Vector2f platform_pos = platforms[0]->getPosition();
+    sf::Vector2f platform_size = platforms[0]->getSize();
+    
+    // 玩家应该站在平台的顶部
     sf::Vector2f player_position = sf::Vector2f(
-        platforms[0]->getPosition().x + platforms[0]->getSize().x / 2 - player_size.x / 2,
-        window_size.y / 5
+        platform_pos.x + platform_size.x / 2 - player_size.x / 2,
+        platform_pos.y - player_size.y  // 玩家底部与平台顶部对齐
     );
+    
+    std::cout << "Platform 0 position: (" << platform_pos.x << ", " << platform_pos.y << ")" << std::endl;
+    std::cout << "Platform 0 size: (" << platform_size.x << ", " << platform_size.y << ")" << std::endl;
+    std::cout << "Player initial position: (" << player_position.x << ", " << player_position.y << ")" << std::endl;
+    std::cout << "Player size: (" << player_size.x << ", " << player_size.y << ")" << std::endl;
+    
     player = new Entities::Player(player_position, player_size, this);
+    
+    
+    // 重要：设置玩家的初始速度为平台速度，避免相对运动
+    player->setVelocity(platforms[0]->getVelocity());
+    
+    std::cout << "Player set on platform 0 with velocity: (" << platforms[0]->getVelocity().x << ", " << platforms[0]->getVelocity().y << ")" << std::endl;
 }
 
 void GameModel::resetPlatformGenerateInterval() {
-    platform_generate_interval = 1.0f + static_cast<float>(rand() % 1 - 0.5) / 2;
+    platform_generate_interval = Common::Config::GameConfig::PLATFORM_GENERATE_INTERVAL + 
+                                 static_cast<float>(rand()) / RAND_MAX * (2 * Common::Config::GameConfig::GENERATE_INTERVAL_VARIANCE) - Common::Config::GameConfig::GENERATE_INTERVAL_VARIANCE; // ±配置的随机变化
 }
 
 void GameModel::initGame() {
     total_score = 0;
-    scroll_speed = 100.0f;
+    scroll_speed = Common::Config::GameConfig::INITIAL_SCROLL_SPEED;
     game_time = 0;
     resetPlatformGenerateInterval();
-    enemy_generate_interval = 5.0f;
-    pickup_generate_interval = 2.0f; // 豆子生成间隔
+    enemy_generate_interval = Common::Config::GameConfig::ENEMY_GENERATE_INTERVAL;
+    pickup_generate_interval = Common::Config::GameConfig::PICKUP_GENERATE_INTERVAL;
     initPlatforms();
     initPlayer();
     initSkills();
@@ -314,18 +348,18 @@ void GameModel::initGame() {
 void GameModel::createBullet(sf::Vector2f position, sf::Vector2f velocity, bool is_player_bullet) {
     sf::Vector2f bullet_size;
     if (is_player_bullet) {
-        // 玩家箭矢：更长更薄的形状
-        bullet_size = sf::Vector2f(16, 8);
+        // 玩家箭矢：使用配置的子弹尺寸
+        bullet_size = Common::Config::GameConfig::BULLET_SIZE;
     } else {
-        // 敌人子弹：小圆形
-        bullet_size = sf::Vector2f(10, 10);
+        // 敌人子弹：小圆形，稍小一些
+        bullet_size = sf::Vector2f(Common::Config::GameConfig::BULLET_SIZE.x * Common::Config::GameConfig::BULLET_SIZE_SCALE, Common::Config::GameConfig::BULLET_SIZE.y * Common::Config::GameConfig::BULLET_SIZE_SCALE);
     }
     bullets[next_bullet_id] = new Entities::Bullet(next_bullet_id, position, velocity, bullet_size, is_player_bullet);
     next_bullet_id++;
 }
 
 void GameModel::generateEnemy() {
-    sf::Vector2f enemy_size(40, 40);
+    sf::Vector2f enemy_size = Common::Config::GameConfig::ENEMY_SIZE;
     sf::Vector2f position;
     
     int side = rand() % 4;
@@ -349,10 +383,10 @@ void GameModel::generateEnemy() {
 }
 
 void GameModel::generatePickup() {
-    sf::Vector2f pickup_size(15, 15);
+    sf::Vector2f pickup_size = Common::Config::GameConfig::PICKUP_SIZE;
     
     int random_chance = rand() % 100;
-    bool is_star = random_chance < 30; // 增加到30%的概率
+    bool is_star = random_chance < (Common::Config::GameConfig::PICKUP_STAR_PROBABILITY * 100); // 使用配置的概率
     
     std::cout << "Pickup generation: random=" << random_chance << ", is_star=" << is_star << std::endl;
     
@@ -422,7 +456,7 @@ void GameModel::checkPlayerBulletEnemyCollisions() {
             for (auto enemy_it = enemies.begin(); enemy_it != enemies.end(); ) {
                 if (bullet_it->second->collidesWith(enemy_it->second->getPosition(), enemy_it->second->getSize())) {
                     // 玩家箭矢击中敌人，删除敌人和子弹
-                    total_score += 50;  // 击杀敌人得分
+                    total_score += Common::Config::GameConfig::ENEMY_SCORE_VALUE;  // 击杀敌人得分
                     delete enemy_it->second;
                     enemy_it = enemies.erase(enemy_it);
                     hit_enemy = true;
@@ -503,18 +537,18 @@ void GameModel::playerUseSkill(int skill_id, sf::Vector2f direction) {
             sf::Vector2f player_pos = player->getPosition();
             sf::Vector2f arrow_pos = sf::Vector2f(
                 player_pos.x + player_size.x / 2, 
-                player_pos.y + player_size.y / 2 - 4.0f  // 箭矢高度的一半
+                player_pos.y + player_size.y / 2 - Common::Config::GameConfig::BULLET_SIZE.y / 2  // 箭矢高度的一半
             );
             
             // 箭矢必须水平飞行，Y速度为0，抵消滚动影响
-            sf::Vector2f arrow_velocity = sf::Vector2f(player_facing.x * 400.0f, 0.0f);
+            sf::Vector2f arrow_velocity = sf::Vector2f(player_facing.x * Common::Config::GameConfig::BULLET_SPEED, 0.0f);
             createBullet(arrow_pos, arrow_velocity, true);  // 玩家箭矢
             break;
         }
         case 1: // SPRINT - 冲刺技能
         {
             sf::Vector2f player_pos = player->getPosition();
-            float sprint_distance = 100.0f; // 冲刺距离
+            float sprint_distance = Common::Config::GameConfig::SKILL_SPRINT_DISTANCE; // 冲刺距离
             
             // 根据玩家面向方向进行冲刺
             sf::Vector2f target_pos = sf::Vector2f(
@@ -539,19 +573,33 @@ void GameModel::playerUseSkill(int skill_id, sf::Vector2f direction) {
 
 // 实现缺失的方法
 Model::Entities::PlatformType GameModel::getPlatformTypeRand() {
-    int random = rand() % 100;
+    float random = static_cast<float>(rand()) / RAND_MAX; // 0.0 - 1.0
     
-    if (random < 50) {
-        return Entities::PlatformType::NORMAL;      // 50% 普通平台
-    } else if (random < 65) {
-        return Entities::PlatformType::ROLLING;     // 15% 滚动平台
-    } else if (random < 80) {
-        return Entities::PlatformType::BOUNCY;      // 15% 弹跳平台
-    } else if (random < 95) {
-        return Entities::PlatformType::FRAGILE;     // 15% 脆弱平台
-    } else {
-        return Entities::PlatformType::SPIKED;      // 5% 带刺平台（最危险，概率最低）
+    // 累积概率计算
+    float cumulative = 0.0f;
+    
+    cumulative += Common::Config::GameConfig::PLATFORM_NORMAL_PROBABILITY;
+    if (random < cumulative) {
+        return Entities::PlatformType::NORMAL;
     }
+    
+    cumulative += Common::Config::GameConfig::PLATFORM_ROLLING_PROBABILITY;
+    if (random < cumulative) {
+        return Entities::PlatformType::ROLLING;
+    }
+    
+    cumulative += Common::Config::GameConfig::PLATFORM_BOUNCY_PROBABILITY;
+    if (random < cumulative) {
+        return Entities::PlatformType::BOUNCY;
+    }
+    
+    cumulative += Common::Config::GameConfig::PLATFORM_FRAGILE_PROBABILITY;
+    if (random < cumulative) {
+        return Entities::PlatformType::FRAGILE;
+    }
+    
+    // 剩余情况为带刺平台
+    return Entities::PlatformType::SPIKED;
 }
 
 // 初始化技能系统
@@ -563,8 +611,83 @@ void GameModel::initSkills() {
     skills.clear();
     
     // 创建两个技能：箭矢射击和冲刺
-    skills.push_back(new Entities::Skill(Entities::SkillType::ARROW_SHOT, 2.0f));  // 2秒冷却
-    skills.push_back(new Entities::Skill(Entities::SkillType::SPRINT, 5.0f));      // 5秒冷却
+    skills.push_back(new Entities::Skill(Entities::SkillType::ARROW_SHOT, Common::Config::GameConfig::SKILL_ARROW_COOLDOWN));
+    skills.push_back(new Entities::Skill(Entities::SkillType::SPRINT, Common::Config::GameConfig::SKILL_SPRINT_COOLDOWN));
+}
+
+bool GameModel::isPlatformPositionValid(sf::Vector2f position, sf::Vector2f size) {
+    // 检查新平台与现有平台的间距，确保不重叠且有足够间距
+    // 垂直间距 = 玩家高度 + 安全距离(20像素)
+    float min_vertical_spacing = Common::Config::GameConfig::PLAYER_SIZE.y + 20.0f;
+    // 水平间距 = 玩家宽度 + 安全距离(30像素)，确保玩家站在一个平台上无法同时接触另一个平台
+    float min_horizontal_spacing = Common::Config::GameConfig::PLAYER_SIZE.x + 30.0f;
+    
+    // 定义新平台的边界
+    float new_left = position.x;
+    float new_right = position.x + size.x;
+    float new_top = position.y;
+    float new_bottom = position.y + size.y;
+    
+    // 检查与现有平台的碰撞
+    for (const auto& [id, platform] : platforms) {
+        if (!platform) continue;
+        
+        sf::Vector2f existing_pos = platform->getPosition();
+        sf::Vector2f existing_size = platform->getSize();
+        
+        // 定义现有平台的边界
+        float existing_left = existing_pos.x;
+        float existing_right = existing_pos.x + existing_size.x;
+        float existing_top = existing_pos.y;
+        float existing_bottom = existing_pos.y + existing_size.y;
+        
+        // 检查垂直间距
+        float vertical_distance = 0.0f;
+        bool vertical_overlap = false;
+        
+        if (new_bottom < existing_top) {
+            // 新平台在现有平台上方
+            vertical_distance = existing_top - new_bottom;
+        } else if (new_top > existing_bottom) {
+            // 新平台在现有平台下方
+            vertical_distance = new_top - existing_bottom;
+        } else {
+            // 垂直重叠
+            vertical_overlap = true;
+        }
+        
+        // 检查水平间距
+        float horizontal_distance = 0.0f;
+        bool horizontal_overlap = false;
+        
+        if (new_right < existing_left) {
+            // 新平台在现有平台左侧
+            horizontal_distance = existing_left - new_right;
+        } else if (new_left > existing_right) {
+            // 新平台在现有平台右侧
+            horizontal_distance = new_left - existing_right;
+        } else {
+            // 水平重叠
+            horizontal_overlap = true;
+        }
+        
+        // 如果两个方向都重叠，则位置无效
+        if (vertical_overlap && horizontal_overlap) {
+            return false;
+        }
+        
+        // 如果垂直重叠但水平有间距，检查水平间距是否足够
+        if (vertical_overlap && horizontal_distance < min_horizontal_spacing) {
+            return false;
+        }
+        
+        // 如果水平重叠但垂直有间距，检查垂直间距是否足够
+        if (horizontal_overlap && vertical_distance < min_vertical_spacing) {
+            return false;
+        }
+    }
+    
+    return true;
 }
 
 

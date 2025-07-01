@@ -1,5 +1,5 @@
 #include "View/ScoreView.h"
-#include "Utils/Config.h"
+#include "Common/Config/Config.h"
 #include <string>
 #include <iostream>
 

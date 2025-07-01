@@ -9,7 +9,7 @@ GameApp::GameApp(std::string game_title, sf::Vector2u window_size, int fps, bool
       gameover_command(this) {
     window.create(sf::VideoMode(window_size.x, window_size.y), game_title, sf::Style::Default);
     window.setFramerateLimit(fps);
-    changePage(View::PAGE_STATE::MAIN_MENU);
+    changePage(Common::PAGE_STATE::MAIN_MENU);
 }
 
 void GameApp::run() {
@@ -29,26 +29,26 @@ void GameApp::run() {
     }
 }
 
-void GameApp::changePage(View::PAGE_STATE new_page_state, bool init, void* info) {
+void GameApp::changePage(Common::PAGE_STATE new_page_state, bool init, void* info) {
     // update the page
     current_page_state = new_page_state;
     switch (new_page_state) {
-        case View::PAGE_STATE::GAME:
+        case Common::PAGE_STATE::GAME:
             if (init) {
                 initGame();
             }
             page = game_view;
             break;
-        case View::PAGE_STATE::EXIT:
+        case Common::PAGE_STATE::EXIT:
             page->exit();
             break;
-        case View::PAGE_STATE::SCORE:
+        case Common::PAGE_STATE::SCORE:
             if (init) {
                 initScore(info);
             }
             page = score_view;
             break;
-        case View::PAGE_STATE::MAIN_MENU:
+        case Common::PAGE_STATE::MAIN_MENU:
             if (init) {
                 initMainMenu();
             }
@@ -72,7 +72,7 @@ void GameApp::GameOverCommand::execute(Common::CommandParam& params) {
         game_over_param.value.game_time
     };
     app->changePage(
-        View::PAGE_STATE::SCORE,
+        Common::PAGE_STATE::SCORE,
         true,
         static_cast<void*>(&score_info)  
     );

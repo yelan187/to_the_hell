@@ -2,6 +2,7 @@
 
 #include "Common/CommandBase.h"
 #include "Common/NotificationBase.h"
+#include "Common/InternalNotification.h"
 
 #include "ViewModel/ViewModel.h"
 #include "Model/GameModel.h"
@@ -108,6 +109,7 @@ private:
     }
     std::map<PlayerState, sf::Texture> player_textures;
     void loadPlayerTextures();
+    // 内部转换方法：将Model层PlayerState转换为ViewModel层纹理，仅用于数据适配
     sf::Texture* getPlayerTexture(Model::Entities::PlayerState state);
     Common::FrameInfo::PlatformInfo getPlatformInfo(Common::_FrameInfo::PlatformInfo info);
 

@@ -1,14 +1,18 @@
 #pragma once
-#include <string>
-#include <SFML/Graphics.hpp>
+#include "Common/Config/Config.h"
 
+// 为了向后兼容，保留Utils命名空间的别名
 namespace Utils {
-    const std::string WINDOW_TITLE = "To The Hell";
-    constexpr int WINDOW_WIDTH = 800;
-    constexpr int WINDOW_HEIGHT = 600;
-    constexpr int FPS = 60;
-    constexpr bool DEBUG_MODE = true;
-
-    const sf::Vector2f PLAYER_SIZE(60, 60);
-    const sf::Vector2f PLATFORM_SIZE(100, 12);
+    // 引用新的配置系统
+    using namespace Common::Config;
+    
+    // 向后兼容的常量别名
+    const auto& WINDOW_TITLE = GlobalConfig::WINDOW_TITLE;
+    const auto& WINDOW_WIDTH = GlobalConfig::WINDOW_WIDTH;
+    const auto& WINDOW_HEIGHT = GlobalConfig::WINDOW_HEIGHT;
+    const auto& FPS = GlobalConfig::FPS;
+    const auto& DEBUG_MODE = GlobalConfig::DEBUG_MODE;
+    
+    const auto& PLAYER_SIZE = GameConfig::PLAYER_SIZE;
+    const auto& PLATFORM_SIZE = GameConfig::PLATFORM_SIZE;
 }

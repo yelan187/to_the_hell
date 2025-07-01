@@ -2,9 +2,8 @@
 #include <SFML/Graphics.hpp>
 #include <map>
 #include <memory> 
-#include "Utils/Config.h"
+#include "Common/Config/Config.h"
 #include "Common/NotificationBase.h"
-#include "Model/Entities/Platform.h" // 用于PlatformType枚举
 
 namespace View{
 namespace UI {
@@ -12,11 +11,11 @@ namespace UI {
 /**
  * Platform类负责渲染不同类型的平台
  * 支持五种平台类型：
- * - NORMAL: 绿色矩形平台
- * - SPIKED: 红色矩形平台（危险）
- * - ROLLING: 绿色平台+黑色方向箭头
- * - FRAGILE: 绿色虚线边框平台
- * - BOUNCY: 绿色椭圆形平台
+ * - NORMAL (0): 绿色矩形平台
+ * - SPIKED (1): 红色矩形平台（危险）
+ * - ROLLING (2): 绿色平台+黑色方向箭头
+ * - FRAGILE (3): 绿色虚线边框平台
+ * - BOUNCY (4): 绿色椭圆形平台
  */
 class Platform {
 public:
@@ -25,6 +24,13 @@ public:
     void render();
 
 private:
+    // 平台类型常量定义（避免依赖Model层枚举）
+    static const int PLATFORM_NORMAL = 0;
+    static const int PLATFORM_SPIKED = 1;
+    static const int PLATFORM_ROLLING = 2;
+    static const int PLATFORM_FRAGILE = 3;
+    static const int PLATFORM_BOUNCY = 4;
+    
     int id;
     sf::RenderWindow& window;
     sf::RectangleShape rect;

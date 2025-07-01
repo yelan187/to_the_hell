@@ -7,6 +7,7 @@
 #include "Model/Entities/Bullet.h"
 #include "Model/Entities/Pickup.h"
 #include "Model/Entities/Skill.h"
+#include "Common/Config/Config.h"
 #include <chrono>
 #include <map>
 
@@ -40,7 +41,10 @@ public:
     int getTotalScore() { return total_score; }
     std::chrono::seconds getDuration() { return std::chrono::seconds(static_cast<int>(game_time)); }
     std::map<int, Entities::Platform*> getPlatforms() const { return platforms; }
-    Entities::Platform* getPlatformById(int id) const { return platforms.at(id); }
+    Entities::Platform* getPlatformById(int id) const { 
+        auto it = platforms.find(id);
+        return (it != platforms.end()) ? it->second : nullptr;
+    }
     std::map<int, Entities::Enemy*> getEnemies() const { return enemies; }
     void createBullet(sf::Vector2f position, sf::Vector2f velocity, bool is_player_bullet = false);
     std::map<int, Entities::Bullet*> getBullets() const { return bullets; }
@@ -64,8 +68,8 @@ public:
     // skill_id: 0=箭矢射击, 1=冲刺
     void playerUseSkill(int skill_id, sf::Vector2f direction = sf::Vector2f(1.0f, 0.0f));
     
-    sf::Vector2f platform_size = Utils::PLATFORM_SIZE;
-    sf::Vector2f player_size = sf::Vector2f(30, 60);
+    sf::Vector2f platform_size = Common::Config::GameConfig::PLATFORM_SIZE;
+    sf::Vector2f player_size = Common::Config::GameConfig::PLAYER_SIZE;
     
 private:
     bool init;
@@ -106,5 +110,6 @@ private:
     // 平台相关方法
     Entities::PlatformType getPlatformTypeRand();
     void resetPlatformGenerateInterval();
+    bool isPlatformPositionValid(sf::Vector2f position, sf::Vector2f size); // 检查平台位置是否有效（无碰撞）
 };
 }

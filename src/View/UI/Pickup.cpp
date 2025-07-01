@@ -34,19 +34,19 @@ void Pickup::update(const Common::FrameInfo::PickupInfo& info) {
     size = info.size;
     pickup_type = info.pickup_type;
     
-    if (pickup_type == 0) { // 普通圆形豆子
+    if (pickup_type == NORMAL_DOT_TYPE) { // 普通圆形豆子
         normal_shape.setRadius(size.x / 2);
         normal_shape.setPosition(position);
-    } else { // 五角星豆子
+    } else if (pickup_type == STAR_DOT_TYPE) { // 五角星豆子
         sf::Vector2f center = sf::Vector2f(position.x + size.x / 2, position.y + size.y / 2);
         createStarShape(center, size.x / 2);
     }
 }
 
 void Pickup::render() {
-    if (pickup_type == 0) {
+    if (pickup_type == NORMAL_DOT_TYPE) {
         window.draw(normal_shape);
-    } else {
+    } else if (pickup_type == STAR_DOT_TYPE) {
         window.draw(star_shape);
     }
 }

@@ -1,12 +1,9 @@
 #pragma once
 
 #include "Common/ParamBase.h"
+#include "Common/PageState.h"
 #include <chrono>
 #include <SFML/Graphics.hpp>  // 添加SFML头文件
-
-namespace View {
-    enum class PAGE_STATE;
-}
 
 namespace Common {
 
@@ -31,7 +28,7 @@ public:
 typedef CommandTypeParam<float> UpdateParam;
 
 typedef struct {
-    View::PAGE_STATE new_page_state;
+    Common::PAGE_STATE new_page_state;
     bool init;
 } ChangePageParamValue;
 typedef CommandTypeParam<ChangePageParamValue> ChangePageParam;

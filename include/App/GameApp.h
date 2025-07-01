@@ -2,6 +2,7 @@
 
 #include <memory>
 #include "Common/CommandBase.h"
+#include "Common/PageState.h"
 // include View/ViewModel/Model
 #include "View/MainMenuView.h"
 #include "ViewModel/MainMenuViewModel.h"
@@ -20,7 +21,7 @@ class GameApp {
 public:    
     GameApp(std::string game_title, sf::Vector2u window_size, int fps, bool debug=false);
     void run();
-    void changePage(View::PAGE_STATE new_page_state, bool init = true, void* info = nullptr);
+    void changePage(Common::PAGE_STATE new_page_state, bool init = true, void* info = nullptr);
 
 private:
     // Main Menu Page
@@ -46,7 +47,7 @@ private:
     void initScore(void* info);
 
     // current page
-    View::PAGE_STATE current_page_state = View::PAGE_STATE::MAIN_MENU;
+    Common::PAGE_STATE current_page_state = Common::PAGE_STATE::MAIN_MENU;
     std::shared_ptr<View::Page> page;
 
     // game info

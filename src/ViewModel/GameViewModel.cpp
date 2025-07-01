@@ -1,5 +1,7 @@
 #include <iostream>
 #include "ViewModel/GameViewModel.h"
+#include "Common/InternalNotification.h"
+#include "Common/Config/Config.h"
 
 using ViewModel::GameViewModel;
 
@@ -182,7 +184,7 @@ sf::Texture* GameViewModel::getPlayerTexture(Model::Entities::PlayerState state)
 Common::FrameInfo::PlatformInfo GameViewModel::getPlatformInfo(Common::_FrameInfo::PlatformInfo info) {
     Common::FrameInfo::PlatformInfo platform_info;
     platform_info.position = info.position;
-    platform_info.size = Utils::PLATFORM_SIZE;
+    platform_info.size = Common::Config::GameConfig::PLATFORM_SIZE;
     platform_info.platform_type = static_cast<int>(info.type);
     platform_info.rolling_direction = info.rolling_direction; // 使用Model层传递的真实滚动方向
     
