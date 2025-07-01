@@ -550,20 +550,71 @@ void GameModel::playerUseSkill(int skill_id, sf::Vector2f direction) {
             sf::Vector2f player_pos = player->getPosition();
             float sprint_distance = Common::Config::GameConfig::SKILL_SPRINT_DISTANCE; // 冲刺距离
             
-            // 根据玩家面向方向进行冲刺
-            sf::Vector2f target_pos = sf::Vector2f(
-                player_pos.x + player_facing.x * sprint_distance,
-                player_pos.y
-            );
+            // 获取玩家当前所在的平台ID（如果有的话）
+            int current_platform_id = player->getOnPlatformId();
             
-            // 确保不超出窗口边界
-            if (target_pos.x < 0) {
-                target_pos.x = 0;
-            } else if (target_pos.x + player_size.x > window_size.x) {
-                target_pos.x = window_size.x - player_size.x;
+            // 分步检测冲刺路径上的碰撞
+            float step_size = 5.0f; // 每步5像素
+            float current_distance = 0.0f;
+            sf::Vector2f final_pos = player_pos;
+            
+            while (current_distance < sprint_distance) {
+                sf::Vector2f test_pos = sf::Vector2f(
+                    player_pos.x + player_facing.x * (current_distance + step_size),
+                    player_pos.y
+                );
+                
+                // 检查窗口边界
+                if (test_pos.x < 0 || test_pos.x + player_size.x > window_size.x) {
+                    break;
+                }
+                
+                // 检查与平台的碰撞（忽略当前站立的平台）
+                bool collision = false;
+                sf::Vector2f test_player_rb = test_pos + player_size;
+                
+                for (const auto& platform_pair : platforms) {
+                    Platform* platform = platform_pair.second;
+                    
+                    // 忽略当前站立的平台，允许在其上移动
+                    if (current_platform_id != -1 && platform->id == current_platform_id) {
+                        continue;
+                    }
+                    
+                    sf::Vector2f platform_pos = platform->getPosition();
+                    sf::Vector2f platform_size = platform->getSize();
+                    sf::Vector2f platform_rb = platform_pos + platform_size;
+                    
+                    // 检查碰撞 - 使用AABB碰撞检测
+                    if (!(test_player_rb.x <= platform_pos.x || test_pos.x >= platform_rb.x ||
+                          test_player_rb.y <= platform_pos.y || test_pos.y >= platform_rb.y)) {
+                        collision = true;
+                        break;
+                    }
+                }
+                
+                if (collision) {
+                    break;
+                }
+                
+                final_pos = test_pos;
+                current_distance += step_size;
             }
             
-            player->setPosition(target_pos);
+            // 确保最终位置不会超出窗口边界
+            if (final_pos.x < 0) {
+                final_pos.x = 0;
+            } else if (final_pos.x + player_size.x > window_size.x) {
+                final_pos.x = window_size.x - player_size.x;
+            }
+            
+            if (final_pos.y < 0) {
+                final_pos.y = 0;
+            } else if (final_pos.y + player_size.y > window_size.y) {
+                final_pos.y = window_size.y - player_size.y;
+            }
+            
+            player->setPosition(final_pos);
             break;
         }
         default:
