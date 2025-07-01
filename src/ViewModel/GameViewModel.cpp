@@ -182,10 +182,27 @@ sf::Texture* GameViewModel::getPlayerTexture(Model::Entities::PlayerState state)
 Common::FrameInfo::PlatformInfo GameViewModel::getPlatformInfo(Common::_FrameInfo::PlatformInfo info) {
     Common::FrameInfo::PlatformInfo platform_info;
     platform_info.position = info.position;
+    platform_info.size = Utils::PLATFORM_SIZE;
+    platform_info.platform_type = static_cast<int>(info.type);
+    platform_info.rolling_direction = info.rolling_direction; // 使用Model层传递的真实滚动方向
+    
+    // 根据平台类型设置颜色（严格按照内层master实现）
     switch (info.type) {
         case Model::Entities::PlatformType::NORMAL:
-            platform_info.color = sf::Color::Green; // Default color for normal platforms
-            platform_info.size = Utils::PLATFORM_SIZE;
+            platform_info.color = sf::Color::Green; // 普通平台 - 绿色
+            break;
+        case Model::Entities::PlatformType::SPIKED:
+            platform_info.color = sf::Color::Red; // 带刺平台 - 红色
+            break;
+        case Model::Entities::PlatformType::ROLLING:
+            platform_info.color = sf::Color::Green; // 滚动平台 - 绿色底色，View层会添加黑色箭头
+            break;
+        case Model::Entities::PlatformType::FRAGILE:
+            platform_info.color = sf::Color::Transparent; // 脆弱平台 - 透明，View层会添加绿色虚线边框
+            break;
+        case Model::Entities::PlatformType::BOUNCY:
+            platform_info.color = sf::Color::Green; // 弹跳平台 - 绿色，View层会渲染为椭圆形
+            // 弹跳平台使用与普通平台相同的宽度
             break;
     }
     return platform_info;

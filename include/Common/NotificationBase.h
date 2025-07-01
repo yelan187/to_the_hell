@@ -62,6 +62,8 @@ typedef struct frameInfo{
         sf::Vector2f position;
         sf::Color color;
         sf::Vector2f size;
+        int platform_type;      // 平台类型（对应PlatformType枚举）
+        bool rolling_direction; // 滚动方向（true=右，false=左）仅滚动平台使用
     } PlatformInfo;
     std::map<int, PlatformInfo> platforms_info;
     std::vector<int> platforms_id;
@@ -116,6 +118,7 @@ typedef struct _frameInfo{
     typedef struct {
         sf::Vector2f position;
         Model::Entities::PlatformType type;
+        bool rolling_direction; // 滚动方向（true=右，false=左）
     } PlatformInfo;
     std::map<int, PlatformInfo> platforms_info;
     std::vector<int> platforms_id;

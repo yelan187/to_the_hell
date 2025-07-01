@@ -70,6 +70,7 @@ void GameModel::fire() {
         platforms_id.push_back(pair.first);
         platforms_info[pair.first].position = pair.second->getPosition();
         platforms_info[pair.first].type = pair.second->type;
+        platforms_info[pair.first].rolling_direction = pair.second->getRollingDirection();
     }
     param->value.platforms_id = platforms_id;
     param->value.platforms_info = platforms_info;
@@ -153,7 +154,16 @@ void GameModel::update(float delta_time) {
     for (auto it = platforms.begin(); it != platforms.end(); ) {
         Entities::Platform* platform = it->second;
         platform->update(delta_time);
-        if (platform->outOfWindow(window_size)) {
+        
+        // 检查脆弱平台是否破碎
+        if (platform->isBroken()) {
+            // 如果玩家在这个平台上，让玩家掉落
+            if (player && player->getOnPlatformId() == platform->id) {
+                player->fall(); // 让玩家开始下落
+            }
+            delete platform;
+            it = platforms.erase(it);
+        } else if (platform->outOfWindow(window_size)) {
             delete platform;
             it = platforms.erase(it);
         } else {
@@ -226,6 +236,12 @@ void GameModel::update(float delta_time) {
         return;
     }
     
+    // 检查玩家是否死亡（例如踩到带刺平台）
+    if (player && player->isDead()) {
+        gameOver();
+        return;
+    }
+    
     // 检查玩家箭矢击中敌人
     checkPlayerBulletEnemyCollisions();
     
@@ -261,7 +277,8 @@ void GameModel::initPlatforms() {
             static_cast<float>(window_size.y / 3 + window_size.y / 2 / initial_platforms * i)
         );
         
-        PlatformType type = getPlatformTypeRand();
+        // 初始平台都设为普通平台，确保玩家安全开始游戏
+        PlatformType type = PlatformType::NORMAL;
 
         platforms[id] = new Entities::Platform(id, type, position, platform_size, scroll_speed);
     }
@@ -498,8 +515,19 @@ void GameModel::playerUseSkill(int skill_id, sf::Vector2f direction) {
 
 // 实现缺失的方法
 Model::Entities::PlatformType GameModel::getPlatformTypeRand() {
-    // 简单实现：目前只返回NORMAL类型
-    return Entities::PlatformType::NORMAL;
+    int random = rand() % 100;
+    
+    if (random < 50) {
+        return Entities::PlatformType::NORMAL;      // 50% 普通平台
+    } else if (random < 65) {
+        return Entities::PlatformType::ROLLING;     // 15% 滚动平台
+    } else if (random < 80) {
+        return Entities::PlatformType::BOUNCY;      // 15% 弹跳平台
+    } else if (random < 95) {
+        return Entities::PlatformType::FRAGILE;     // 15% 脆弱平台
+    } else {
+        return Entities::PlatformType::SPIKED;      // 5% 带刺平台（最危险，概率最低）
+    }
 }
 
 // 初始化技能系统

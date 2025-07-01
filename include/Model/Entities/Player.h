@@ -64,6 +64,11 @@ public:
     void walkRight();
     void stopLeft();
     void stopRight();
+    
+    // 处理平台特殊效果
+    void handlePlatformEffects(Platform* platform);
+    void bounce(float bounce_force); // 弹跳效果
+    void kill() { is_dead = true; }
 
     PlayerState getState() const { return state; }
     sf::Vector2f getPosition() const { return position; }

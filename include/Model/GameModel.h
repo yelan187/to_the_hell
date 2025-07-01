@@ -97,7 +97,7 @@ private:
     void cleanupOutOfBoundsEntities();
     void fire();
     
-    // 新增：缺失的方法声明
+    // 平台相关方法
     Entities::PlatformType getPlatformTypeRand();
     void resetPlatformGenerateInterval();
 };
