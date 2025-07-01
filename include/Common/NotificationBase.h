@@ -84,6 +84,7 @@ typedef struct frameInfo{
         sf::Vector2f size;
         sf::Color color;
         bool is_player_bullet;  // 是否为玩家箭矢
+        sf::Vector2f velocity;  // 子弹速度方向
     } BulletInfo;
     std::map<int, BulletInfo> bullets_info;
     std::vector<int> bullets_id;
@@ -138,6 +139,7 @@ typedef struct _frameInfo{
         sf::Vector2f position;
         sf::Vector2f size;
         bool is_player_bullet;  // 是否为玩家箭矢
+        sf::Vector2f velocity;  // 子弹速度方向
     } BulletInfo;
     std::map<int, BulletInfo> bullets_info;
     std::vector<int> bullets_id;

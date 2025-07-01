@@ -15,6 +15,7 @@ public:
     
     sf::Vector2f getPosition() const { return position; }
     sf::Vector2f getSize() const { return size; }
+    sf::Vector2f getVelocity() const { return velocity; }
     int getId() const { return id; }
     bool isPlayerBullet() const { return is_player_bullet; }
 

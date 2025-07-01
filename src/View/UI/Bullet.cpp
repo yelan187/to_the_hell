@@ -17,14 +17,28 @@ void Bullet::createArrowShape() {
     float arrow_length = width * 2.0f;  // 箭矢比原始size更长
     float arrow_width = height;
     
-    // 箭头的7个点（箭头指向右）
-    arrow_shape.setPoint(0, sf::Vector2f(position.x + arrow_length, position.y + arrow_width / 2)); // 箭头尖端
-    arrow_shape.setPoint(1, sf::Vector2f(position.x + arrow_length * 0.7f, position.y)); // 上侧
-    arrow_shape.setPoint(2, sf::Vector2f(position.x + arrow_length * 0.7f, position.y + arrow_width * 0.3f)); // 上杆
-    arrow_shape.setPoint(3, sf::Vector2f(position.x, position.y + arrow_width * 0.3f)); // 左上杆
-    arrow_shape.setPoint(4, sf::Vector2f(position.x, position.y + arrow_width * 0.7f)); // 左下杆
-    arrow_shape.setPoint(5, sf::Vector2f(position.x + arrow_length * 0.7f, position.y + arrow_width * 0.7f)); // 下杆
-    arrow_shape.setPoint(6, sf::Vector2f(position.x + arrow_length * 0.7f, position.y + arrow_width)); // 下侧
+    // 判断箭矢方向：根据速度的x分量确定朝向
+    bool pointing_right = velocity.x > 0;
+    
+    if (pointing_right) {
+        // 箭头指向右的7个点
+        arrow_shape.setPoint(0, sf::Vector2f(position.x + arrow_length, position.y + arrow_width / 2)); // 箭头尖端
+        arrow_shape.setPoint(1, sf::Vector2f(position.x + arrow_length * 0.7f, position.y)); // 上侧
+        arrow_shape.setPoint(2, sf::Vector2f(position.x + arrow_length * 0.7f, position.y + arrow_width * 0.3f)); // 上杆
+        arrow_shape.setPoint(3, sf::Vector2f(position.x, position.y + arrow_width * 0.3f)); // 左上杆
+        arrow_shape.setPoint(4, sf::Vector2f(position.x, position.y + arrow_width * 0.7f)); // 左下杆
+        arrow_shape.setPoint(5, sf::Vector2f(position.x + arrow_length * 0.7f, position.y + arrow_width * 0.7f)); // 下杆
+        arrow_shape.setPoint(6, sf::Vector2f(position.x + arrow_length * 0.7f, position.y + arrow_width)); // 下侧
+    } else {
+        // 箭头指向左的7个点（镜像）
+        arrow_shape.setPoint(0, sf::Vector2f(position.x, position.y + arrow_width / 2)); // 箭头尖端
+        arrow_shape.setPoint(1, sf::Vector2f(position.x + arrow_length * 0.3f, position.y)); // 上侧
+        arrow_shape.setPoint(2, sf::Vector2f(position.x + arrow_length * 0.3f, position.y + arrow_width * 0.3f)); // 上杆
+        arrow_shape.setPoint(3, sf::Vector2f(position.x + arrow_length, position.y + arrow_width * 0.3f)); // 右上杆
+        arrow_shape.setPoint(4, sf::Vector2f(position.x + arrow_length, position.y + arrow_width * 0.7f)); // 右下杆
+        arrow_shape.setPoint(5, sf::Vector2f(position.x + arrow_length * 0.3f, position.y + arrow_width * 0.7f)); // 下杆
+        arrow_shape.setPoint(6, sf::Vector2f(position.x + arrow_length * 0.3f, position.y + arrow_width)); // 下侧
+    }
     
     arrow_shape.setFillColor(sf::Color::Yellow);
 }
@@ -32,6 +46,7 @@ void Bullet::createArrowShape() {
 void Bullet::update(const Common::FrameInfo::BulletInfo& info) {
     position = info.position;
     size = info.size;
+    velocity = info.velocity;
     is_player_bullet = info.is_player_bullet;
     
     if (is_player_bullet) {

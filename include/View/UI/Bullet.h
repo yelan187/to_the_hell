@@ -18,6 +18,7 @@ private:
     sf::ConvexShape arrow_shape;      // 用于玩家箭矢
     sf::Vector2f position;
     sf::Vector2f size;
+    sf::Vector2f velocity;            // 子弹速度方向
     bool is_player_bullet;
     
     void createArrowShape();

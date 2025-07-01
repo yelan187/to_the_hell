@@ -96,6 +96,7 @@ void GameModel::fire() {
         bullets_info[pair.first].position = pair.second->getPosition();
         bullets_info[pair.first].size = pair.second->getSize();
         bullets_info[pair.first].is_player_bullet = pair.second->isPlayerBullet();
+        bullets_info[pair.first].velocity = pair.second->getVelocity();
     }
     param->value.bullets_id = bullets_id;
     param->value.bullets_info = bullets_info;
@@ -210,7 +211,7 @@ void GameModel::update(float delta_time) {
     pickup_generate_interval -= delta_time;
     if (pickup_generate_interval <= 0.0f) {
         generatePickup();
-        pickup_generate_interval = 2.0f + static_cast<float>(rand() % 2);
+        pickup_generate_interval = 0.8f + static_cast<float>(rand() % 8) / 10.0f; // 0.8-1.6秒间隔，提高生成频率
     }
     
     for (auto it = pickups.begin(); it != pickups.end(); ) {
@@ -272,9 +273,10 @@ void GameModel::initPlatforms() {
     for (int i = 0; i < initial_platforms; ++i) {
         int id = i;
         
+        // 调整初始平台位置到页面中间部分，增加垂直间隔
         sf::Vector2f position(
             static_cast<float>(rand() % static_cast<int>(window_size.x - platform_size.x)),
-            static_cast<float>(window_size.y / 3 + window_size.y / 2 / initial_platforms * i)
+            static_cast<float>(window_size.y / 2 + (window_size.y * 2 / 3) / initial_platforms * i)
         );
         
         // 初始平台都设为普通平台，确保玩家安全开始游戏
@@ -303,7 +305,7 @@ void GameModel::initGame() {
     game_time = 0;
     resetPlatformGenerateInterval();
     enemy_generate_interval = 5.0f;
-    pickup_generate_interval = 3.0f;
+    pickup_generate_interval = 2.0f; // 豆子生成间隔
     initPlatforms();
     initPlayer();
     initSkills();
@@ -313,10 +315,10 @@ void GameModel::createBullet(sf::Vector2f position, sf::Vector2f velocity, bool 
     sf::Vector2f bullet_size;
     if (is_player_bullet) {
         // 玩家箭矢：更长更薄的形状
-        bullet_size = sf::Vector2f(16, 4);
+        bullet_size = sf::Vector2f(16, 8);
     } else {
         // 敌人子弹：小圆形
-        bullet_size = sf::Vector2f(6, 6);
+        bullet_size = sf::Vector2f(10, 10);
     }
     bullets[next_bullet_id] = new Entities::Bullet(next_bullet_id, position, velocity, bullet_size, is_player_bullet);
     next_bullet_id++;
@@ -349,35 +351,57 @@ void GameModel::generateEnemy() {
 void GameModel::generatePickup() {
     sf::Vector2f pickup_size(15, 15);
     
-    bool is_star = (rand() % 100) < 20;
+    int random_chance = rand() % 100;
+    bool is_star = random_chance < 30; // 增加到30%的概率
+    
+    std::cout << "Pickup generation: random=" << random_chance << ", is_star=" << is_star << std::endl;
     
     if (is_star) {
+        // 星形豆子从下方进入页面，像平台一样
         sf::Vector2f position(
             rand() % static_cast<int>(window_size.x - pickup_size.x),
-            window_size.y + pickup_size.y
+            window_size.y  // 从页面底部进入
         );
         pickups[next_pickup_id] = new Entities::Pickup(
             next_pickup_id, Entities::PickupType::STAR_DOT, position, pickup_size, this, -1
         );
+        next_pickup_id++;
+        std::cout << "Generated star pickup at (" << position.x << ", " << position.y << ") with ID " << (next_pickup_id-1) << std::endl;
     } else {
         if (!platforms.empty()) {
-            auto it = platforms.begin();
-            std::advance(it, rand() % platforms.size());
-            int platform_id = it->first;
+            // 寻找位置最低的平台（y坐标最大的）
+            int selected_platform_id = -1;
+            float lowest_y = -1.0f;
             
-            sf::Vector2f platform_pos = it->second->getPosition();
-            sf::Vector2f platform_size = it->second->getSize();
-            sf::Vector2f position(
-                platform_pos.x + rand() % static_cast<int>(platform_size.x - pickup_size.x),
-                platform_pos.y - pickup_size.y
-            );
+            for (const auto& platform_pair : platforms) {
+                sf::Vector2f platform_pos = platform_pair.second->getPosition();
+                // 选择y坐标最大的平台（位置最低）
+                if (platform_pos.y > lowest_y) {
+                    lowest_y = platform_pos.y;
+                    selected_platform_id = platform_pair.first;
+                }
+            }
             
-            pickups[next_pickup_id] = new Entities::Pickup(
-                next_pickup_id, Entities::PickupType::NORMAL_DOT, position, pickup_size, this, platform_id
-            );
+            if (selected_platform_id != -1) {
+                sf::Vector2f platform_pos = platforms[selected_platform_id]->getPosition();
+                sf::Vector2f platform_size = platforms[selected_platform_id]->getSize();
+                sf::Vector2f position(
+                    platform_pos.x + rand() % static_cast<int>(platform_size.x - pickup_size.x),
+                    platform_pos.y - pickup_size.y
+                );
+                
+                pickups[next_pickup_id] = new Entities::Pickup(
+                    next_pickup_id, Entities::PickupType::NORMAL_DOT, position, pickup_size, this, selected_platform_id
+                );
+                next_pickup_id++;
+                std::cout << "Generated normal pickup at (" << position.x << ", " << position.y << ") with ID " << (next_pickup_id-1) << std::endl;
+            } else {
+                std::cout << "No platform found for normal pickup" << std::endl;
+            }
+        } else {
+            std::cout << "No platforms available for pickup generation" << std::endl;
         }
     }
-    next_pickup_id++;
 }
 
 bool GameModel::checkBulletPlayerCollisions() {

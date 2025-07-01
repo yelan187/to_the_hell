@@ -15,10 +15,12 @@ private:
     int id;
     sf::RenderWindow& window;
     sf::CircleShape normal_shape;    // 圆形豆子
-    sf::CircleShape star_shape;      // 五角星豆子（暂用圆形，可扩展为星形）
+    sf::ConvexShape star_shape;      // 五角星豆子
     sf::Vector2f position;
     sf::Vector2f size;
     int pickup_type;
+    
+    void createStarShape(sf::Vector2f center, float radius);
 };
 
 }

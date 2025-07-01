@@ -255,6 +255,7 @@ void GameViewModel::forwarding(const Common::_FrameInfo& frame_info) {
         bullets_info[id].position = info.position;
         bullets_info[id].size = info.size;
         bullets_info[id].is_player_bullet = info.is_player_bullet;
+        bullets_info[id].velocity = info.velocity;
         // 玩家箭矢为黄色，敌人子弹为白色
         bullets_info[id].color = info.is_player_bullet ? sf::Color::Yellow : sf::Color::White;
     }
