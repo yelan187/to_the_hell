@@ -17,7 +17,6 @@ static float PLAYER_JUMP_FORCE;
 static float PLAYER_GRAVITY;
 static float PLAYER_MAX_FALL_SPEED;
 static float PLAYER_FALL_ACCELERATION;       // 玩家手动下落时的额外加速度
-static float PLAYER_INITIAL_Y_RATIO;         // 玩家初始Y位置比例（相对窗口高度）
 static float PLAYER_COLLISION_SHRINK_RATIO;  // 玩家碰撞框水平方向缩小比例（0-1）
 
 // 平台配置
