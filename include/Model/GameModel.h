@@ -18,6 +18,11 @@ namespace Model {
 }
 
 namespace Model {
+/**
+ * GameModel类 - 游戏核心逻辑模型
+ * 管理游戏中的所有实体：玩家、平台、敌人、子弹、豆子、技能
+ * 处理碰撞检测、实体生成、游戏状态更新等核心功能
+ */
 class GameModel : public Model {
 public:
     GameModel(sf::Vector2u window_size);
@@ -55,7 +60,8 @@ public:
     void playerStopLeft();
     void playerStopRight();
     
-    // 技能系统
+    // 技能系统：支持两种技能
+    // skill_id: 0=箭矢射击, 1=冲刺
     void playerUseSkill(int skill_id, sf::Vector2f direction = sf::Vector2f(1.0f, 0.0f));
     
     sf::Vector2f platform_size = Utils::PLATFORM_SIZE;

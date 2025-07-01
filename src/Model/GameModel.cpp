@@ -459,7 +459,7 @@ void GameModel::playerStopRight() {
     player->stopRight();
 }
 
-// 统一的技能系统实现（严格按照内层xueba/master的两个技能）
+// 技能系统实现：支持箭矢射击和冲刺技能
 void GameModel::playerUseSkill(int skill_id, sf::Vector2f direction) {
     if (!player) return;
     

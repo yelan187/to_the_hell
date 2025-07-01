@@ -83,23 +83,23 @@ void Platform::renderRollingPlatform() {
     // 先绘制绿色平台基础
     window.draw(rect);
     
-    // 然后绘制箭头指示滚动方向
+    // 绘制黑色箭头指示滚动方向
     sf::Vector2f pos = platform_info.position;
     sf::Vector2f size = platform_info.size;
     bool rolling_right = platform_info.rolling_direction;
     
     sf::Color arrow_color(0, 0, 0); // 黑色箭头，在绿色背景上更醒目
     
-    // 在平台中央绘制多个箭头
+    // 在平台中央绘制3个箭头
     float center_y = pos.y + size.y / 2.0f;
-    int num_arrows = 3; // 绘制3个箭头
+    int num_arrows = 3;
     float arrow_spacing = size.x / (num_arrows + 1);
     
     for (int i = 1; i <= num_arrows; i++) {
         float arrow_x = pos.x + arrow_spacing * i;
         
         if (rolling_right) {
-            // 向右的箭头: 使用三角形
+            // 向右箭头：三角形旋转90度
             sf::CircleShape arrow_triangle(6, 3); // 半径6，3个顶点形成三角形
             arrow_triangle.setFillColor(arrow_color);
             arrow_triangle.setOrigin(6, 6);
@@ -107,7 +107,7 @@ void Platform::renderRollingPlatform() {
             arrow_triangle.setRotation(90); // 旋转90度使箭头指向右边
             window.draw(arrow_triangle);
         } else {
-            // 向左的箭头: 使用三角形
+            // 向左箭头：三角形旋转270度
             sf::CircleShape arrow_triangle(6, 3); // 半径6，3个顶点形成三角形
             arrow_triangle.setFillColor(arrow_color);
             arrow_triangle.setOrigin(6, 6);
@@ -124,9 +124,9 @@ void Platform::renderBouncyPlatform() {
 }
 
 void Platform::setupEllipse(const Common::FrameInfo::PlatformInfo& platform_info) {
-    // 设置椭圆形状用于弹跳平台（严格按照内层master实现）
+    // 设置椭圆形状用于弹跳平台
     ellipse.setRadius(platform_info.size.x / 2.0f); // 使用平台宽度的一半作为半径
-    ellipse.setScale(1.0f, 0.2f); // 压扁成椭圆（高度压缩到20%，更扁）
+    ellipse.setScale(1.0f, 0.2f); // 压扁成椭圆，高度压缩到20%
     ellipse.setFillColor(sf::Color::Green);
     ellipse.setPosition(platform_info.position);
 }

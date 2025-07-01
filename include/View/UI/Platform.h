@@ -9,6 +9,15 @@
 namespace View{
 namespace UI {
 
+/**
+ * Platform类负责渲染不同类型的平台
+ * 支持五种平台类型：
+ * - NORMAL: 绿色矩形平台
+ * - SPIKED: 红色矩形平台（危险）
+ * - ROLLING: 绿色平台+黑色方向箭头
+ * - FRAGILE: 绿色虚线边框平台
+ * - BOUNCY: 绿色椭圆形平台
+ */
 class Platform {
 public:
     Platform(int id, sf::RenderWindow& window) : id(id), window(window) {}
