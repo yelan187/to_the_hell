@@ -554,7 +554,7 @@ void GameModel::playerUseSkill(int skill_id, sf::Vector2f direction) {
             int current_platform_id = player->getOnPlatformId();
             
             // 分步检测冲刺路径上的碰撞
-            float step_size = 5.0f; // 每步5像素
+            float step_size = 2.0f; // 每步2像素，更精确的检测
             float current_distance = 0.0f;
             sf::Vector2f final_pos = player_pos;
             
@@ -571,23 +571,17 @@ void GameModel::playerUseSkill(int skill_id, sf::Vector2f direction) {
                 
                 // 检查与平台的碰撞（忽略当前站立的平台）
                 bool collision = false;
-                sf::Vector2f test_player_rb = test_pos + player_size;
                 
                 for (const auto& platform_pair : platforms) {
-                    Platform* platform = platform_pair.second;
+                    Entities::Platform* platform = platform_pair.second;
                     
                     // 忽略当前站立的平台，允许在其上移动
                     if (current_platform_id != -1 && platform->id == current_platform_id) {
                         continue;
                     }
                     
-                    sf::Vector2f platform_pos = platform->getPosition();
-                    sf::Vector2f platform_size = platform->getSize();
-                    sf::Vector2f platform_rb = platform_pos + platform_size;
-                    
-                    // 检查碰撞 - 使用AABB碰撞检测
-                    if (!(test_player_rb.x <= platform_pos.x || test_pos.x >= platform_rb.x ||
-                          test_player_rb.y <= platform_pos.y || test_pos.y >= platform_rb.y)) {
+                    // 使用Player的碰撞检测方法来检查是否会发生碰撞
+                    if (player->collisionDetection(platform, test_pos)) {
                         collision = true;
                         break;
                     }

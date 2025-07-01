@@ -16,6 +16,7 @@ float GameConfig::PLAYER_JUMP_FORCE = 400.0f;
 float GameConfig::PLAYER_GRAVITY = 800.0f;
 float GameConfig::PLAYER_MAX_FALL_SPEED = 600.0f;
 float GameConfig::PLAYER_INITIAL_Y_RATIO = 0.2f;  // 1/5 = 0.2
+float GameConfig::PLAYER_COLLISION_SHRINK_RATIO = 0.3f;  // 水平方向缩小30%
 
 // 平台配置
 sf::Vector2f GameConfig::PLATFORM_SIZE(100.0f, 12.0f);

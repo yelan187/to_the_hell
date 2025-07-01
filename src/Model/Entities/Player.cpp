@@ -1,7 +1,7 @@
 #include "Model/Entities/Player.h"
 #include "Model/Entities/Platform.h"
-#include "Model/GameModel.h" // Include the definition of GameModel
-#include "Utils/Config.h"
+#include "Model/GameModel.h"
+
 
 using Model::Entities::Player;
 
@@ -184,7 +184,12 @@ bool Player::collisionDetection(Platform* platform) {
 
 bool Player::collisionDetection(Platform* platform, sf::Vector2f p) {
     sf::Vector2f player_lt = p;
-    sf::Vector2f player_rb = player_lt + getSize();
+    sf::Vector2f player_rb = p + getSize();
+
+    // 只在平台检测时缩小水平碰撞框，垂直方向保持完整
+    float shrink_amount = getSize().x * Common::Config::GameConfig::PLAYER_COLLISION_SHRINK_RATIO;
+    player_lt.x += shrink_amount; // 玩家碰撞框左上角向右偏移
+    player_rb.x -= shrink_amount; // 玩家碰撞框右下角向左偏移
 
     sf::Vector2f platform_lt = platform->getPosition();
     sf::Vector2f platform_rb = platform_lt + platform->getSize();
@@ -233,6 +238,12 @@ sf::Vector2f Player::findCollisionPosition(Platform* platform,
 void Player::handleCollision(Platform* platform, sf::Vector2f prev_position, float delta_time) {
     // std::cout << "Handling collision with platform ID: " << platform->id << std::endl;
     sf::Vector2f p = findCollisionPosition(platform, prev_position, delta_time);
+    
+    // 计算缩小后的水平碰撞框
+    float shrink_amount = getSize().x * Common::Config::GameConfig::PLAYER_COLLISION_SHRINK_RATIO;
+    sf::Vector2f effective_lt = sf::Vector2f(p.x + shrink_amount, p.y);
+    sf::Vector2f effective_rb = sf::Vector2f(p.x + getSize().x - shrink_amount, p.y + getSize().y);
+    
     if ((p.y + getSize().y) <= (platform->getPosition().y + 2)) {
         /*
          * player is above the platform
@@ -241,15 +252,11 @@ void Player::handleCollision(Platform* platform, sf::Vector2f prev_position, flo
         setPosition(p);
         on_platform = true;
         on_platform_id = platform->id;
-        
         // 处理平台特殊效果
         handlePlatformEffects(platform);
-        
         if (state == PlayerState::JUMPING_WALKING) {
-            // std::cout << "Player landed on platform" << std::endl;
             state = PlayerState::WALKING;
         } else if (state == PlayerState::JUMPING_IDLE) {
-            // std::cout << "Player landed on platform" << std::endl;
             state = PlayerState::IDLE;
         }
     } else if (p.y >= (platform->getPosition().y + platform->getSize().y - 1)) {
@@ -261,7 +268,7 @@ void Player::handleCollision(Platform* platform, sf::Vector2f prev_position, flo
         on_platform = false;
         on_platform_id = -1;
         collision_direction = CollisionDirection::UP;
-    } else if ((p.x + getSize().x) <= (platform->getPosition().x + 1)) {
+    } else if ((effective_rb.x) <= (platform->getPosition().x + 1)) {
         /*
          * player is to the left of the platform
          */
@@ -270,7 +277,7 @@ void Player::handleCollision(Platform* platform, sf::Vector2f prev_position, flo
         on_platform = false;
         on_platform_id = -1;
         collision_direction = CollisionDirection::RIGHT;
-    } else if (p.x >= (platform->getPosition().x + platform->getSize().x - 1)) {
+    } else if (effective_lt.x >= (platform->getPosition().x + platform->getSize().x - 1)) {
         /*
          * player is to the right of the platform
          */
