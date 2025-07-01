@@ -19,15 +19,6 @@ public:
     // 调试配置
     static bool DEBUG_MODE;
     
-    // 资源路径配置
-    static const std::string ASSETS_PATH;
-    static const std::string FONTS_PATH;
-    static const std::string IMAGES_PATH;
-    static const std::string SOUNDS_PATH;
-    
-    // 基础UI配置
-    static const sf::Color DEFAULT_TEXT_COLOR;
-    static const sf::Color DEFAULT_BACKGROUND_COLOR;
     
 private:
     GlobalConfig() = default; // 静态类，禁止实例化

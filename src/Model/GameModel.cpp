@@ -286,7 +286,7 @@ void GameModel::generatePlatform() {
 }
 
 void GameModel::initPlatforms() {
-    const int initial_platforms = Common::Config::GameConfig::INITIAL_PLATFORM_COUNT;
+    const int initial_platforms = 3;
     for (int i = 0; i < initial_platforms; ++i) {
         int id = i;
         
@@ -323,7 +323,7 @@ void GameModel::initPlayer() {
 
 void GameModel::resetPlatformGenerateInterval() {
     platform_generate_interval = Common::Config::GameConfig::PLATFORM_GENERATE_INTERVAL + 
-                                 static_cast<float>(rand()) / RAND_MAX * (2 * Common::Config::GameConfig::GENERATE_INTERVAL_VARIANCE) - Common::Config::GameConfig::GENERATE_INTERVAL_VARIANCE; // ±配置的随机变化
+                                 static_cast<float>(rand()) / RAND_MAX * (2 * Common::Config::GameConfig::PLATFORM_GENERATE_INTERVAL_VARIANCE) - Common::Config::GameConfig::PLATFORM_GENERATE_INTERVAL_VARIANCE; // ±配置的随机变化
 }
 
 void GameModel::initGame() {
@@ -345,7 +345,7 @@ void GameModel::createBullet(sf::Vector2f position, sf::Vector2f velocity, bool 
         bullet_size = Common::Config::GameConfig::BULLET_SIZE;
     } else {
         // 敌人子弹：小圆形，稍小一些
-        bullet_size = sf::Vector2f(Common::Config::GameConfig::BULLET_SIZE.x * Common::Config::GameConfig::BULLET_SIZE_SCALE, Common::Config::GameConfig::BULLET_SIZE.y * Common::Config::GameConfig::BULLET_SIZE_SCALE);
+        bullet_size = sf::Vector2f(Common::Config::GameConfig::BULLET_SIZE.x * 0.6f, Common::Config::GameConfig::BULLET_SIZE.y * 0.6f);
     }
     bullets[next_bullet_id] = new Entities::Bullet(next_bullet_id, position, velocity, bullet_size, is_player_bullet);
     next_bullet_id++;
@@ -426,9 +426,18 @@ void GameModel::generatePickup() {
 bool GameModel::checkBulletPlayerCollisions() {
     for (const auto& bullet_pair : bullets) {
         // 只检查敌人的子弹，不检查玩家的箭矢
-        if (!bullet_pair.second->isPlayerBullet() && 
-            bullet_pair.second->collidesWith(player->getPosition(), player->getSize())) {
-            return true;
+        if (!bullet_pair.second->isPlayerBullet()) {
+            // 使用玩家碰撞缩放参数，只在水平方向缩小碰撞框
+            sf::Vector2f player_pos = player->getPosition();
+            sf::Vector2f player_size = player->getSize();
+            
+            float shrink_amount = player_size.x * Common::Config::GameConfig::PLAYER_COLLISION_SHRINK_RATIO;
+            sf::Vector2f effective_player_pos(player_pos.x + shrink_amount, player_pos.y);
+            sf::Vector2f effective_player_size(player_size.x - 2 * shrink_amount, player_size.y);
+            
+            if (bullet_pair.second->collidesWith(effective_player_pos, effective_player_size)) {
+                return true;
+            }
         }
     }
     return false;
