@@ -63,7 +63,7 @@ void GameView::updateframe(Common::FrameInfo frame_info) {
         platforms.push_back(platform);
     }
     
-    // 新增：更新敌人
+    // 更新敌人
     enemies.clear();
     for (int id : frame_info.enemies_id) {
         View::UI::Enemy enemy(id, window);
@@ -71,7 +71,7 @@ void GameView::updateframe(Common::FrameInfo frame_info) {
         enemies.push_back(enemy);
     }
     
-    // 新增：更新子弹
+    // 更新子弹
     bullets.clear();
     for (int id : frame_info.bullets_id) {
         View::UI::Bullet bullet(id, window);
@@ -79,7 +79,7 @@ void GameView::updateframe(Common::FrameInfo frame_info) {
         bullets.push_back(bullet);
     }
     
-    // 新增：更新豆子
+    // 更新豆子
     pickups.clear();
     for (int id : frame_info.pickups_id) {
         pickups.emplace_back(id, window);
@@ -105,15 +105,15 @@ void GameView::render() {
     for (auto &p: platforms)
         p.render();
         
-    // 新增：渲染敌人
+    // 渲染敌人
     for (auto &e: enemies)
         e.render();
         
-    // 新增：渲染子弹
+    // 渲染子弹
     for (auto &b: bullets)
         b.render();
         
-    // 新增：渲染豆子
+    // 渲染豆子
     for (auto &pickup: pickups)
         pickup.render();
         

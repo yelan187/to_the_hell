@@ -110,7 +110,7 @@ private:
     sf::Vector2f velocity;
     sf::Vector2f gravity;
 
-    // 添加面向方向
+    // 面向方向
     sf::Vector2f facing_direction;
 
     CollisionDirection collision_direction;

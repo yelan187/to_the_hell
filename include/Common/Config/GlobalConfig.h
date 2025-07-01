@@ -11,17 +11,17 @@ namespace Config {
 class GlobalConfig {
 public:
     // 窗口配置
-    static const std::string WINDOW_TITLE;
-    static const int WINDOW_WIDTH;
-    static const int WINDOW_HEIGHT;
-    static const int FPS;
+    static const std::string WINDOW_TITLE;               // 游戏窗口标题
+    static const int WINDOW_WIDTH;                       // 窗口宽度
+    static const int WINDOW_HEIGHT;                      // 窗口高度
+    static const int FPS;                                // 目标帧率
     
     // 调试配置
-    static bool DEBUG_MODE;
+    static bool DEBUG_MODE;                              // 调试模式开关
     
     
 private:
-    GlobalConfig() = default; // 静态类，禁止实例化
+    GlobalConfig() = default;                            // 静态类，禁止实例化
 };
 
 }

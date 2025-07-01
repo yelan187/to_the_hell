@@ -3,7 +3,7 @@
 #include "Common/ParamBase.h"
 #include "Common/PageState.h"
 #include <chrono>
-#include <SFML/Graphics.hpp>  // 添加SFML头文件
+#include <SFML/Graphics.hpp>
 
 namespace Common {
 
@@ -41,8 +41,8 @@ typedef CommandTypeParam<GameOverParamValue> GameOverCommandParam;
 
 // 玩家技能命令参数
 typedef struct {
-    int skill_id;      // 技能ID：0=箭矢射击, 1=冲刺
-    sf::Vector2f direction;  // 方向参数（用于箭矢射击方向）
+    int skill_id;
+    sf::Vector2f direction;
 } PlayerSkillParamValue;
 typedef CommandTypeParam<PlayerSkillParamValue> PlayerSkillParam;
 

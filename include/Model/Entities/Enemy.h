@@ -24,7 +24,7 @@ public:
     sf::Vector2f getSize() const { return size; }
     EnemyType getType() const { return type; }
     int getId() const { return id; }
-    sf::Vector2f getFacingDirection() const { return facing_direction; }  // 获取面向方向
+    sf::Vector2f getFacingDirection() const { return facing_direction; }
     
     bool canShoot() const;
     void shoot();
@@ -35,7 +35,7 @@ private:
     sf::Vector2f position;
     sf::Vector2f size;
     sf::Vector2f velocity;
-    sf::Vector2f facing_direction;  // 新增：面向方向
+    sf::Vector2f facing_direction;
     GameModel* game_model;
     
     float shoot_timer;

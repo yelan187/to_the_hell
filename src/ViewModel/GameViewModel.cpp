@@ -47,6 +47,7 @@ std::string GameViewModel::getTotalScoreText() {
 }
 
 void GameViewModel::playerJump() {
+    // 防止按键重复触发，实现按键状态管理
     if (!key_state[sf::Keyboard::W]) {
         model->playerJump();
         key_state[sf::Keyboard::W] = true;
@@ -54,6 +55,7 @@ void GameViewModel::playerJump() {
 }
 
 void GameViewModel::playerDown() {
+    // 防止连续下落命令，实现单次按键效果
     if (!key_state[sf::Keyboard::S]) {
         model->playerDown();
         key_state[sf::Keyboard::S] = true;
@@ -61,8 +63,10 @@ void GameViewModel::playerDown() {
 }
 
 void GameViewModel::playerWalkLeft() {
+    // 管理左右移动状态，确保方向正确性
     if (!key_state[sf::Keyboard::A]) {
         key_state[sf::Keyboard::A] = true;
+        // 只有在不按右键时才设置为向左，避免冲突
         if (!key_state[sf::Keyboard::D]) {
             player_towards = towards::LEFT;
         }
@@ -71,8 +75,10 @@ void GameViewModel::playerWalkLeft() {
 }
 
 void GameViewModel::playerWalkRight() {
+    // 管理左右移动状态，确保方向正确性
     if (!key_state[sf::Keyboard::D]) {
         key_state[sf::Keyboard::D] = true;
+        // 只有在不按左键时才设置为向右，避免冲突
         if (!key_state[sf::Keyboard::A]) {
             player_towards = towards::RIGHT;
         }
@@ -81,6 +87,7 @@ void GameViewModel::playerWalkRight() {
 }
 
 void GameViewModel::playerStopLeft() {
+    // 释放左键状态，如果右键仍按着则切换方向
     key_state[sf::Keyboard::A] = false;
     if (key_state[sf::Keyboard::D]) {
         player_towards = towards::RIGHT;
@@ -89,6 +96,7 @@ void GameViewModel::playerStopLeft() {
 }
 
 void GameViewModel::playerStopRight() {
+    // 释放右键状态，如果左键仍按着则切换方向
     key_state[sf::Keyboard::D] = false;
     if (key_state[sf::Keyboard::A]) {
         player_towards = towards::LEFT;
@@ -97,15 +105,17 @@ void GameViewModel::playerStopRight() {
 }
 
 void GameViewModel::playerStopJump() {
+    // 释放跳跃键状态，允许再次跳跃
     key_state[sf::Keyboard::W] = false;
 }
 
 void GameViewModel::playerStopDown() {
+    // 释放下落键状态，允许再次快速下落
     key_state[sf::Keyboard::S] = false;
 }
 
-// 统一的技能方法实现
 void GameViewModel::playerUseSkill(int skill_id, sf::Vector2f direction) {
+    // 将技能使用请求委托给Model层处理
     model->playerUseSkill(skill_id, direction);
 }
 
@@ -240,7 +250,7 @@ void GameViewModel::forwarding(const Common::_FrameInfo& frame_info) {
     change_frame_param->value.platforms_info = platforms_info;
     change_frame_param->value.platforms_id = frame_info.platforms_id;
     
-    // 新增：敌人信息转换
+    // 敌人信息转换
     std::map<int, Common::FrameInfo::EnemyInfo> enemies_info;
     for (const auto& [id, info] : frame_info.enemies_info) {
         enemies_info[id].position = info.position;
@@ -251,7 +261,7 @@ void GameViewModel::forwarding(const Common::_FrameInfo& frame_info) {
     change_frame_param->value.enemies_info = enemies_info;
     change_frame_param->value.enemies_id = frame_info.enemies_id;
     
-    // 新增：子弹信息转换
+    // 子弹信息转换
     std::map<int, Common::FrameInfo::BulletInfo> bullets_info;
     for (const auto& [id, info] : frame_info.bullets_info) {
         bullets_info[id].position = info.position;
@@ -264,7 +274,7 @@ void GameViewModel::forwarding(const Common::_FrameInfo& frame_info) {
     change_frame_param->value.bullets_info = bullets_info;
     change_frame_param->value.bullets_id = frame_info.bullets_id;
     
-    // 新增：豆子信息转换
+    // 豆子信息转换
     std::map<int, Common::FrameInfo::PickupInfo> pickups_info;
     for (const auto& [id, info] : frame_info.pickups_info) {
         pickups_info[id].position = info.position;
@@ -275,7 +285,7 @@ void GameViewModel::forwarding(const Common::_FrameInfo& frame_info) {
     change_frame_param->value.pickups_info = pickups_info;
     change_frame_param->value.pickups_id = frame_info.pickups_id;
     
-    // 新增：技能信息转换
+    // 技能信息转换
     std::vector<Common::FrameInfo::SkillInfo> skills_info;
     auto skills = model->getSkills();
     for (auto* skill : skills) {

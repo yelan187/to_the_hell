@@ -30,7 +30,7 @@ private:
     
     void loadTexture();
     void createProgrammaticIcon();
-    void createCooldownSector(sf::ConvexShape& sector, float progress);  // 新增：创建扇形冷却遮罩
+    void createCooldownSector(sf::ConvexShape& sector, float progress);  // 创建扇形冷却遮罩
     sf::ConvexShape arrow_shape;
     sf::CircleShape sprint_shape;
 };

@@ -92,7 +92,6 @@ void Player::stopRight() {
 void Player::updatePosition(float delta_time) {
     sf::Vector2f prev_position = position;
     position += velocity * delta_time + 0.5f * acceleration * delta_time * delta_time;
-    // std::cout << "Updating position: " << position.x << ", " << position.y << std::endl;
 
     int prev_on_platform_id = on_platform_id;
     on_platform = false;
@@ -101,7 +100,6 @@ void Player::updatePosition(float delta_time) {
         Platform* platform = platform_pair.second;
         bool res = collisionDetection(platform);
         if (res) {
-            // std::cout << "Collision detected with platform ID: " << platform->id << std::endl;
 
             if (prev_on_platform_id == platform->id) {
                 on_platform = true;
@@ -166,12 +164,7 @@ void Player::updateAcceleration(float delta_time) {
 }
 
 void Player::update(float delta_time) {
-    // std::cout << sf::Keyboard::isKeyPressed(sf::Keyboard::A) << std::endl;
-    // cout velocity and acceleration
-    // std::cout << "Velocity: " << velocity.x << ", " << velocity.y << std::endl;
-    // std::cout << "position: " << position.x << ", " << position.y << std::endl;
-    // std::cout << "on_platform_id: " << on_platform_id << std::endl;
-    
+
     // 处理滚动平台效果 - 移动到updateVelocity中处理
     updatePosition(delta_time);
     updateVelocity(delta_time);
@@ -236,7 +229,6 @@ sf::Vector2f Player::findCollisionPosition(Platform* platform,
 }
 
 void Player::handleCollision(Platform* platform, sf::Vector2f prev_position, float delta_time) {
-    // std::cout << "Handling collision with platform ID: " << platform->id << std::endl;
     sf::Vector2f p = findCollisionPosition(platform, prev_position, delta_time);
     
     // 计算缩小后的水平碰撞框

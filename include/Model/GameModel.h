@@ -97,7 +97,7 @@ private:
     void initPlatforms();
     void initPlayer();
     void initGame();
-    void initSkills();  // 新增：初始化技能
+    void initSkills();  // 初始化技能
     void generatePlatform();
     void generateEnemy();
     void generatePickup();
