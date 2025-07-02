@@ -37,6 +37,8 @@ void GameView::notification_callback(Common::NotificationParam* param, void* vie
     GameView* game_view = static_cast<GameView*>(view);
     switch (param->id) {
         case Common::NotificationId::ChangeGameFrame:
+            game_view->total_score_text.setString(*game_view->total_score_text_ptr);
+            game_view->game_time_text.setString(*game_view->game_time_text_ptr);
             game_view->updateframe(dynamic_cast<Common::ChangeGameFrameParam*>(param)->value);
             break;
         case Common::NotificationId::GameOver:
@@ -47,9 +49,9 @@ void GameView::notification_callback(Common::NotificationParam* param, void* vie
 
 void GameView::updateframe(Common::FrameInfo frame_info) {
 
-    total_score_text.setString(frame_info.total_score_text);
+    // total_score_text.setString(frame_info.total_score_text);
 
-    game_time_text.setString(frame_info.game_time_text);
+    // game_time_text.setString(frame_info.game_time_text);
 
     if (debug) {
         debug_info_text.setString(frame_info.debug_info_text);

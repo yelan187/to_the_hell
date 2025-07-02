@@ -41,8 +41,12 @@ public:
     }
 
     // properties
-    std::string getTotalScoreText();
-    std::string getGameTimeText();
+    std::string* getTotalScoreText() {
+        return &total_score_text;
+    };
+    std::string* getGameTimeText() {
+        return &game_time_text;
+    };
     std::string getDebugInfoText() {
         return model->getDebugInfo();
     }
@@ -102,6 +106,10 @@ private:
     void loadPlayerTextures();
     sf::Texture* getPlayerTexture(Model::Entities::PlayerState state);
     Common::FrameInfo::PlatformInfo getPlatformInfo(Common::_FrameInfo::PlatformInfo info);
+    std::string game_time_text;
+    std::string total_score_text;
+    void changeGameTimeText();
+    void changeTotalScoreText();
 
 // commands
 public:

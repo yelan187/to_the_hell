@@ -8,16 +8,10 @@ using Model::Entities::Player;
 void Player::jump(float scroll_speed) {
     if (state == PlayerState::IDLE) {
         state = PlayerState::JUMPING_IDLE;
-        velocity.y = -jumping_speed;
-        
     } else if (state == PlayerState::WALKING) {
         state = PlayerState::JUMPING_WALKING;
-        if (on_platform) {
-            velocity.y = -jumping_speed;
-        } else {
-            velocity.y = -jumping_speed - scroll_speed;
-        }
     }
+    velocity.y = -jumping_speed - scroll_speed;
 }
 void Player::fall() {
     if (!on_platform) {

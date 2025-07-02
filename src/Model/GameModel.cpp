@@ -91,9 +91,9 @@ void GameModel::update(float delta_time) {
     for (auto it = platforms.begin(); it != platforms.end(); ) {
         Entities::Platform* platform = it->second;
         platform->update(delta_time);
-        std::cout << "Platform " << it->first << " position: "
-                  << platform->getPosition().x << ", "
-                  << platform->getPosition().y << std::endl;
+        // std::cout << "Platform " << it->first << " position: "
+        //           << platform->getPosition().x << ", "
+        //           << platform->getPosition().y << std::endl;
         if (platform->outOfWindow(window_size)) {
             delete platform;
             // std::cout << "Platform " << it->first << " removed." << std::endl;

@@ -21,7 +21,7 @@ GameViewModel::GameViewModel(sf::Vector2u window_size) :
     loadPlayerTextures();
 }
 
-std::string GameViewModel::getGameTimeText() {
+void GameViewModel::changeGameTimeText() {
     std::chrono::seconds duration = model->getDuration();
     int seconds = duration.count() % 60;
     int minutes = (duration.count() / 60) % 60;
@@ -37,11 +37,11 @@ std::string GameViewModel::getGameTimeText() {
         ss << "00m";
     }
     ss << std::setw(2) << std::setfill('0') << seconds << "s";
-    return ss.str();
+    game_time_text = ss.str();
 }
 
-std::string GameViewModel::getTotalScoreText() {
-    return "Score: " + std::to_string(model->getTotalScore());
+void GameViewModel::changeTotalScoreText() {
+    total_score_text = "Score: " + std::to_string(model->getTotalScore());
 }
 
 void GameViewModel::playerJump() {
@@ -202,8 +202,10 @@ void GameViewModel::notification_callback(Common::NotificationParam* param, void
 void GameViewModel::forwarding(const Common::_FrameInfo& frame_info) {
     Common::ChangeGameFrameParam* change_frame_param = new Common::ChangeGameFrameParam();
     change_frame_param->id = Common::NotificationId::ChangeGameFrame;
-    change_frame_param->value.total_score_text = getTotalScoreText();
-    change_frame_param->value.game_time_text = getGameTimeText();
+    changeGameTimeText();
+    changeTotalScoreText();
+    // change_frame_param->value.total_score_text = getTotalScoreText();
+    // change_frame_param->value.game_time_text = getGameTimeText();
     change_frame_param->value.debug_info_text = getDebugInfoText();
     change_frame_param->value.player_info.position = frame_info.player_info.position;
     change_frame_param->value.player_info.size = frame_info.player_info.size;

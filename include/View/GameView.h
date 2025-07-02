@@ -25,11 +25,11 @@ public:
     }
     
     // properties
-    void setTotalScoreText(const std::string& text) {
-        total_score_text.setString(text);
+    void setTotalScoreText(const std::string* text_ptr) {
+        total_score_text_ptr = text_ptr;
     }
-    void setGameTimeText(const std::string& text) {
-        game_time_text.setString(text);
+    void setGameTimeText(const std::string* text_ptr) {
+        game_time_text_ptr = text_ptr;
     }
     void setDebugInfoText(const std::string& text) {
         if (debug) {
@@ -81,7 +81,9 @@ private:
     bool debug;
     sf::Font font;
     sf::Text game_time_text;
+    const std::string* game_time_text_ptr;
     sf::Text total_score_text;
+    const std::string* total_score_text_ptr;
     sf::Text debug_info_text;
     // player info
     View::UI::Player player;
