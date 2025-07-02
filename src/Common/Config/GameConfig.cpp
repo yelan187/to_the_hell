@@ -5,6 +5,10 @@
 namespace Common {
 namespace Config {
 
+// 
+int GameConfig::SCORE_UPDATE_INTERVAL = 10;
+int GameConfig::SCORE_INCREMENT = 1;                     // 每秒得分
+
 // 玩家配置
 sf::Vector2f GameConfig::PLAYER_SIZE(60.0f, 60.0f);
 float GameConfig::PLAYER_WALK_SPEED = 150.0f;               // 玩家行走速度
@@ -54,7 +58,7 @@ int GameConfig::PICKUP_STAR_SCORE = 5;                      // 五角星豆子�
 
 // 子弹配置
 sf::Vector2f GameConfig::BULLET_SIZE(16.0f, 16.0f);
-float GameConfig::BULLET_SPEED = 300.0f;                    // 玩家子弹速度
+float GameConfig::BULLET_SPEED = 500.0f;                    // 玩家子弹速度
 
 // 技能配置
 float GameConfig::SKILL_ARROW_COOLDOWN = 1.0f;              // 箭矢技能冷却时间(秒)
@@ -62,6 +66,7 @@ float GameConfig::SKILL_SPRINT_COOLDOWN = 5.0f;             // 冲刺技能冷�
 float GameConfig::SKILL_SPRINT_DURATION = 1.0f;             // 冲刺持续时间(秒)
 float GameConfig::SKILL_SPRINT_SPEED_MULTIPLIER = 2.0f;     // 冲刺速度倍数
 float GameConfig::SKILL_SPRINT_DISTANCE = 100.0f;           // 冲刺距离(像素)
+float GameConfig::SKILL_GROUND_PENETRATION_COOLDOWN = 0.5f; // 地面穿透技能冷却时间(秒)
 
 // 游戏流程配置
 float GameConfig::INITIAL_SCROLL_SPEED = 100.0f;            // 初始滚动速度

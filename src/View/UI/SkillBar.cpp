@@ -10,6 +10,9 @@ SkillBar::SkillBar(sf::Vector2f position, sf::Vector2f skill_size)
     skills.emplace_back(SkillType::SPRINT, 
                        sf::Vector2f(position.x, position.y + skill_spacing), // 垂直排列
                        skill_size);
+    skills.emplace_back(SkillType::GROUND_PENETRATION,
+                       sf::Vector2f(position.x, position.y + 2 * skill_spacing), // 垂直排列
+                       skill_size);
 }
 
 void SkillBar::updateSkills(const std::vector<Common::FrameInfo::SkillInfo>& skills_info) {

@@ -8,7 +8,8 @@ namespace Entities {
 // 技能类型枚举
 enum class SkillType {
     ARROW_SHOT,  // 箭矢射击
-    SPRINT       // 冲刺
+    SPRINT,      // 冲刺
+    GROUND_PENETRATION
 };
 
 // 技能类 - 管理技能冷却和可用性

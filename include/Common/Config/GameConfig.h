@@ -10,6 +10,11 @@ namespace Config {
 class GameConfig {
 public:
 
+// 分数配置
+
+static int SCORE_UPDATE_INTERVAL;               // 分数更新间隔(秒)
+static int SCORE_INCREMENT;
+
 // 玩家配置
 static sf::Vector2f PLAYER_SIZE;                        // 玩家大小
 static float PLAYER_WALK_SPEED;                         // 玩家行走速度
@@ -66,6 +71,7 @@ static float SKILL_SPRINT_COOLDOWN;                     // 冲刺技能冷却时
 static float SKILL_SPRINT_DURATION;                     // 冲刺持续时间(秒)
 static float SKILL_SPRINT_SPEED_MULTIPLIER;             // 冲刺速度倍数
 static float SKILL_SPRINT_DISTANCE;                     // 冲刺距离(像素)
+static float SKILL_GROUND_PENETRATION_COOLDOWN;
 
 // 游戏流程配置
 static float INITIAL_SCROLL_SPEED;                      // 初始滚动速度

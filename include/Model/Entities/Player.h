@@ -75,6 +75,8 @@ public:
     void bounce(float bounce_force); // 弹跳效果
     void kill() { is_dead = true; }
 
+    void groundPenetration();
+
     PlayerState getState() const { return state; }
     sf::Vector2f getPosition() const { return position; }
     sf::Vector2f getVelocity() const { return velocity; }
@@ -84,6 +86,7 @@ public:
     sf::Vector2f getFacingDirection() const { return facing_direction; }
     void setFacingDirection(sf::Vector2f direction) { facing_direction = direction; }
     
+    bool isOnPlatform() const { return on_platform; }
     bool isDead() const { return is_dead; }
     void setDead(bool dead) { is_dead = dead; }
 
@@ -100,6 +103,7 @@ public:
     }
 
 private:
+
     GameModel* game_model;
 
     bool on_platform;

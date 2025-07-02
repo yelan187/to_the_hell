@@ -38,6 +38,11 @@ void Skill::loadTexture() {
         case SkillType::SPRINT:
             loaded = skill_texture->loadFromFile("assets/images/skill/sprint.png");
             break;
+        case SkillType::GROUND_PENETRATION:
+            loaded = skill_texture->loadFromFile("assets/images/skill/ground-penetration.png");
+            break;
+        default:
+            break;
     }
     
     if (loaded) {

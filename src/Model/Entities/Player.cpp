@@ -20,20 +20,25 @@ void Player::jump(float scroll_speed) {
 void Player::fall() {
     if (!on_platform) {
         velocity.y += Common::Config::GameConfig::PLAYER_FALL_ACCELERATION;
-    } else {
-        Platform* current_platform = game_model->getPlatformById(on_platform_id);
-        sf::Vector2f p = position + sf::Vector2f(0, size.y + current_platform->getSize().y + 2);
-        for (auto& platform_pair : game_model->getPlatforms()) {
-            Platform* platform = platform_pair.second;
-            bool res = collisionDetection(platform, p);
-            if (res) {
-                return;
-            }
-        }
-        position = p;
-        velocity.y = 0;
     }
 }
+
+void Player::groundPenetration(){
+    Platform* current_platform = game_model->getPlatformById(on_platform_id);
+    sf::Vector2f p = position + sf::Vector2f(0, size.y + current_platform->getSize().y + 2);
+    for (auto& platform_pair : game_model->getPlatforms()) {
+        Platform* platform = platform_pair.second;
+        bool res = collisionDetection(platform, p);
+        if (res) {
+            return;
+        }
+    }
+    position = p;
+    velocity.y = current_platform->getVelocity().y;
+    on_platform = false;
+    on_platform_id = -1;
+}
+
 void Player::walkLeft() {
     facing_direction = sf::Vector2f(-1.0f, 0.0f);  // 设置面向左侧
     if (state == PlayerState::IDLE) {
