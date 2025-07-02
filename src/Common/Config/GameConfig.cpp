@@ -5,6 +5,10 @@
 namespace Common {
 namespace Config {
 
+// 
+int GameConfig::SCORE_UPDATE_INTERVAL = 10;
+int GameConfig::SCORE_INCREMENT = 1;                     // 每秒得分
+
 // 玩家配置
 sf::Vector2f GameConfig::PLAYER_SIZE(60.0f, 60.0f);
 float GameConfig::PLAYER_WALK_SPEED = 150.0f;               // 玩家行走速度
@@ -27,7 +31,7 @@ float GameConfig::PLATFORM_FRAGILE_PROBABILITY = 0.15f;     // 脆弱平台生�
 float GameConfig::PLATFORM_SPIKED_PROBABILITY = 0.05f;      // 带刺平台生成概率
 
 float GameConfig::PLATFORM_ROLLING_SPEED = 100.0f;          // 滚动平台速度
-float GameConfig::PLATFORM_BOUNCY_FORCE = 500.0f;           // 弹跳平台的弹跳力
+float GameConfig::PLATFORM_BOUNCY_FORCE = 400.0f;           // 弹跳平台的弹跳力
 float GameConfig::PLATFORM_FRAGILE_BREAK_DELAY = 0.3f;      // 脆弱平台破碎延迟时间(秒)
 int GameConfig::PLATFORM_GENERATION_MAX_ATTEMPTS = 5;       // 平台生成最大尝试次数
 
@@ -54,7 +58,7 @@ int GameConfig::PICKUP_STAR_SCORE = 5;                      // 五角星豆子�
 
 // 子弹配置
 sf::Vector2f GameConfig::BULLET_SIZE(16.0f, 16.0f);
-float GameConfig::BULLET_SPEED = 300.0f;                    // 玩家子弹速度
+float GameConfig::BULLET_SPEED = 500.0f;                    // 玩家子弹速度
 
 // 技能配置
 float GameConfig::SKILL_ARROW_COOLDOWN = 1.0f;              // 箭矢技能冷却时间(秒)
@@ -62,6 +66,8 @@ float GameConfig::SKILL_SPRINT_COOLDOWN = 5.0f;             // 冲刺技能冷�
 float GameConfig::SKILL_SPRINT_DURATION = 1.0f;             // 冲刺持续时间(秒)
 float GameConfig::SKILL_SPRINT_SPEED_MULTIPLIER = 2.0f;     // 冲刺速度倍数
 float GameConfig::SKILL_SPRINT_DISTANCE = 100.0f;           // 冲刺距离(像素)
+int GameConfig::SKILL_SPRINT_RESET_KILL_COUNT = 2;
+float GameConfig::SKILL_GROUND_PENETRATION_COOLDOWN = 0.5f; // 地面穿透技能冷却时间(秒)
 
 // 游戏流程配置
 float GameConfig::INITIAL_SCROLL_SPEED = 100.0f;            // 初始滚动速度

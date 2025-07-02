@@ -87,30 +87,38 @@ void GameViewModel::playerWalkRight() {
 
 void GameViewModel::playerStopLeft() {
     // 释放左键状态，如果右键仍按着则切换方向
-    key_state[sf::Keyboard::A] = false;
-    if (key_state[sf::Keyboard::D]) {
-        player_towards = towards::RIGHT;
+    if (key_state[sf::Keyboard::A]) {
+        key_state[sf::Keyboard::A] = false;
+        if (key_state[sf::Keyboard::D]) {
+            player_towards = towards::RIGHT;
+        }
+        model->playerStopLeft();
     }
-    model->playerStopLeft();
 }
 
 void GameViewModel::playerStopRight() {
     // 释放右键状态，如果左键仍按着则切换方向
-    key_state[sf::Keyboard::D] = false;
-    if (key_state[sf::Keyboard::A]) {
-        player_towards = towards::LEFT;
+    if (key_state[sf::Keyboard::D]){
+        key_state[sf::Keyboard::D] = false; 
+        if (key_state[sf::Keyboard::A]) {
+            player_towards = towards::LEFT;
+        }
+        model->playerStopRight();
     }
-    model->playerStopRight();
 }
 
 void GameViewModel::playerStopJump() {
     // 释放跳跃键状态，允许再次跳跃
-    key_state[sf::Keyboard::W] = false;
+    if (key_state[sf::Keyboard::W]) {
+        // 只有在跳跃状态下才需要处理
+        key_state[sf::Keyboard::W] = false;
+    }
 }
 
 void GameViewModel::playerStopDown() {
-    // 释放下落键状态，允许再次快速下落
-    key_state[sf::Keyboard::S] = false;
+    if (key_state[sf::Keyboard::S]) {
+        key_state[sf::Keyboard::S] = false;
+    }
 }
 
 void GameViewModel::playerUseSkill(int skill_id, sf::Vector2f direction) {
@@ -163,6 +171,21 @@ void GameViewModel::loadPlayerTextures() {
     } catch (const std::exception& e) {
         std::cout << "Error loading player textures: " << e.what() << std::endl;
     }
+    try {
+        sf::Texture sprint_l_texture;
+        sprint_l_texture.loadFromFile("assets/images/player/player_sprint_l.png");
+        player_textures[PlayerState::SPRINTING_L] = sprint_l_texture;
+    } catch (const std::exception& e) {
+        std::cout << "Error loading player textures: " << e.what() << std::endl;
+    }
+    try {
+        sf::Texture sprint_r_texture;
+        sprint_r_texture.loadFromFile("assets/images/player/player_sprint_r.png");
+        player_textures[PlayerState::SPRINTING_R] = sprint_r_texture;
+    } catch (const std::exception& e) {
+        std::cout << "Error loading player textures: " << e.what() << std::endl;
+    }
+    // std::cout << "Player textures loaded successfully." << std::endl;
 }
 
 sf::Texture* GameViewModel::getPlayerTexture(Model::Entities::PlayerState state) {
@@ -185,6 +208,12 @@ sf::Texture* GameViewModel::getPlayerTexture(Model::Entities::PlayerState state)
                 return &player_textures[PlayerState::JUMPING_L];
             } else {
                 return &player_textures[PlayerState::JUMPING_R];
+            }
+        case Model::Entities::PlayerState::SPRINTING:
+            if (player_towards == towards::LEFT) {
+                return &player_textures[PlayerState::SPRINTING_L];
+            } else {
+                return &player_textures[PlayerState::SPRINTING_R];
             }
     }
     return &player_textures[PlayerState::IDLE_R]; // Default to idle right texture

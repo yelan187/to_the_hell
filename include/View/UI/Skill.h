@@ -8,7 +8,8 @@ namespace UI {
 
 enum class SkillType {
     ARROW_SHOT,
-    SPRINT
+    SPRINT,
+    GROUND_PENETRATION
 };
 
 class Skill {

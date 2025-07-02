@@ -100,24 +100,27 @@ void GameModel::initGame() {
 }
 
 void GameModel::initPlatforms() {
+    platforms[next_platform_id++] = new Entities::Platform(next_platform_id, PlatformType::NORMAL, 
+        sf::Vector2f(-200, -500), sf::Vector2f(200,window_size.y + 500), 0);
+    platforms[next_platform_id++] = new Entities::Platform(next_platform_id, PlatformType::NORMAL, 
+        sf::Vector2f(window_size.x, -500), sf::Vector2f(200,window_size.y + 500), 0);
+    
     const int initial_platforms = 3;
     for (int i = 0; i < initial_platforms; ++i) {
-        int id = i;
-        
         sf::Vector2f position(
             static_cast<float>(rand() % static_cast<int>(window_size.x - platform_size.x)),
             static_cast<float>(window_size.y / 2 + (window_size.y * 2 / 3) / initial_platforms * i)
         );
         
         PlatformType type = PlatformType::NORMAL;
-        platforms[id] = new Entities::Platform(id, type, position, platform_size, scroll_speed);
+        platforms[next_platform_id] = new Entities::Platform(next_platform_id, type, position, platform_size, scroll_speed);
     }
-    next_platform_id = initial_platforms;
+    next_platform_id += initial_platforms;
 }
 
 void GameModel::initPlayer() {
-    sf::Vector2f platform_pos = platforms[0]->getPosition();
-    sf::Vector2f platform_size = platforms[0]->getSize();
+    sf::Vector2f platform_pos = platforms[2]->getPosition();
+    sf::Vector2f platform_size = platforms[2]->getSize();
     
     sf::Vector2f player_position = sf::Vector2f(
         platform_pos.x + platform_size.x / 2 - player_size.x / 2,
@@ -125,7 +128,7 @@ void GameModel::initPlayer() {
     );
     
     player = new Entities::Player(player_position, player_size, this);
-    player->setVelocity(platforms[0]->getVelocity());
+    player->setVelocity(platforms[2]->getVelocity());
 }
 
 void GameModel::initSkills() {
@@ -136,6 +139,7 @@ void GameModel::initSkills() {
     
     skills.push_back(new Entities::Skill(Entities::SkillType::ARROW_SHOT, Common::Config::GameConfig::SKILL_ARROW_COOLDOWN));
     skills.push_back(new Entities::Skill(Entities::SkillType::SPRINT, Common::Config::GameConfig::SKILL_SPRINT_COOLDOWN));
+    skills.push_back(new Entities::Skill(Entities::SkillType::GROUND_PENETRATION, Common::Config::GameConfig::SKILL_GROUND_PENETRATION_COOLDOWN));
 }
 
 void GameModel::resetPlatformGenerateInterval() {
@@ -151,8 +155,13 @@ void GameModel::update(float delta_time) {
         init = true;
         return;
     }
-    
+    auto prev_time = game_time;
     game_time += delta_time;
+    if (static_cast<int>(game_time) % Common::Config::GameConfig::SCORE_UPDATE_INTERVAL 
+        - static_cast<int>(prev_time)%Common::Config::GameConfig::SCORE_UPDATE_INTERVAL >= 1) 
+    {
+        total_score += Common::Config::GameConfig::SCORE_INCREMENT;
+    }
 
     // 平台生成和更新
     platform_generate_interval -= delta_time;
@@ -166,9 +175,6 @@ void GameModel::update(float delta_time) {
         platform->update(delta_time);
         
         if (platform->isBroken()) {
-            if (player && player->getOnPlatformId() == platform->id) {
-                player->fall();
-            }
             delete platform;
             it = platforms.erase(it);
         } else if (platform->outOfWindow(window_size)) {
@@ -237,10 +243,14 @@ void GameModel::update(float delta_time) {
     }
     
     // 技能更新
-    for (auto* skill : skills) {
-        skill->update(delta_time);
+    {
+        for (auto* skill : skills) {
+            skill->update(delta_time);
+        }
+        if (player->getKillCount() == Common::Config::GameConfig::SKILL_SPRINT_RESET_KILL_COUNT) {
+            skills[1]->resetCD();
+        }
     }
-    
     // 碰撞检测
     if (checkBulletPlayerCollisions()) {
         player->setDead(true);
@@ -259,7 +269,7 @@ void GameModel::update(float delta_time) {
     total_score += score_gained;
     
     // 边界检查
-    if (player->getPosition().y <= 0 || player->getPosition().y + player->getSize().y >= window_size.y) {
+    if (player->getPosition().y + player->getSize().y >= window_size.y) {
         gameOver();
         return;
     }
@@ -386,6 +396,7 @@ void GameModel::checkPlayerBulletEnemyCollisions() {
                     delete enemy_it->second;
                     enemy_it = enemies.erase(enemy_it);
                     hit_enemy = true;
+                    player->addKillCount();
                     break;
                 } else {
                     ++enemy_it;
@@ -425,7 +436,11 @@ void GameModel::playerJump() {
 }
 
 void GameModel::playerDown() {
-    player->fall();
+    if (!player->isOnPlatform()) {
+        player->fall();
+    } else {
+        playerUseSkill(2); // 使用冲刺技能
+    }
 }
 
 void GameModel::playerWalkLeft() {
@@ -470,53 +485,17 @@ void GameModel::playerUseSkill(int skill_id, sf::Vector2f direction) {
         }
         case 1: // SPRINT
         {
-            sf::Vector2f player_pos = player->getPosition();
-            float sprint_distance = Common::Config::GameConfig::SKILL_SPRINT_DISTANCE;
-            int current_platform_id = player->getOnPlatformId();
-            
-            float step_size = 2.0f;
-            float current_distance = 0.0f;
-            sf::Vector2f final_pos = player_pos;
-            
-            while (current_distance < sprint_distance) {
-                sf::Vector2f test_pos = sf::Vector2f(
-                    player_pos.x + player_facing.x * (current_distance + step_size),
-                    player_pos.y
-                );
-                
-                if (test_pos.x < 0 || test_pos.x + player_size.x > window_size.x) {
-                    break;
-                }
-                
-                bool collision = false;
-                for (const auto& platform_pair : platforms) {
-                    Entities::Platform* platform = platform_pair.second;
-                    
-                    if (current_platform_id != -1 && platform->id == current_platform_id) {
-                        continue;
-                    }
-                    
-                    if (player->collisionDetection(platform, test_pos)) {
-                        collision = true;
-                        break;
-                    }
-                }
-                
-                if (collision) {
-                    break;
-                }
-                
-                final_pos = test_pos;
-                current_distance += step_size;
-            }
-            
-            // 边界检查
-            if (final_pos.x < 0) final_pos.x = 0;
-            else if (final_pos.x + player_size.x > window_size.x) final_pos.x = window_size.x - player_size.x;
-            if (final_pos.y < 0) final_pos.y = 0;
-            else if (final_pos.y + player_size.y > window_size.y) final_pos.y = window_size.y - player_size.y;
-            
-            player->setPosition(final_pos);
+            sf::Vector2f sprint_replacement = sf::Vector2f(
+                player_facing.x * Common::Config::GameConfig::SKILL_SPRINT_DISTANCE, 
+                0.0f
+            );
+            player->updatePosition(0.0f, sprint_replacement);
+            player->resetKillCount();
+            break;
+        }
+        case 2:
+        {
+            player->groundPenetration();
             break;
         }
         default:
