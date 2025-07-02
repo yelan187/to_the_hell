@@ -28,7 +28,9 @@ public:
         WALKING_L,
         WALKING_R,
         JUMPING_L,
-        JUMPING_R
+        JUMPING_R,
+        SPRINTING_L,
+        SPRINTING_R
     };
     enum class PlatformType {
         NORMAL

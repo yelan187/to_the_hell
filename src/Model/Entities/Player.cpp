@@ -1,27 +1,37 @@
 #include "Model/Entities/Player.h"
 #include "Model/Entities/Platform.h"
 #include "Model/GameModel.h"
-
+#include <cmath>
 
 using Model::Entities::Player;
 
 void Player::jump(float scroll_speed) {
+    if (jump_counter >= max_jump_count) {
+        return;
+    }
+    jump_counter++;
     if (state == PlayerState::IDLE) {
-        state = PlayerState::JUMPING_IDLE;
-        velocity.y = -jumping_speed;
-        
+        state = PlayerState::JUMPING_IDLE;        
     } else if (state == PlayerState::WALKING) {
         state = PlayerState::JUMPING_WALKING;
-        if (on_platform) {
-            velocity.y = -jumping_speed;
-        } else {
-            velocity.y = -jumping_speed - scroll_speed;
-        }
     }
+    velocity.y = -jumping_speed;
 }
 void Player::fall() {
     if (!on_platform) {
         velocity.y += Common::Config::GameConfig::PLAYER_FALL_ACCELERATION;
+    } else {
+        Platform* current_platform = game_model->getPlatformById(on_platform_id);
+        sf::Vector2f p = position + sf::Vector2f(0, size.y + current_platform->getSize().y + 2);
+        for (auto& platform_pair : game_model->getPlatforms()) {
+            Platform* platform = platform_pair.second;
+            bool res = collisionDetection(platform, p);
+            if (res) {
+                return;
+            }
+        }
+        position = p;
+        velocity.y = 0;
     }
 }
 void Player::walkLeft() {
@@ -31,13 +41,13 @@ void Player::walkLeft() {
         velocity.x -= walking_speed;
     } else if (state == PlayerState::WALKING) {
         state = PlayerState::IDLE;
-        velocity.x = 0;
+        velocity.x -= walking_speed;
     } else if (state == PlayerState::JUMPING_IDLE) {
         state = PlayerState::JUMPING_WALKING;
         velocity.x -= walking_speed;
     } else if (state == PlayerState::JUMPING_WALKING) {
         state = PlayerState::JUMPING_IDLE;
-        velocity.x = 0;
+        velocity.x-= walking_speed;
     }
 }
 
@@ -48,25 +58,25 @@ void Player::walkRight() {
         velocity.x += walking_speed;
     }else if (state == PlayerState::WALKING) {
         state = PlayerState::IDLE;
-        velocity.x = 0;
+        velocity.x += walking_speed;
     } else if (state == PlayerState::JUMPING_IDLE) {
         state = PlayerState::JUMPING_WALKING;
         velocity.x += walking_speed;
     } else if (state == PlayerState::JUMPING_WALKING) {
         state = PlayerState::JUMPING_IDLE;
-        velocity.x = 0;
+        velocity.x += walking_speed;
     }
 }
 void Player::stopLeft() {
     if (state == PlayerState::WALKING) {
         state = PlayerState::IDLE;
-        velocity.x = 0;
+        velocity.x += walking_speed;
     } else if (state == PlayerState::IDLE){
         state = PlayerState::WALKING;
         velocity.x += walking_speed;
     } else if (state == PlayerState::JUMPING_WALKING) {
         state = PlayerState::JUMPING_IDLE;
-        velocity.x = 0;
+        velocity.x += walking_speed;
     } else if (state == PlayerState::JUMPING_IDLE) {
         state = PlayerState::JUMPING_WALKING;
         velocity.x += walking_speed;
@@ -76,22 +86,23 @@ void Player::stopLeft() {
 void Player::stopRight() {
     if (state == PlayerState::WALKING) {
         state = PlayerState::IDLE;
-        velocity.x = 0;
+        velocity.x -= walking_speed;
     } else if (state == PlayerState::IDLE){
         state = PlayerState::WALKING;
         velocity.x -= walking_speed;
     } else if (state == PlayerState::JUMPING_WALKING) {
         state = PlayerState::JUMPING_IDLE;
-        velocity.x = 0;
+        velocity.x -= walking_speed;
     } else if (state == PlayerState::JUMPING_IDLE) {
         state = PlayerState::JUMPING_WALKING;
         velocity.x -= walking_speed;
     }
 }
 
-void Player::updatePosition(float delta_time) {
+void Player::updatePosition(float delta_time,sf::Vector2f additional_replacement) {
     sf::Vector2f prev_position = position;
     position += velocity * delta_time + 0.5f * acceleration * delta_time * delta_time;
+    position += additional_replacement;
 
     int prev_on_platform_id = on_platform_id;
     on_platform = false;
@@ -100,7 +111,6 @@ void Player::updatePosition(float delta_time) {
         Platform* platform = platform_pair.second;
         bool res = collisionDetection(platform);
         if (res) {
-
             if (prev_on_platform_id == platform->id) {
                 on_platform = true;
                 on_platform_id = platform->id;
@@ -114,45 +124,56 @@ void Player::updatePosition(float delta_time) {
 }
 
 void Player::updateVelocity(float delta_time) {
+    // std::cout << "velocity: " << velocity.x << ", " << velocity.y << std::endl;
     velocity += acceleration * delta_time;
-    
+    if (!(on_platform && game_model->getPlatformById(on_platform_id)->type == PlatformType::ROLLING)) {
+        if (prev_rolling_associated_velocity.x != 0){
+            velocity -= prev_rolling_associated_velocity;
+        }
+        prev_rolling_associated_velocity.x = 0;
+    }
+
     if (on_platform) {
         Platform* current_platform = game_model->getPlatformById(on_platform_id);
-        
         // 检查脆弱平台是否已经破碎
         if (current_platform->isBroken()) {
             // 平台已破碎，玩家开始下落
             on_platform = false;
             on_platform_id = -1;
             velocity.y = 0; // 开始下落
-        } else if (current_platform->type == Entities::PlatformType::ROLLING) {
-            // 滚动平台：玩家跟随平台滚动
-            sf::Vector2f rolling_vel = current_platform->getRollingVelocity();
-            velocity = rolling_vel;
         } else {
-            // 普通平台或其他类型平台
             velocity.y = current_platform->getVelocity().y;
-        }
-    } else {
-        if (collision_direction == CollisionDirection::UP) {
-            velocity.y = 0;
-        } else if (collision_direction == CollisionDirection::LEFT) {
-            velocity.x = 0;
-        } else if (collision_direction == CollisionDirection::RIGHT) {
-            velocity.x = 0;
-        } else if (collision_direction == CollisionDirection::NONE) {
-            if ((state == PlayerState::JUMPING_WALKING || state == PlayerState::WALKING)
-                && velocity.x == 0){
-                if (prev_collision_direction == CollisionDirection::LEFT) {
-                    velocity.x = -walking_speed;
-                } else if (prev_collision_direction == CollisionDirection::RIGHT) {
-                    velocity.x = walking_speed;
+            if (current_platform->type == PlatformType::ROLLING) { 
+                if (prev_rolling_associated_velocity.x == 0) {
+                    prev_rolling_associated_velocity.x = current_platform->getRollingSpeed() * (current_platform->getRollingDirection() ? 1 : -1);
+                    velocity += prev_rolling_associated_velocity;
                 }
             }
         }
+    } else {
+        if (collision_direction == CollisionDirection::NONE) {
+            if (prev_collision_correction_velocity.x != 0) {
+                velocity -= prev_collision_correction_velocity;
+            }
+            prev_collision_correction_velocity.x = 0;
+        }
+
+        if (collision_direction == CollisionDirection::UP) {
+            velocity.y = 0;
+        } else if (collision_direction == CollisionDirection::LEFT || 
+                   collision_direction == CollisionDirection::RIGHT) {
+            if (prev_collision_correction_velocity.x == 0) {
+                prev_collision_correction_velocity.x = -velocity.x;
+                velocity += prev_collision_correction_velocity;
+            }
+        }
     }
+
     prev_collision_direction = collision_direction;
     collision_direction = CollisionDirection::NONE;
+    std::cout << "prev_rolling_associated_velocity: " << prev_rolling_associated_velocity.x << std::endl;
+    std::cout << "Velocity: " << velocity.x << ", " << velocity.y << std::endl;
+    std::cout << "on_platform_id: "<< on_platform_id << std::endl;
 }
 
 void Player::updateAcceleration(float delta_time) {
@@ -251,6 +272,7 @@ void Player::handleCollision(Platform* platform, sf::Vector2f prev_position, flo
         } else if (state == PlayerState::JUMPING_IDLE) {
             state = PlayerState::IDLE;
         }
+        jump_counter = 0;
     } else if (p.y >= (platform->getPosition().y + platform->getSize().y - 1)) {
         /*
          * player is below the platform

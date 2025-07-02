@@ -27,7 +27,7 @@ float GameConfig::PLATFORM_FRAGILE_PROBABILITY = 0.15f;     // 脆弱平台生�
 float GameConfig::PLATFORM_SPIKED_PROBABILITY = 0.05f;      // 带刺平台生成概率
 
 float GameConfig::PLATFORM_ROLLING_SPEED = 100.0f;          // 滚动平台速度
-float GameConfig::PLATFORM_BOUNCY_FORCE = 500.0f;           // 弹跳平台的弹跳力
+float GameConfig::PLATFORM_BOUNCY_FORCE = 400.0f;           // 弹跳平台的弹跳力
 float GameConfig::PLATFORM_FRAGILE_BREAK_DELAY = 0.3f;      // 脆弱平台破碎延迟时间(秒)
 int GameConfig::PLATFORM_GENERATION_MAX_ATTEMPTS = 5;       // 平台生成最大尝试次数
 

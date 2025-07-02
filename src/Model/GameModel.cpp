@@ -172,9 +172,6 @@ void GameModel::update(float delta_time) {
         platform->update(delta_time);
         
         if (platform->isBroken()) {
-            if (player && player->getOnPlatformId() == platform->id) {
-                player->fall();
-            }
             delete platform;
             it = platforms.erase(it);
         } else if (platform->outOfWindow(window_size)) {
@@ -476,53 +473,11 @@ void GameModel::playerUseSkill(int skill_id, sf::Vector2f direction) {
         }
         case 1: // SPRINT
         {
-            sf::Vector2f player_pos = player->getPosition();
-            float sprint_distance = Common::Config::GameConfig::SKILL_SPRINT_DISTANCE;
-            int current_platform_id = player->getOnPlatformId();
-            
-            float step_size = 2.0f;
-            float current_distance = 0.0f;
-            sf::Vector2f final_pos = player_pos;
-            
-            while (current_distance < sprint_distance) {
-                sf::Vector2f test_pos = sf::Vector2f(
-                    player_pos.x + player_facing.x * (current_distance + step_size),
-                    player_pos.y
-                );
-                
-                if (test_pos.x < 0 || test_pos.x + player_size.x > window_size.x) {
-                    break;
-                }
-                
-                bool collision = false;
-                for (const auto& platform_pair : platforms) {
-                    Entities::Platform* platform = platform_pair.second;
-                    
-                    if (current_platform_id != -1 && platform->id == current_platform_id) {
-                        continue;
-                    }
-                    
-                    if (player->collisionDetection(platform, test_pos)) {
-                        collision = true;
-                        break;
-                    }
-                }
-                
-                if (collision) {
-                    break;
-                }
-                
-                final_pos = test_pos;
-                current_distance += step_size;
-            }
-            
-            // 边界检查
-            if (final_pos.x < 0) final_pos.x = 0;
-            else if (final_pos.x + player_size.x > window_size.x) final_pos.x = window_size.x - player_size.x;
-            if (final_pos.y < 0) final_pos.y = 0;
-            else if (final_pos.y + player_size.y > window_size.y) final_pos.y = window_size.y - player_size.y;
-            
-            player->setPosition(final_pos);
+            sf::Vector2f sprint_replacement = sf::Vector2f(
+                player_facing.x * Common::Config::GameConfig::SKILL_SPRINT_DISTANCE, 
+                0.0f
+            );
+            player->updatePosition(0.0f, sprint_replacement);
             break;
         }
         default:

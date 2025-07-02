@@ -164,6 +164,21 @@ void GameViewModel::loadPlayerTextures() {
     } catch (const std::exception& e) {
         std::cout << "Error loading player textures: " << e.what() << std::endl;
     }
+    try {
+        sf::Texture sprint_l_texture;
+        sprint_l_texture.loadFromFile("assets/images/player/player_sprint_l.png");
+        player_textures[PlayerState::SPRINTING_L] = sprint_l_texture;
+    } catch (const std::exception& e) {
+        std::cout << "Error loading player textures: " << e.what() << std::endl;
+    }
+    try {
+        sf::Texture sprint_r_texture;
+        sprint_r_texture.loadFromFile("assets/images/player/player_sprint_r.png");
+        player_textures[PlayerState::SPRINTING_R] = sprint_r_texture;
+    } catch (const std::exception& e) {
+        std::cout << "Error loading player textures: " << e.what() << std::endl;
+    }
+    // std::cout << "Player textures loaded successfully." << std::endl;
 }
 
 sf::Texture* GameViewModel::getPlayerTexture(Model::Entities::PlayerState state) {
@@ -186,6 +201,12 @@ sf::Texture* GameViewModel::getPlayerTexture(Model::Entities::PlayerState state)
                 return &player_textures[PlayerState::JUMPING_L];
             } else {
                 return &player_textures[PlayerState::JUMPING_R];
+            }
+        case Model::Entities::PlayerState::SPRINTING:
+            if (player_towards == towards::LEFT) {
+                return &player_textures[PlayerState::SPRINTING_L];
+            } else {
+                return &player_textures[PlayerState::SPRINTING_R];
             }
     }
     return &player_textures[PlayerState::IDLE_R]; // Default to idle right texture
