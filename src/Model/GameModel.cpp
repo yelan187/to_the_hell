@@ -1,11 +1,5 @@
 #include <iostream>
 #include "Model/GameModel.h"
-#include "Model/Entities/Enemy.h"
-#include "Model/Entities/Bullet.h"
-#include "Model/Entities/Pickup.h"
-#include "Model/Entities/Skill.h"
-#include "Common/InternalNotification.h"
-#include "Common/Config/Config.h"
 
 using Model::GameModel;
 using Model::Entities::PlatformType;
@@ -270,7 +264,7 @@ void GameModel::update(float delta_time) {
         return;
     }
     
-    fire();
+    trigger.fire(Common::NotificationId::ChangeGameFrame);
 }
 
 // ==================== 实体生成方法 ====================
@@ -607,87 +601,4 @@ bool GameModel::isPlatformPositionValid(sf::Vector2f position, sf::Vector2f size
     }
     
     return true;
-}
-
-// ==================== 通知方法 ====================
-
-void GameModel::fire() {
-    Common::_ChangeGameFrameParam* param = new Common::_ChangeGameFrameParam();
-    param->id = Common::NotificationId::_ChangeGameFrame;
-    param->value.player_info.position = player->getPosition();
-    param->value.player_info.size = player->getSize();
-    param->value.player_info.state = player->getState();
-    
-    // 平台信息
-    std::vector<int> platforms_id;
-    std::map<int, Common::_FrameInfo::PlatformInfo> platforms_info;
-    for (const auto& pair : platforms) {
-        platforms_id.push_back(pair.first);
-        platforms_info[pair.first].position = pair.second->getPosition();
-        platforms_info[pair.first].type = pair.second->type;
-        platforms_info[pair.first].rolling_direction = pair.second->getRollingDirection();
-    }
-    param->value.platforms_id = platforms_id;
-    param->value.platforms_info = platforms_info;
-    
-    // 敌人信息
-    std::vector<int> enemies_id;
-    std::map<int, Common::_FrameInfo::EnemyInfo> enemies_info;
-    for (const auto& pair : enemies) {
-        enemies_id.push_back(pair.first);
-        enemies_info[pair.first].position = pair.second->getPosition();
-        enemies_info[pair.first].size = pair.second->getSize();
-        enemies_info[pair.first].type = pair.second->getType();
-        enemies_info[pair.first].facing_direction = pair.second->getFacingDirection();
-    }
-    param->value.enemies_id = enemies_id;
-    param->value.enemies_info = enemies_info;
-    
-    // 子弹信息
-    std::vector<int> bullets_id;
-    std::map<int, Common::_FrameInfo::BulletInfo> bullets_info;
-    for (const auto& pair : bullets) {
-        bullets_id.push_back(pair.first);
-        bullets_info[pair.first].position = pair.second->getPosition();
-        bullets_info[pair.first].size = pair.second->getSize();
-        bullets_info[pair.first].is_player_bullet = pair.second->isPlayerBullet();
-        bullets_info[pair.first].velocity = pair.second->getVelocity();
-    }
-    param->value.bullets_id = bullets_id;
-    param->value.bullets_info = bullets_info;
-    
-    // 豆子信息
-    std::vector<int> pickups_id;
-    std::map<int, Common::_FrameInfo::PickupInfo> pickups_info;
-    for (const auto& pair : pickups) {
-        pickups_id.push_back(pair.first);
-        pickups_info[pair.first].position = pair.second->getPosition();
-        pickups_info[pair.first].size = pair.second->getSize();
-        pickups_info[pair.first].type = pair.second->getType();
-    }
-    param->value.pickups_id = pickups_id;
-    param->value.pickups_info = pickups_info;
-    
-    // 技能信息
-    std::vector<Common::_FrameInfo::SkillInfo> skills_info;
-    for (size_t i = 0; i < skills.size(); ++i) {
-        Common::_FrameInfo::SkillInfo skill_info;
-        skill_info.skill_type = static_cast<int>(skills[i]->getType());
-        skill_info.cooldown_progress = skills[i]->getCooldownProgress();
-        skill_info.is_available = skills[i]->isAvailable();
-        skills_info.push_back(skill_info);
-    }
-    param->value.skills_info = skills_info;
-    
-    trigger.fire(param);
-    delete param;
-}
-
-void GameModel::gameOver() {
-    Common::GameOverNotificationParam* param = new Common::GameOverNotificationParam();
-    param->id = Common::NotificationId::GameOver;
-    param->value.total_score = total_score;
-    param->value.game_time = std::chrono::seconds(static_cast<int>(game_time));
-    trigger.fire(param);
-    delete param;
 }

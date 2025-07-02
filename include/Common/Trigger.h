@@ -16,7 +16,7 @@ public:
 
 	void add(NotificationFunc notification_func, void *self);
 
-	void fire(NotificationParam *param);
+	void fire(NotificationId id);
 
 private:
 	std::vector<Recevier> receviers;

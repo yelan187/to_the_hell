@@ -13,13 +13,25 @@ namespace ViewModel {
 
 class ScoreViewModel : public ViewModel {
 public:
-
-    ScoreViewModel(sf::Vector2u window_size);    
+    ScoreViewModel(sf::Vector2u window_size);  
+    // model  
     void setModel(std::shared_ptr<Model::ScoreModel> model) {
         this->model = model;
     }
-    
-    std::vector<std::string> getMenuOptions() const;
+    // properties
+    std::vector<std::string>* getMenuOptions() {
+        return &menu_options;
+    }
+    int* getCurrentSelectionIndex() {
+        return &current_selection_index;
+    }
+    std::string* getTotalScore() const {
+        return model->getScore();
+    }
+    std::string* getGameTime() const {
+        return model->getTime();
+    }
+    // commands
     Common::CommandBase* getNavigateUpCommand() {
         return &navigateUp_command;
     }
@@ -29,44 +41,30 @@ public:
     Common::CommandBase* getUpdateCommand() {
         return &update_command;
     }
-    Common::Trigger& getTrigger() {
-        return trigger;
-    }
-    int getCurrentSelectionIndex() const {
-        return current_selection_index;
-    }
-    int getTotalScore() const {
-        return model->getScore();
-    }
-    std::chrono::seconds getGameTime() const {
-        return model->getTime();
-    }
     // notification
     Common::NotificationFunc getNotificationCallback() {
         return &notification_callback;
     }
-    int getScore() const;
-    std::chrono::seconds getTime() const;
 
 private:
-    void navigateUp();
-    void navigateDown();
-    static void notification_callback(Common::NotificationParam* param, void* view_model) {};
-private:
+    // model
     std::shared_ptr<Model::ScoreModel> model;
+    // notification
+    static void notification_callback(Common::NotificationId id, void* view_model) {}
+    // others
     int current_selection_index;
     std::vector<std::string> menu_options;
+    void navigateUp();
+    void navigateDown();
+
+// commands
 public:
     class NavigateUpCommand : public Common::CommandBase {
     public:
         NavigateUpCommand(ScoreViewModel* view_model) : view_model(view_model) {}
         void execute() override {
             view_model->navigateUp();
-            Common::ChangeCurrentSelectionParam* param = new Common::ChangeCurrentSelectionParam();
-            param->id = Common::NotificationId::ChangeCurrentSelection;
-            param->value = view_model->getCurrentSelectionIndex();
-            view_model->trigger.fire(param);
-            delete param;
+            view_model->trigger.fire(Common::NotificationId::ChangeCurrentSelection);
         }
     private:
         ScoreViewModel* view_model;
@@ -77,11 +75,7 @@ public:
         NavigateDownCommand(ScoreViewModel* view_model) : view_model(view_model) {}
         void execute() override {
             view_model->navigateDown();
-            Common::ChangeCurrentSelectionParam* param = new Common::ChangeCurrentSelectionParam();
-            param->id = Common::NotificationId::ChangeCurrentSelection;
-            param->value = view_model->getCurrentSelectionIndex();
-            view_model->trigger.fire(param);
-            delete param;
+            view_model->trigger.fire(Common::NotificationId::ChangeCurrentSelection);
         }
     private:
         ScoreViewModel* view_model;

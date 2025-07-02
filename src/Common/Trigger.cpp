@@ -9,10 +9,10 @@ void Trigger::add(NotificationFunc notification_func, void *self) {
     receviers.push_back(receiver);
 }
 
-void Trigger::fire(NotificationParam *param) {
+void Trigger::fire(NotificationId id) {
     for (const auto& receiver : receviers) {
         if (receiver.notification_func) {
-            receiver.notification_func(param, receiver.self);
+            receiver.notification_func(id, receiver.self);
         }
     }
 }

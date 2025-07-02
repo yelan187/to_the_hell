@@ -3,10 +3,10 @@
 
 using Model::ScoreModel;
 
-int ScoreModel::getScore() const {
-    return score;
+std::string* ScoreModel::getScore() {
+    return &score;
 }
 
-std::chrono::seconds ScoreModel::getTime() const {
-    return time;
+std::string* ScoreModel::getTime() {
+    return &time;
 }

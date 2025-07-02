@@ -2,7 +2,7 @@
 
 #include "Common/CommandBase.h"
 #include "Common/NotificationBase.h"
-#include "Common/InternalNotification.h"
+#include "Common/FrameInfo.h"
 
 #include "ViewModel/ViewModel.h"
 #include "Model/GameModel.h"
@@ -42,10 +42,17 @@ public:
     }
 
     // properties
-    std::string getTotalScoreText();
-    std::string getGameTimeText();
-    std::string getDebugInfoText() {
-        return model->getDebugInfo();
+    std::string* getTotalScore() {
+        return &total_score;
+    }
+    std::string* getGameTime() {
+        return &game_time;
+    }
+    std::string* getDebugInfo() {
+        return &debug_info;
+    }
+    Common::FrameInfo* getFrameInfo() {
+        return &frame_info;
     }
 
     // commands
@@ -91,14 +98,21 @@ public:
     void playerStopJump();
     void playerStopDown();
 
-    void forwarding(const Common::_FrameInfo& frame_info);
-    
+    void forwarding();
     // 技能方法
     void playerUseSkill(int skill_id, sf::Vector2f direction = sf::Vector2f(1.0f, 0.0f));
 
 private:
-    static void notification_callback(Common::NotificationParam* param, void* viewmodel);
+    // model
     std::shared_ptr<Model::GameModel> model;
+    // properties
+    Common::FrameInfo frame_info;
+    std::string total_score;
+    std::string game_time;
+    std::string debug_info;
+    // notification
+    static void notification_callback(Common::NotificationId id, void* viewmodel);
+    // others
     towards player_towards = towards::RIGHT;
     std::map<sf::Keyboard::Key, bool> key_state;
     void init_keystate() {
@@ -109,9 +123,13 @@ private:
     }
     std::map<PlayerState, sf::Texture> player_textures;
     void loadPlayerTextures();
-    // 内部转换方法：将Model层PlayerState转换为ViewModel层纹理，仅用于数据适配
     sf::Texture* getPlayerTexture(Model::Entities::PlayerState state);
-    Common::FrameInfo::PlatformInfo getPlatformInfo(Common::_FrameInfo::PlatformInfo info);
+    void getPlatformInfo();
+    void updateTotalScoreText();
+    void updateGameTimeText();
+    void updateDebugInfoText() {
+        debug_info = model->getDebugInfo();
+    }
 
 // commands
 public:
