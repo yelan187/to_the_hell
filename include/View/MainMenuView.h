@@ -18,25 +18,15 @@ public:
         }
     }
     // properties
-    void setCurrentSelection(int selection) {
+    void setCurrentSelection(int* selection) {
         current_selection = selection;
     }
-    void setMenuOptions(const std::vector<std::string>& options) {
-        menu_options.clear();
-        for (const auto& option : options) {
-            sf::Text text;
-            text.setString(option);
-            text.setCharacterSize(50);
-            text.setFillColor(sf::Color::White);
-            text.setFont(font);
-            auto textRect = text.getLocalBounds();
-            text.setOrigin(textRect.width / 2, textRect.height / 2);
-            text.setPosition(
-                window_size.x / 2,
-                window_size.y / 2 + (menu_options.size() * text.getCharacterSize() * 1.5f)
-            );
-            menu_options.push_back(text);
-        }
+    void setMenuOptions(std::vector<std::string>* options) {
+        menu_options_text = options;
+        initMenuOptions();
+    }
+    void setBackgroundParticles(std::vector<sf::Vector2f>* particles) {
+        background_particles_pos = particles;
     }
     // commands
     void setNavigateUpCommand(Common::CommandBase* command) {
@@ -54,26 +44,31 @@ public:
     }
     // update
     void updateCurrentSelection();
-    void updateBackgroundParticles(std::vector<sf::Vector2f>* particles);
+    void updateBackgroundParticles();
 
     void init();
     void render() override;
     void handleInput(const sf::Event& event) override;
 
 private:
-    static void notification_callback(Common::NotificationParam* param, void* view);
-    // menu info
-    sf::Texture title_texture;
-    sf::Sprite title_sprite;
-    std::vector<sf::Text> menu_options;
-    int current_selection;
-    sf::Font font;
-    sf::CircleShape option_pointer;
-    std::vector<sf::CircleShape> background_particles;
+    // properties
+    int* current_selection;
+    std::vector<std::string>* menu_options_text;
+    std::vector<sf::Vector2f>* background_particles_pos;
     // command
     Common::CommandBase* navigateUp_command;
     Common::CommandBase* navigateDown_command;
     Common::CommandBase* confirmSelection_command;
+    // notification
+    static void notification_callback(Common::NotificationId id, void* view);
+    // others
+    sf::Texture title_texture;
+    sf::Sprite title_sprite;
+    std::vector<sf::Text> menu_options;
+    sf::Font font;
+    sf::CircleShape option_pointer;
+    std::vector<sf::CircleShape> background_particles;
+    void initMenuOptions();
 };
 
 }

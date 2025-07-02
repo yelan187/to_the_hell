@@ -1,6 +1,5 @@
 #include <iostream>
 #include "ViewModel/GameViewModel.h"
-#include "Common/InternalNotification.h"
 #include "Common/Config/Config.h"
 
 using ViewModel::GameViewModel;
@@ -23,7 +22,7 @@ GameViewModel::GameViewModel(sf::Vector2u window_size) :
     loadPlayerTextures();
 }
 
-std::string GameViewModel::getGameTimeText() {
+void GameViewModel::updateGameTimeText() {
     std::chrono::seconds duration = model->getDuration();
     int seconds = duration.count() % 60;
     int minutes = (duration.count() / 60) % 60;
@@ -39,11 +38,11 @@ std::string GameViewModel::getGameTimeText() {
         ss << "00m";
     }
     ss << std::setw(2) << std::setfill('0') << seconds << "s";
-    return ss.str();
+    game_time = ss.str();
 }
 
-std::string GameViewModel::getTotalScoreText() {
-    return "Score: " + std::to_string(model->getTotalScore());
+void GameViewModel::updateTotalScoreText() {
+    total_score = "Score: " + std::to_string(model->getTotalScore());
 }
 
 void GameViewModel::playerJump() {
@@ -220,114 +219,115 @@ sf::Texture* GameViewModel::getPlayerTexture(Model::Entities::PlayerState state)
     return &player_textures[PlayerState::IDLE_R]; // Default to idle right texture
 }
 
-Common::FrameInfo::PlatformInfo GameViewModel::getPlatformInfo(Common::_FrameInfo::PlatformInfo info) {
-    Common::FrameInfo::PlatformInfo platform_info;
-    platform_info.position = info.position;
-    platform_info.size = Common::Config::GameConfig::PLATFORM_SIZE;
-    platform_info.platform_type = static_cast<int>(info.type);
-    platform_info.rolling_direction = info.rolling_direction; // 使用Model层传递的真实滚动方向
+void GameViewModel::getPlatformInfo() {
+    std::map<int, Model::Entities::Platform*> platforms = model->getPlatforms();
     
-    // 根据平台类型设置颜色和属性
-    switch (info.type) {
-        case Model::Entities::PlatformType::NORMAL:
-            platform_info.color = sf::Color::Green; // 普通平台 - 绿色
-            break;
-        case Model::Entities::PlatformType::SPIKED:
-            platform_info.color = sf::Color::Red; // 带刺平台 - 红色
-            break;
-        case Model::Entities::PlatformType::ROLLING:
-            platform_info.color = sf::Color::Green; // 滚动平台 - 绿色底色，View层添加方向箭头
-            break;
-        case Model::Entities::PlatformType::FRAGILE:
-            platform_info.color = sf::Color::Transparent; // 脆弱平台 - 透明，View层添加虚线边框
-            break;
-        case Model::Entities::PlatformType::BOUNCY:
-            platform_info.color = sf::Color::Green; // 弹跳平台 - 绿色椭圆形状
-            break;
+    std::vector<int> platforms_id;
+    std::map<int, Common::FrameInfo::PlatformInfo> platform_info;
+    for (const auto& pair : platforms) {
+        platforms_id.push_back(pair.first);
+        platform_info[pair.first].position = pair.second->getPosition();
+        platform_info[pair.first].size = Common::Config::GameConfig::PLATFORM_SIZE;
+        platform_info[pair.first].platform_type = static_cast<int>(pair.second->type);
+        switch (pair.second->type) {
+            case Model::Entities::PlatformType::NORMAL:
+                platform_info[pair.first].color = sf::Color::Green; // 普通平台 - 绿色
+                break;
+            case Model::Entities::PlatformType::SPIKED:
+                platform_info[pair.first].color = sf::Color::Red; // 带刺平台 - 红色
+                break;
+            case Model::Entities::PlatformType::ROLLING:
+                platform_info[pair.first].color = sf::Color::Green; // 滚动平台 - 绿色底色，View层添加方向箭头
+                break;
+            case Model::Entities::PlatformType::FRAGILE:
+                platform_info[pair.first].color = sf::Color::Transparent; // 脆弱平台 - 透明，View层添加虚线边框
+                break;
+            case Model::Entities::PlatformType::BOUNCY:
+                platform_info[pair.first].color = sf::Color::Green; // 弹跳平台 - 绿色椭圆形状
+                break;
+        }
+        platform_info[pair.first].rolling_direction = pair.second->getRollingDirection();
     }
-    return platform_info;
+    frame_info.platforms_id = platforms_id;
+    frame_info.platforms_info = platform_info;
 }
 
-void GameViewModel::notification_callback(Common::NotificationParam* param, void* view_model) {
+void GameViewModel::notification_callback(Common::NotificationId id, void* view_model) {
     if (!view_model) return;
     GameViewModel* game_view_model = static_cast<GameViewModel*>(view_model);
-    switch (param->id) {
-        case Common::NotificationId::_ChangeGameFrame:
-            game_view_model->forwarding(dynamic_cast<Common::_ChangeGameFrameParam*>(param)->value);
+    switch (id) {
+        case Common::NotificationId::ChangeGameFrame:
+            game_view_model->forwarding();
             break;
         case Common::NotificationId::GameOver: 
-            game_view_model->trigger.fire(param);
+            game_view_model->trigger.fire(Common::NotificationId::GameOver);
             break;
     }
 }
 
-void GameViewModel::forwarding(const Common::_FrameInfo& frame_info) {
-    Common::ChangeGameFrameParam* change_frame_param = new Common::ChangeGameFrameParam();
-    change_frame_param->id = Common::NotificationId::ChangeGameFrame;
-    change_frame_param->value.total_score_text = getTotalScoreText();
-    change_frame_param->value.game_time_text = getGameTimeText();
-    change_frame_param->value.debug_info_text = getDebugInfoText();
-    change_frame_param->value.player_info.position = frame_info.player_info.position;
-    change_frame_param->value.player_info.size = frame_info.player_info.size;
-    change_frame_param->value.player_info.texture = getPlayerTexture(frame_info.player_info.state);
-    
+void GameViewModel::forwarding() {
+    updateGameTimeText();
+    updateTotalScoreText();
+    updateDebugInfoText();
+    frame_info.player_info.position = model->getPlayer()->getPosition();
+    frame_info.player_info.size = model->getPlayer()->getSize();
+    frame_info.player_info.texture = getPlayerTexture(model->getPlayer()->getState());  
     // 平台信息转换
-    std::map<int, Common::FrameInfo::PlatformInfo> platforms_info;
-    for (const auto& [id, info] : frame_info.platforms_info) {
-        platforms_info[id] = getPlatformInfo(info);
-    }
-    change_frame_param->value.platforms_info = platforms_info;
-    change_frame_param->value.platforms_id = frame_info.platforms_id;
+    getPlatformInfo();
     
     // 敌人信息转换
+    std::vector<int> enemies_id;
     std::map<int, Common::FrameInfo::EnemyInfo> enemies_info;
-    for (const auto& [id, info] : frame_info.enemies_info) {
-        enemies_info[id].position = info.position;
-        enemies_info[id].size = info.size;
-        enemies_info[id].color = sf::Color::Red; // 敌人显示为红色
-        enemies_info[id].facing_direction = info.facing_direction; // 传递面向方向
+    for (const auto& pair : model->getEnemies()) {
+        enemies_id.push_back(pair.first);
+        enemies_info[pair.first].position = pair.second->getPosition();
+        enemies_info[pair.first].size = pair.second->getSize();
+        enemies_info[pair.first].color = sf::Color::Red;
+        enemies_info[pair.first].facing_direction = pair.second->getFacingDirection();
     }
-    change_frame_param->value.enemies_info = enemies_info;
-    change_frame_param->value.enemies_id = frame_info.enemies_id;
-    
+    frame_info.enemies_info = enemies_info;
+    frame_info.enemies_id = enemies_id;
+
     // 子弹信息转换
+    std::vector<int> bullets_id;
     std::map<int, Common::FrameInfo::BulletInfo> bullets_info;
-    for (const auto& [id, info] : frame_info.bullets_info) {
-        bullets_info[id].position = info.position;
-        bullets_info[id].size = info.size;
-        bullets_info[id].is_player_bullet = info.is_player_bullet;
-        bullets_info[id].velocity = info.velocity;
+    for (const auto& pair : model->getBullets()) {
+        bullets_id.push_back(pair.first);
+        bullets_info[pair.first].position = pair.second->getPosition();
+        bullets_info[pair.first].size = pair.second->getSize();
+        bullets_info[pair.first].is_player_bullet = pair.second->isPlayerBullet();
+        bullets_info[pair.first].velocity = pair.second->getVelocity();
         // 玩家箭矢为黄色，敌人子弹为白色
-        bullets_info[id].color = info.is_player_bullet ? sf::Color::Yellow : sf::Color::White;
+        bullets_info[pair.first].color = bullets_info[pair.first].is_player_bullet ? sf::Color::Yellow : sf::Color::White;
     }
-    change_frame_param->value.bullets_info = bullets_info;
-    change_frame_param->value.bullets_id = frame_info.bullets_id;
-    
+    frame_info.bullets_info = bullets_info;
+    frame_info.bullets_id = bullets_id;
+
     // 豆子信息转换
+    std::vector<int> pickups_id;
     std::map<int, Common::FrameInfo::PickupInfo> pickups_info;
-    for (const auto& [id, info] : frame_info.pickups_info) {
-        pickups_info[id].position = info.position;
-        pickups_info[id].size = info.size;
-        pickups_info[id].color = sf::Color::Yellow; // 豆子显示为黄色
-        pickups_info[id].pickup_type = static_cast<int>(info.type); // 转换枚举为整数
+    for (const auto& pair : model->getPickups()) {
+        pickups_id.push_back(pair.first);
+        pickups_info[pair.first].position = pair.second->getPosition();
+        pickups_info[pair.first].size = pair.second->getSize();
+        pickups_info[pair.first].color = sf::Color::Yellow; // 豆子显示为黄色
+        pickups_info[pair.first].pickup_type = static_cast<int>(pair.second->getType()); // 转换枚举为整数
     }
-    change_frame_param->value.pickups_info = pickups_info;
-    change_frame_param->value.pickups_id = frame_info.pickups_id;
-    
+    frame_info.pickups_info = pickups_info;
+    frame_info.pickups_id = pickups_id;
+
     // 技能信息转换
     std::vector<Common::FrameInfo::SkillInfo> skills_info;
-    auto skills = model->getSkills();
-    for (auto* skill : skills) {
+    for (auto* skill : model->getSkills()) {
         Common::FrameInfo::SkillInfo skill_info;
         skill_info.skill_type = static_cast<int>(skill->getType());
         skill_info.cooldown_progress = skill->getCooldownProgress();
         skill_info.is_available = skill->isAvailable();
         skills_info.push_back(skill_info);
     }
-    change_frame_param->value.skills_info = skills_info;
-    
-    trigger.fire(change_frame_param);
-    delete change_frame_param;
+    frame_info.skills_info = skills_info;
+
+    trigger.fire(Common::NotificationId::ChangeGameFrame);
 }
 
 void GameViewModel::UpdateCommand::execute(Common::CommandParam& delta_time) {

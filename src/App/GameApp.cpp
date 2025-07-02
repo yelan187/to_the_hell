@@ -92,6 +92,7 @@ void GameApp::initMainMenu() {
     // properties
     mainmenu_view->setCurrentSelection(mainmenu_view_model->getCurrentSelectionIndex());
     mainmenu_view->setMenuOptions(mainmenu_view_model->getMenuOptions());
+    mainmenu_view->setBackgroundParticles(mainmenu_view_model->getBackgroundParticles());
     // commands
     mainmenu_view->setUpdateCommand(mainmenu_view_model->getUpdateCommand());
     mainmenu_view->setNavigateUpCommand(mainmenu_view_model->getNavigateUpCommand());
@@ -115,9 +116,10 @@ void GameApp::initGame() {
     // set model
     game_view_model->setModel(game_model);
     // properties
-    game_view->setTotalScoreText(game_view_model->getTotalScoreText());
-    game_view->setGameTimeText(game_view_model->getGameTimeText());
-    game_view->setDebugInfoText(game_view_model->getDebugInfoText());
+    game_view->setTotalScore(game_view_model->getTotalScore());
+    game_view->setGameTime(game_view_model->getGameTime());
+    game_view->setDebugInfo(game_view_model->getDebugInfo());
+    game_view->setFrameInfo(game_view_model->getFrameInfo());
     // commands
     game_view->setPlayerLeftCommand(game_view_model->getPlayerLeftCommand());
     game_view->setPlayerRightCommand(game_view_model->getPlayerRightCommand());
@@ -148,16 +150,14 @@ void GameApp::initScore(void* info) {
         game_title, window_size, fps, window
     );
     score_view_model = std::make_shared<ViewModel::ScoreViewModel>(window_size);
-    score_model = std::make_shared<Model::ScoreModel>(window_size, 0, std::chrono::seconds(0));
-    score_model->setScore(score_info->total_score);
-    score_model->setTime(score_info->game_time);
+    score_model = std::make_shared<Model::ScoreModel>(window_size, score_info->total_score, score_info->game_time);
     // set model
     score_view_model->setModel(score_model);
     // properties
     score_view->setCurrentSelection(score_view_model->getCurrentSelectionIndex());
     score_view->setMenuOptions(score_view_model->getMenuOptions());
-    score_view->setTotalScoreText(score_view_model->getTotalScore());
-    score_view->setTimeText(score_view_model->getGameTime());
+    score_view->setTotalScore(score_view_model->getTotalScore());
+    score_view->setGameTime(score_view_model->getGameTime());
     // commands
     score_view->setNavigateUpCommand(score_view_model->getNavigateUpCommand());
     score_view->setNavigateDownCommand(score_view_model->getNavigateDownCommand());
@@ -168,5 +168,6 @@ void GameApp::initScore(void* info) {
         score_view->getNotificationCallback(),
         score_view.get()
     );
+
     score_view->init();
 }

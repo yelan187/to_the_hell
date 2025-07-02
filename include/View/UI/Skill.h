@@ -1,5 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include "Common/NotificationBase.h"
+#include "Common/FrameInfo.h"
 
 namespace View {
 namespace UI {

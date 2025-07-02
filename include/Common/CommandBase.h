@@ -1,13 +1,12 @@
 #pragma once
 
-#include "Common/ParamBase.h"
 #include "Common/PageState.h"
 #include <chrono>
 #include <SFML/Graphics.hpp>
 
 namespace Common {
 
-class CommandParam : public Param {
+class CommandParam{
 public:
     virtual ~CommandParam() = default;
 };
@@ -34,8 +33,8 @@ typedef struct {
 typedef CommandTypeParam<ChangePageParamValue> ChangePageParam;
 
 typedef struct {
-    int total_score;
-    std::chrono::seconds game_time;
+    std::string total_score;
+    std::string game_time;
 } GameOverParamValue;
 typedef CommandTypeParam<GameOverParamValue> GameOverCommandParam;
 

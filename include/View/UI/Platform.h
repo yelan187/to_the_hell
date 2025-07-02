@@ -4,6 +4,7 @@
 #include <memory> 
 #include "Common/Config/Config.h"
 #include "Common/NotificationBase.h"
+#include "Common/FrameInfo.h"
 
 namespace View{
 namespace UI {

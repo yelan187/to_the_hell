@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include "Common/Config/Config.h"
+#include "Common/FrameInfo.h"
 #include "View/Page.h"
 #include "View/UI/Player.h"
 #include "View/UI/Platform.h"
@@ -16,7 +17,6 @@ namespace View {
 
 class GameView : public Page {
 public:
-
     GameView(std::string game_title, sf::Vector2u window_size, int fps, sf::RenderWindow& window, bool debug = false) : 
         Page(game_title, window_size, fps, window), 
         debug(debug),
@@ -30,15 +30,18 @@ public:
     }
     
     // properties
-    void setTotalScoreText(const std::string& text) {
-        total_score_text.setString(text);
+    void setFrameInfo(Common::FrameInfo* frame_info) {
+        this->frame_info = frame_info;
     }
-    void setGameTimeText(const std::string& text) {
-        game_time_text.setString(text);
+    void setTotalScore(std::string* total_score) {
+        this->total_score = total_score;
     }
-    void setDebugInfoText(const std::string& text) {
+    void setGameTime(std::string* game_time) {
+        this->game_time = game_time;
+    }
+    void setDebugInfo(std::string* debug_info) {
         if (debug) {
-            debug_info_text.setString(text);
+            this->debug_info = debug_info;
         }
     }
     // commands
@@ -79,15 +82,20 @@ public:
     Common::NotificationFunc getNotificationCallback() {
         return &notification_callback;
     }
-    // update
-    void updateframe(Common::FrameInfo frame_info);
-    
+    // others
     void init();
     void render() override;
     void handleInput(const sf::Event& event) override;
 private:
-    void gameOver(Common::GameOver value);
-    static void notification_callback(Common::NotificationParam* param, void* view);
+    void updateframe();
+    void gameOver();
+    // properties
+    Common::FrameInfo* frame_info;
+    std::string* total_score;
+    std::string* game_time;
+    std::string* debug_info;
+    // notification
+    static void notification_callback(Common::NotificationId id, void* view);
     // game info
     bool debug;
     sf::Font font;
@@ -96,7 +104,7 @@ private:
     sf::Text debug_info_text;
     // player info
     View::UI::Player player;
-    
+    // platform info
     std::vector<int> platforms_id;
     std::vector<View::UI::Platform> platforms;
     
@@ -113,15 +121,11 @@ private:
     Common::CommandBase* playerRightCommand;
     Common::CommandBase* playerJumpCommand;
     Common::CommandBase* playerDownCommand;
-    
     Common::CommandBase* playerStopLeftCommand;
     Common::CommandBase* playerStopRightCommand;
     Common::CommandBase* playerStopJumpCommand;
     Common::CommandBase* playerStopDownCommand;
-
     Common::CommandBase* gameover_command;
-    
-    // 技能命令
     Common::CommandBase* playerSkillCommand;
 };
 

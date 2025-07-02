@@ -38,8 +38,8 @@ private:
 
     // Score Page
     typedef struct scoreInfo {
-        int total_score;
-        std::chrono::seconds game_time;
+        std::string total_score;
+        std::string game_time;
     } ScoreInfo;
     std::shared_ptr<View::ScoreView> score_view;
     std::shared_ptr<ViewModel::ScoreViewModel> score_view_model;

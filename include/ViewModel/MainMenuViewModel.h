@@ -16,16 +16,23 @@ public:
         START_GAME,
         EXIT
     };
-
     MainMenuViewModel(sf::Vector2u window_size);
     virtual ~MainMenuViewModel() = default;
-    
+    // model
     void setModel(std::shared_ptr<Model::MainMenuModel> model) {
         this->model = model;
     }
-
-    std::vector<sf::Vector2f> getBackgroundParticles() const;
-    std::vector<std::string> getMenuOptions() const;
+    // properties
+    std::vector<sf::Vector2f>* getBackgroundParticles() {
+        return &background_particles;
+    }
+    std::vector<std::string>* getMenuOptions() {
+        return &menu_options;
+    }
+    int* getCurrentSelectionIndex() {
+        return &current_selection_index;
+    }
+    // commands
     Common::CommandBase* getNavigateUpCommand() {
         return &navigateUp_command;
     }
@@ -35,34 +42,26 @@ public:
     Common::CommandBase* getUpdateCommand() {
         return &update_command;
     }
-
-    int getCurrentSelectionIndex() const {
-        return current_selection_index;
-    }
-
     // notification
     Common::NotificationFunc getNotificationCallback() {
         return &notification_callback;
     }
 private:
+    // model
+    std::shared_ptr<Model::MainMenuModel> model;
+    // properties
+    std::vector<std::string> menu_options;
+    std::vector<sf::Vector2f> background_particles;
+    int current_selection_index;
+    // notification
+	static void notification_callback(Common::NotificationId id, void* view_model) {}
+    // others
+    float animation_time;
+    void initMenuOptions();
+    void initAvailableOptions();
     void navigateUp();
     void navigateDown();
     void updateAnimationState(float delta_time);
-    void updateAvailableOptions();
-    // notification
-	static void notification_callback(Common::NotificationParam* param, void* view_model) {};
-
-private:
-    // model
-    std::shared_ptr<Model::MainMenuModel> model;
-
-    // props
-	float animation_time;
-
-    std::vector<sf::Vector2f> background_particles;
-
-    std::vector<MenuOption> available_options;
-    int current_selection_index;
 
 // commands
 public:
@@ -71,11 +70,7 @@ public:
         NavigateUpCommand(MainMenuViewModel* view_model) : view_model(view_model) {}
         void execute() override {
             view_model->navigateUp();
-            Common::ChangeCurrentSelectionParam* param = new Common::ChangeCurrentSelectionParam();
-            param->id = Common::NotificationId::ChangeCurrentSelection;
-            param->value = view_model->getCurrentSelectionIndex();
-            view_model->trigger.fire(param);
-            delete param;
+            view_model->trigger.fire(Common::NotificationId::ChangeCurrentSelection);
         }
     private:
         MainMenuViewModel* view_model;
@@ -86,11 +81,7 @@ public:
         NavigateDownCommand(MainMenuViewModel* view_model) : view_model(view_model) {}
         void execute() override {
             view_model->navigateDown();
-            Common::ChangeCurrentSelectionParam* param = new Common::ChangeCurrentSelectionParam();
-            param->id = Common::NotificationId::ChangeCurrentSelection;
-            param->value = view_model->getCurrentSelectionIndex();
-            view_model->trigger.fire(param);
-            delete param;
+            view_model->trigger.fire(Common::NotificationId::ChangeCurrentSelection);
         }
     private:
         MainMenuViewModel* view_model;
@@ -99,7 +90,11 @@ public:
     class UpdateCommand : public Common::CommandBase {
     public:
         UpdateCommand(MainMenuViewModel* view_model) : view_model(view_model) {}
-        void execute(Common::CommandParam& delta_time) override;
+        void execute(Common::CommandParam& delta_time) override {
+            auto& update_param = dynamic_cast<Common::UpdateParam&>(delta_time);
+            view_model->updateAnimationState(update_param.value);
+            view_model->trigger.fire(Common::NotificationId::ChangeBackgroundParticles);
+        }
     private:
         MainMenuViewModel* view_model;
     };

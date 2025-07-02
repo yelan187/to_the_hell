@@ -28,6 +28,7 @@ class GameModel : public Model {
 public:
     GameModel(sf::Vector2u window_size);
     ~GameModel();
+    // interact with viewmodel
     std::string getDebugInfo() {
         std::string debug_info;
         if (player) {
@@ -37,37 +38,41 @@ public:
         }
         return debug_info;
     }
-    void gameOver();
     int getTotalScore() { return total_score; }
     std::chrono::seconds getDuration() { return std::chrono::seconds(static_cast<int>(game_time)); }
+    // platform
     std::map<int, Entities::Platform*> getPlatforms() const { return platforms; }
     Entities::Platform* getPlatformById(int id) const { 
         auto it = platforms.find(id);
         return (it != platforms.end()) ? it->second : nullptr;
     }
+
+    // enemy
     std::map<int, Entities::Enemy*> getEnemies() const { return enemies; }
+    // bullet
     void createBullet(sf::Vector2f position, sf::Vector2f velocity, bool is_player_bullet = false);
     std::map<int, Entities::Bullet*> getBullets() const { return bullets; }
+    // pickups
     std::map<int, Entities::Pickup*> getPickups() const { return pickups; }
+    // player
     sf::Vector2f getPlayerPosition() const { return player->getPosition(); }
-
-    void update(float delta_time);
-    
-    // 技能系统
-    std::vector<Entities::Skill*> getSkills() const { return skills; }
-
-    // 玩家控制方法声明
+    Entities::Player* getPlayer() const { return player; }
     void playerJump();
     void playerDown();
     void playerWalkLeft();
     void playerWalkRight();
     void playerStopLeft();
     void playerStopRight();
-    
-    // 技能系统：支持两种技能
+    // skills
+    std::vector<Entities::Skill*> getSkills() const { return skills; }
     // skill_id: 0=箭矢射击, 1=冲刺
     void playerUseSkill(int skill_id, sf::Vector2f direction = sf::Vector2f(1.0f, 0.0f));
-    
+    // gameover
+    void gameOver() {
+        trigger.fire(Common::NotificationId::GameOver);
+    }
+    // others
+    void update(float delta_time);
     sf::Vector2f platform_size = Common::Config::GameConfig::PLATFORM_SIZE;
     sf::Vector2f player_size = Common::Config::GameConfig::PLAYER_SIZE;
     
@@ -105,7 +110,6 @@ private:
     void checkPlayerBulletEnemyCollisions();
     int checkPickupPlayerCollisions();
     void cleanupOutOfBoundsEntities();
-    void fire();
     
     // 平台相关方法
     Entities::PlatformType getPlatformTypeRand();

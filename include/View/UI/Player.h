@@ -4,6 +4,7 @@
 #include <map>
 #include <memory>
 #include "Common/NotificationBase.h"
+#include "Common/FrameInfo.h"
 
 namespace View{
 namespace UI {

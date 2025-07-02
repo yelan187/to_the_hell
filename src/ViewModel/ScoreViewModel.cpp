@@ -14,13 +14,6 @@ ScoreViewModel::ScoreViewModel(sf::Vector2u window_size) :
     menu_options = {"Restart", "Main Menu", "Exit"};
 }
 
-std::vector<std::string> ScoreViewModel::getMenuOptions() const {
-    std::vector<std::string> options;
-    for (const auto& option : menu_options) {
-        options.push_back(option);
-    }
-    return options;
-}
 
 void ScoreViewModel::navigateUp() {
     current_selection_index = (current_selection_index - 1 + menu_options.size()) % menu_options.size();

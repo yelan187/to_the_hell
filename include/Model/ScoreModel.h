@@ -5,20 +5,19 @@
 namespace Model {
 class ScoreModel : public Model {
 public:
-    ScoreModel(sf::Vector2u window_size,int score, std::chrono::seconds time) : Model(window_size), score(score), time(time) {};
-    
-    int getScore() const;
-    std::chrono::seconds getTime() const;
+    ScoreModel(sf::Vector2u window_size,std::string score, std::string time) : Model(window_size), score(score), time(time) {};
+    std::string* getScore();
+    std::string* getTime();
 
-    void setScore(int total_score) {
+    void setScore(std::string total_score) {
         score = total_score;
     }
-    void setTime(std::chrono::seconds game_time) {
+    void setTime(std::string game_time) {
         time = game_time;
     }
 
 private:
-    int score;
-    std::chrono::seconds time;
+    std::string score;
+    std::string time;
 };
 }
