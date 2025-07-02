@@ -17,6 +17,7 @@ class Skill {
 public:
     Skill(SkillType type, float cooldown_time);
     
+    void resetCD();
     void update(float delta_time);  // 更新冷却时间
     bool canUse() const;           // 检查是否可以使用
     void use();                    // 使用技能（启动冷却）

@@ -190,7 +190,7 @@ void Player::updateAcceleration(float delta_time) {
 }
 
 void Player::update(float delta_time) {
-
+    
     // 处理滚动平台效果 - 移动到updateVelocity中处理
     updatePosition(delta_time);
     updateVelocity(delta_time);

@@ -71,6 +71,7 @@ static float SKILL_SPRINT_COOLDOWN;                     // 冲刺技能冷却时
 static float SKILL_SPRINT_DURATION;                     // 冲刺持续时间(秒)
 static float SKILL_SPRINT_SPEED_MULTIPLIER;             // 冲刺速度倍数
 static float SKILL_SPRINT_DISTANCE;                     // 冲刺距离(像素)
+static int SKILL_SPRINT_RESET_KILL_COUNT;
 static float SKILL_GROUND_PENETRATION_COOLDOWN;
 
 // 游戏流程配置

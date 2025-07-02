@@ -20,6 +20,11 @@ bool Skill::canUse() const {
     return is_available && current_cooldown <= 0.0f;
 }
 
+void Skill::resetCD() {
+    current_cooldown = 0.0f;
+    is_available = true;
+}
+
 void Skill::use() {
     if (canUse()) {
         current_cooldown = cooldown_time;

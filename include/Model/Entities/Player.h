@@ -34,7 +34,9 @@ class Player {
 public:
     Player(sf::Vector2f position, sf::Vector2f size, GameModel* game_model)
         : position(position), size(size), on_platform(false), on_platform_id(-1), 
-          state(PlayerState::IDLE), game_model(game_model), is_dead(false), jump_counter(0), max_jump_count(2) {
+          state(PlayerState::IDLE), game_model(game_model), is_dead(false), jump_counter(0), 
+          max_jump_count(2), killcounter(0) 
+        {
             walking_speed = Common::Config::GameConfig::PLAYER_WALK_SPEED;
             jumping_speed = Common::Config::GameConfig::PLAYER_JUMP_FORCE;
             gravity = sf::Vector2f(0, Common::Config::GameConfig::PLAYER_GRAVITY);
@@ -77,6 +79,13 @@ public:
 
     void groundPenetration();
 
+    void resetKillCount() {
+        killcounter = 0;
+    }
+    void addKillCount(int count = 1) {
+        killcounter += count;
+    }
+    int getKillCount() const { return killcounter; }
     PlayerState getState() const { return state; }
     sf::Vector2f getPosition() const { return position; }
     sf::Vector2f getVelocity() const { return velocity; }
@@ -131,6 +140,8 @@ private:
 
     int max_jump_count;
     int jump_counter;
+
+    int killcounter;
 };
 
 }

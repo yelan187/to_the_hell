@@ -88,30 +88,38 @@ void GameViewModel::playerWalkRight() {
 
 void GameViewModel::playerStopLeft() {
     // 释放左键状态，如果右键仍按着则切换方向
-    key_state[sf::Keyboard::A] = false;
-    if (key_state[sf::Keyboard::D]) {
-        player_towards = towards::RIGHT;
+    if (key_state[sf::Keyboard::A]) {
+        key_state[sf::Keyboard::A] = false;
+        if (key_state[sf::Keyboard::D]) {
+            player_towards = towards::RIGHT;
+        }
+        model->playerStopLeft();
     }
-    model->playerStopLeft();
 }
 
 void GameViewModel::playerStopRight() {
     // 释放右键状态，如果左键仍按着则切换方向
-    key_state[sf::Keyboard::D] = false;
-    if (key_state[sf::Keyboard::A]) {
-        player_towards = towards::LEFT;
+    if (key_state[sf::Keyboard::D]){
+        key_state[sf::Keyboard::D] = false; 
+        if (key_state[sf::Keyboard::A]) {
+            player_towards = towards::LEFT;
+        }
+        model->playerStopRight();
     }
-    model->playerStopRight();
 }
 
 void GameViewModel::playerStopJump() {
     // 释放跳跃键状态，允许再次跳跃
-    key_state[sf::Keyboard::W] = false;
+    if (key_state[sf::Keyboard::W]) {
+        // 只有在跳跃状态下才需要处理
+        key_state[sf::Keyboard::W] = false;
+    }
 }
 
 void GameViewModel::playerStopDown() {
-    // 释放下落键状态，允许再次快速下落
-    key_state[sf::Keyboard::S] = false;
+    if (key_state[sf::Keyboard::S]) {
+        key_state[sf::Keyboard::S] = false;
+    }
 }
 
 void GameViewModel::playerUseSkill(int skill_id, sf::Vector2f direction) {

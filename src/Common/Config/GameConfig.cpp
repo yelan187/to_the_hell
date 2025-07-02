@@ -66,6 +66,7 @@ float GameConfig::SKILL_SPRINT_COOLDOWN = 5.0f;             // 冲刺技能冷�
 float GameConfig::SKILL_SPRINT_DURATION = 1.0f;             // 冲刺持续时间(秒)
 float GameConfig::SKILL_SPRINT_SPEED_MULTIPLIER = 2.0f;     // 冲刺速度倍数
 float GameConfig::SKILL_SPRINT_DISTANCE = 100.0f;           // 冲刺距离(像素)
+int GameConfig::SKILL_SPRINT_RESET_KILL_COUNT = 2;
 float GameConfig::SKILL_GROUND_PENETRATION_COOLDOWN = 0.5f; // 地面穿透技能冷却时间(秒)
 
 // 游戏流程配置

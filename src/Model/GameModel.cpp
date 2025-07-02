@@ -249,10 +249,14 @@ void GameModel::update(float delta_time) {
     }
     
     // 技能更新
-    for (auto* skill : skills) {
-        skill->update(delta_time);
+    {
+        for (auto* skill : skills) {
+            skill->update(delta_time);
+        }
+        if (player->getKillCount() == Common::Config::GameConfig::SKILL_SPRINT_RESET_KILL_COUNT) {
+            skills[1]->resetCD();
+        }
     }
-    
     // 碰撞检测
     if (checkBulletPlayerCollisions()) {
         player->setDead(true);
@@ -398,6 +402,7 @@ void GameModel::checkPlayerBulletEnemyCollisions() {
                     delete enemy_it->second;
                     enemy_it = enemies.erase(enemy_it);
                     hit_enemy = true;
+                    player->addKillCount();
                     break;
                 } else {
                     ++enemy_it;
@@ -491,6 +496,7 @@ void GameModel::playerUseSkill(int skill_id, sf::Vector2f direction) {
                 0.0f
             );
             player->updatePosition(0.0f, sprint_replacement);
+            player->resetKillCount();
             break;
         }
         case 2:
