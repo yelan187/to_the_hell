@@ -176,9 +176,12 @@ void Player::updateVelocity(float delta_time) {
 
     prev_collision_direction = collision_direction;
     collision_direction = CollisionDirection::NONE;
-    std::cout << "prev_rolling_associated_velocity: " << prev_rolling_associated_velocity.x << std::endl;
-    std::cout << "Velocity: " << velocity.x << ", " << velocity.y << std::endl;
-    std::cout << "on_platform_id: "<< on_platform_id << std::endl;
+    // if(Common::Config::GlobalConfig::DEBUG_MODE){
+    //     std::cout << "prev_rolling_associated_velocity: " << prev_rolling_associated_velocity.x << std::endl;
+    //     std::cout << "Velocity: " << velocity.x << ", " << velocity.y << std::endl;
+    //     std::cout << "on_platform_id: "<< on_platform_id << std::endl;
+    // }
+
 }
 
 void Player::updateAcceleration(float delta_time) {
