@@ -19,6 +19,9 @@ float GameConfig::PLAYER_COLLISION_SHRINK_RATIO;
 int GameConfig::PLAYER_MAX_HP;
 int GameConfig::PLAYER_INITIAL_HP;
 
+// 伤害配置声明
+int GameConfig::ENEMY_CONTACT_DAMAGE;
+
 sf::Vector2f GameConfig::PLATFORM_SIZE;
 float GameConfig::PLATFORM_GENERATE_INTERVAL;
 float GameConfig::PLATFORM_GENERATE_INTERVAL_VARIANCE;
@@ -86,6 +89,9 @@ void GameConfig::resetToInitialValues() {
     PLAYER_COLLISION_SHRINK_RATIO = 0.3f;               // 玩家碰撞框水平方向缩小比例（0-1）
     PLAYER_MAX_HP = 3;                                  // 玩家最大生命值
     PLAYER_INITIAL_HP = 3;                              // 玩家初始生命值
+
+    // 非子弹伤害配置
+    ENEMY_CONTACT_DAMAGE = 1;                           // 敌人接触伤害
 
     // 平台配置
     PLATFORM_SIZE = sf::Vector2f(100.0f, 12.0f);        // 平台大小

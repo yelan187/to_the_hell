@@ -493,7 +493,7 @@ void Player::beDamagedByEnemy(int enemy_id) {
     if (!enemy) return;
 
     // 玩家受到敌人伤害
-    takeDamage(1); // 敌人接触伤害为1
+    takeDamage(Common::Config::GameConfig::ENEMY_CONTACT_DAMAGE); // 使用配置中的敌人接触伤害
     
     // 可以添加击退效果等
 }

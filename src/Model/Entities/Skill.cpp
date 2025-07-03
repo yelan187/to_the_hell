@@ -50,7 +50,7 @@ void ArrowShot::execute() {
     // 创建玩家子弹
     sf::Vector2f bullet_position = player->getPosition() + sf::Vector2f(player->getSize().x / 2, player->getSize().y / 2);
     sf::Vector2f bullet_velocity = player->getFacingDirection() * Common::Config::GameConfig::BULLET_SPEED;
-    player->game_model->createBullet(bullet_position, bullet_velocity, true, damage);
+    player->game_model->createBullet(bullet_position, bullet_velocity, damage, true);
 }
 
 // === Sprint 实现 ===

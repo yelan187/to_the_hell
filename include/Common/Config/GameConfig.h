@@ -26,6 +26,9 @@ static float PLAYER_COLLISION_SHRINK_RATIO;             // 玩家碰撞框水平
 static int PLAYER_MAX_HP;                               // 玩家最大生命值
 static int PLAYER_INITIAL_HP;                           // 玩家初始生命值
 
+// 非子弹伤害配置
+static int ENEMY_CONTACT_DAMAGE;                        // 敌人接触伤害
+
 // 平台配置
 static sf::Vector2f PLATFORM_SIZE;                      // 平台大小
 static float PLATFORM_GENERATE_INTERVAL;                // 平台生成间隔时间(秒)
