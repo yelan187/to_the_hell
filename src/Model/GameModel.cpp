@@ -183,7 +183,7 @@ void GameModel::initEvents() {
     events.push_back(new Entities::Event(5.0f, "Scroll Speed Increased", []() {
         Common::Config::GameConfig::SCROLL_SPEED *= 1.2f;
     }));
-    
+
     // 10秒: 敌人生成频率增加
     events.push_back(new Entities::Event(10.0f, "Enemy Spawn Rate Increased", [this]() {
         Common::Config::GameConfig::ENEMY_SPAWN_MIN_INTERVAL /= 1.3f;

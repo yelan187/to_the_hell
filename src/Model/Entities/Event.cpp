@@ -26,5 +26,6 @@ void Event::triggerEffect() {
     }
 }
 
+
 }
 }

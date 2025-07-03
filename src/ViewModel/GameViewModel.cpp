@@ -325,6 +325,9 @@ void GameViewModel::notification_callback(Common::NotificationId id, void* view_
         case Common::NotificationId::GameOver: 
             game_view_model->trigger.fire(Common::NotificationId::GameOver);
             break;
+        case Common::NotificationId::Choose:
+            game_view_model->trigger.fire(Common::NotificationId::Choose);
+            break;
     }
 }
 
