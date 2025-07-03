@@ -205,7 +205,6 @@ void GameModel::initEvents() {
         if (non_normal < 0.9f) {
             Common::Config::GameConfig::PLATFORM_NORMAL_PROBABILITY = 1.0f - non_normal;
         }
-        
     }));
 }
 
@@ -256,9 +255,6 @@ void GameModel::update(float delta_time) {
             ++it;
         }
     }
-    
-    // 玩家更新
-    player->update(delta_time);
     
     // 敌人生成和更新
     enemy_generate_interval -= delta_time;
@@ -316,16 +312,7 @@ void GameModel::update(float delta_time) {
     
     // 更新玩家技能
     if (player) {
-        player->updateSkills(delta_time);
-        
-        // 冲刺技能重置逻辑
-        if (player->getKillCount() == Common::Config::GameConfig::SKILL_SPRINT_RESET_KILL_COUNT) {
-            auto& skills = player->getSkills();
-            auto sprint_it = skills.find(Common::SkillID::SPRINT);
-            if (sprint_it != skills.end()) {
-                sprint_it->second->resetCD();
-            }
-        }
+        player->update(delta_time);
         
         // 使用Player类的碰撞检测系统
         int bullet_id = player->checkBulletCollisions();
@@ -333,11 +320,11 @@ void GameModel::update(float delta_time) {
             player->beDamagedByBullet(bullet_id);
         }
         
+        // 我觉得碰到鬼不应该掉血(
         // int enemy_id = player->checkEnemyCollisions();
         // if (enemy_id != -1) {
         //     player->beDamagedByEnemy(enemy_id);
         // }
-        // 我觉得碰到鬼不应该掉血(
 
         int pickup_id = player->checkPickupCollisions();
         if (pickup_id != -1) {
@@ -446,8 +433,8 @@ void GameModel::generatePickup() {
 
 void GameModel::createBullet(sf::Vector2f position, sf::Vector2f velocity, int damage, bool is_player_bullet) {
     sf::Vector2f bullet_size = is_player_bullet ? 
-        Common::Config::GameConfig::BULLET_SIZE : 
-        sf::Vector2f(Common::Config::GameConfig::BULLET_SIZE.x * 0.6f, Common::Config::GameConfig::BULLET_SIZE.y * 0.6f);
+        Common::Config::GameConfig::SKILL_ARROW_SIZE :
+        Common::Config::GameConfig::ENEMY_BULLET_SIZE; 
     
     bullets[next_bullet_id] = new Entities::Bullet(next_bullet_id, position, velocity, bullet_size, damage, is_player_bullet);
     next_bullet_id++;
@@ -635,19 +622,12 @@ void GameModel::removeBullet(int id) {
     }
 }
 
-void GameModel::handlePickup(int pickup_id) {
-    auto it = pickups.find(pickup_id);
-    if (it == pickups.end()) return;
-    
-    Entities::Pickup* pickup = it->second;
-    if (!pickup) return;
-    
-    // 根据拾取物类型加分
-    total_score += pickup->getScore();
-    
-    // 移除拾取物
-    delete pickup;
-    pickups.erase(it);
+void GameModel::removePickup(int id) {
+    auto it = pickups.find(id);
+    if (it != pickups.end()) {
+        delete it->second;
+        pickups.erase(it);
+    }
 }
 
 // ==================== 玩家子弹击中敌人检测 ====================
@@ -660,9 +640,11 @@ void GameModel::checkPlayerBulletsHitEnemies() {
                 if (bullet_it->second->collidesWith(enemy_it->second->getPosition(), enemy_it->second->getSize())) {
                     // 增加分数
                     total_score += Common::Config::GameConfig::ENEMY_SCORE_VALUE;
-                    // 删除敌人
-                    delete enemy_it->second;
-                    enemy_it = enemies.erase(enemy_it);
+                    enemy_it->second->hp -= bullet_it->second->getDamage();
+                    if (enemy_it->second->hp <= 0) {
+                        delete enemy_it->second;
+                        enemy_it = enemies.erase(enemy_it);
+                    }
                     hit_enemy = true;
                     // 增加玩家击杀计数
                     if (player) {

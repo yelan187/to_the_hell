@@ -90,3 +90,11 @@ bool Pickup::collidesWith(sf::Vector2f target_pos, sf::Vector2f target_size) con
              position.y + size.y < target_pos.y ||
              position.y > target_pos.y + target_size.y);
 }
+
+void Pickup::applyEffect() {
+    if (type == PickupType::NORMAL_DOT) {
+        game_model->addScore(Common::Config::GameConfig::PICKUP_NORMAL_SCORE);
+    } else if (type == PickupType::STAR_DOT) {
+        game_model->addScore(Common::Config::GameConfig::PICKUP_STAR_SCORE);
+    }
+}

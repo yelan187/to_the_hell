@@ -56,13 +56,12 @@ float GameConfig::PICKUP_SPAWN_MAX_INTERVAL;
 int GameConfig::PICKUP_NORMAL_SCORE;
 int GameConfig::PICKUP_STAR_SCORE;
 
-sf::Vector2f GameConfig::BULLET_SIZE;
-float GameConfig::BULLET_SPEED;
-int GameConfig::BULLET_PLAYER_DAMAGE;
-int GameConfig::BULLET_ENEMY_DAMAGE;
+sf::Vector2f GameConfig::ENEMY_BULLET_SIZE;
 
 float GameConfig::SKILL_ARROW_COOLDOWN;
 int GameConfig::SKILL_ARROW_DAMAGE;
+float GameConfig::SKILL_ARROW_SPEED;
+sf::Vector2f GameConfig::SKILL_ARROW_SIZE;
 float GameConfig::SKILL_SPRINT_COOLDOWN;
 float GameConfig::SKILL_SPRINT_DURATION;
 float GameConfig::SKILL_SPRINT_SPEED_MULTIPLIER;
@@ -115,6 +114,7 @@ void GameConfig::resetToInitialValues() {
     ENEMY_SPEED = 50.0f;                                // 敌人移动速度
     ENEMY_SHOOT_INTERVAL = 2.0f;                        // 敌人射击间隔时间(秒)
     ENEMY_BULLET_SPEED = 200.0f;                        // 敌人子弹速度
+    ENEMY_BULLET_SIZE = sf::Vector2f(9.6f, 9.6f);     // 子弹大小
     ENEMY_DAMAGE = 1;
     ENEMY_MAX_HP = 2;
     ENEMY_GENERATE_INTERVAL = 5.0f;                     // 敌人生成间隔时间(秒)，用于初始设置
@@ -132,15 +132,11 @@ void GameConfig::resetToInitialValues() {
     PICKUP_NORMAL_SCORE = 2;                            // 普通豆子得分
     PICKUP_STAR_SCORE = 5;                              // 五角星豆子得分
 
-    // 子弹配置
-    BULLET_SIZE = sf::Vector2f(16.0f, 16.0f);           // 子弹大小
-    BULLET_SPEED = 500.0f;                              // 玩家子弹速度
-    BULLET_PLAYER_DAMAGE = 1;                           // 玩家子弹伤害
-    BULLET_ENEMY_DAMAGE = 1;                            // 敌人子弹伤害
-
     // 技能配置
     SKILL_ARROW_COOLDOWN = 1.0f;                        // 箭矢技能冷却时间(秒)
-    SKILL_ARROW_DAMAGE = 10;                            // 箭矢技能伤害
+    SKILL_ARROW_DAMAGE = 1;                             // 箭矢技能伤害
+    SKILL_ARROW_SPEED = 500.0f;                         // 箭矢技能速度
+    SKILL_ARROW_SIZE = sf::Vector2f(16.0f, 16.0f);      // 箭矢技能大小
     SKILL_SPRINT_COOLDOWN = 5.0f;                       // 冲刺技能冷却时间(秒)
     SKILL_SPRINT_DURATION = 1.0f;                       // 冲刺持续时间(秒)
     SKILL_SPRINT_SPEED_MULTIPLIER = 2.0f;               // 冲刺速度倍数

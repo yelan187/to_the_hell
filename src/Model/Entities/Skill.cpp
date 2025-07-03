@@ -51,7 +51,7 @@ float Skill::getCooldownProgress() const {
 void ArrowShot::execute() {
     // 创建玩家子弹
     sf::Vector2f bullet_position = player->getPosition() + sf::Vector2f(player->getSize().x / 2, player->getSize().y / 2);
-    sf::Vector2f bullet_velocity = player->getFacingDirection() * Common::Config::GameConfig::BULLET_SPEED;
+    sf::Vector2f bullet_velocity = player->getFacingDirection() * Common::Config::GameConfig::SKILL_ARROW_SPEED;
     player->game_model->createBullet(bullet_position, bullet_velocity, damage, true);
 }
 
@@ -65,7 +65,14 @@ void Sprint::execute() {
 
 void Sprint::update(float delta_time) {
     Skill::update(delta_time); // 调用基类更新
-    // 可以在这里添加冲刺持续效果的逻辑
+    // 冲刺技能重置逻辑
+    if (player->getKillCount() == Common::Config::GameConfig::SKILL_SPRINT_RESET_KILL_COUNT) {
+        auto& skills = player->getSkills();
+        auto sprint_it = skills.find(Common::SkillID::SPRINT);
+        if (sprint_it != skills.end()) {
+            sprint_it->second->resetCD();
+        }
+    }
 }
 
 // === GroundPenetration 实现 ===

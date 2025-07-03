@@ -38,7 +38,7 @@ public:
         return platform_info;
     }
 
-
+    void addScore(int increment) { total_score += increment; }
     int getTotalScore() { return total_score; }
     std::chrono::seconds getDuration() { return std::chrono::seconds(static_cast<int>(game_time)); }
     
@@ -65,6 +65,7 @@ public:
         return (it != bullets.end()) ? it->second : nullptr;
     }
     void removeBullet(int id);
+    void removePickup(int id);
     
     // pickups
     std::map<int, Entities::Pickup*> getPickups() const { return pickups; }

@@ -485,7 +485,8 @@ void Player::pickup(int pickup_id) {
     if (!pickup) return;
 
     // 根据拾取物类型处理
-    game_model->handlePickup(pickup_id);
+    pickup->applyEffect();
+    game_model->removePickup(pickup_id); // 从游戏模型中移除拾取物
 }
 
 void Player::beDamagedByEnemy(int enemy_id) {

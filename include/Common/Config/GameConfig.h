@@ -50,8 +50,9 @@ static sf::Vector2f ENEMY_SIZE;                         // 敌人大小
 static float ENEMY_SPEED;                               // 敌人移动速度
 static float ENEMY_SHOOT_INTERVAL;                      // 敌人射击间隔时间(秒)
 static float ENEMY_BULLET_SPEED;                        // 敌人子弹速度
-static int ENEMY_DAMAGE;                              // 敌人对玩家造成的伤害
-static int ENEMY_MAX_HP;                               // 敌人最大生命值
+static sf::Vector2f ENEMY_BULLET_SIZE;                  // 子弹大小
+static int ENEMY_DAMAGE;                                // 敌人对玩家造成的伤害
+static int ENEMY_MAX_HP;                                // 敌人最大生命值
 
 static float ENEMY_GENERATE_INTERVAL;                   // 敌人生成间隔时间(秒)，用于初始设置
 static float ENEMY_SPAWN_MIN_INTERVAL;                  // 敌人生成最小间隔
@@ -68,15 +69,11 @@ static float PICKUP_SPAWN_MAX_INTERVAL;                 // 豆子生成最大间
 static int PICKUP_NORMAL_SCORE;                         // 普通豆子得分
 static int PICKUP_STAR_SCORE;                           // 五角星豆子得分
 
-// 子弹配置
-static sf::Vector2f BULLET_SIZE;                        // 子弹大小
-static float BULLET_SPEED;                              // 玩家子弹速度
-static int BULLET_PLAYER_DAMAGE;                        // 玩家子弹伤害
-static int BULLET_ENEMY_DAMAGE;                         // 敌人子弹伤害
-
 // 技能配置
 static float SKILL_ARROW_COOLDOWN;                      // 箭矢技能冷却时间(秒)
 static int SKILL_ARROW_DAMAGE;                          // 箭矢技能伤害
+static float SKILL_ARROW_SPEED;                         // 箭矢技能速度
+static sf::Vector2f SKILL_ARROW_SIZE;                   // 箭矢技能大小
 static float SKILL_SPRINT_COOLDOWN;                     // 冲刺技能冷却时间(秒)
 static float SKILL_SPRINT_DURATION;                     // 冲刺持续时间(秒)
 static float SKILL_SPRINT_SPEED_MULTIPLIER;             // 冲刺速度倍数
