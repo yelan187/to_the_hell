@@ -219,7 +219,7 @@ sf::Texture* GameViewModel::getPlayerTexture(Model::Entities::PlayerState state)
     return &player_textures[PlayerState::IDLE_R]; // Default to idle right texture
 }
 
-void GameViewModel::getPlatformInfo() {
+void GameViewModel::updatePlatformsInfo() {
     std::map<int, Model::Entities::Platform*> platforms = model->getPlatforms();
     
     std::vector<int> platforms_id;
@@ -268,7 +268,7 @@ void GameViewModel::notification_callback(Common::NotificationId id, void* view_
 void GameViewModel::forwarding() {
     updateGameTimeText();
     updateTotalScoreText();
-    updateDebugInfoText();
+    updatePlatformInfoText();
     
     // 检查player是否已初始化，避免空指针访问
     if (model->getPlayer() != nullptr) {
@@ -286,7 +286,7 @@ void GameViewModel::forwarding() {
         frame_info.player_info.max_hp = Common::Config::GameConfig::PLAYER_MAX_HP;
     }  
     // 平台信息转换
-    getPlatformInfo();
+    updatePlatformsInfo();
     
     // 敌人信息转换
     std::vector<int> enemies_id;

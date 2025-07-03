@@ -488,7 +488,7 @@ void Player::pickup(int pickup_id) {
     game_model->handlePickup(pickup_id);
 }
 
-void Player::damage(int enemy_id) {
+void Player::beDamagedByEnemy(int enemy_id) {
     Enemy* enemy = game_model->getEnemyById(enemy_id);
     if (!enemy) return;
 
@@ -498,7 +498,7 @@ void Player::damage(int enemy_id) {
     // 可以添加击退效果等
 }
 
-void Player::beDamaged(int bullet_id) {
+void Player::beDamagedByBullet(int bullet_id) {
     Bullet* bullet = game_model->getBulletById(bullet_id);
     if (!bullet || bullet->isPlayerBullet()) return;
 

@@ -39,10 +39,8 @@ public:
     void setGameTime(std::string* game_time) {
         this->game_time = game_time;
     }
-    void setDebugInfo(std::string* debug_info) {
-        if (debug) {
-            this->debug_info = debug_info;
-        }
+    void setPlatformInfo(std::string* platform_info) {
+        this->platform_info = platform_info;
     }
     // commands
     void setPlayerLeftCommand(Common::CommandBase* command) {
@@ -97,7 +95,7 @@ private:
     Common::FrameInfo* frame_info;
     std::string* total_score;
     std::string* game_time;
-    std::string* debug_info;
+    std::string* platform_info;
     // notification
     static void notification_callback(Common::NotificationId id, void* view);
     // game info
@@ -105,7 +103,7 @@ private:
     sf::Font font;
     sf::Text game_time_text;
     sf::Text total_score_text;
-    sf::Text debug_info_text;
+    sf::Text platform_info_text;
     sf::Text player_hp_text;
     
     // 背景系统

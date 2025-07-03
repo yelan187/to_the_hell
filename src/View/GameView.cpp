@@ -33,12 +33,11 @@ void GameView::init() {
     player_hp_text.setFont(font);
     player_hp_text.setPosition(15, 135);  // 调整HP位置，适应更大字体
 
-    if (debug) {
-        debug_info_text.setCharacterSize(36);  // 从24增加到36 (1.5倍)
-        debug_info_text.setFillColor(sf::Color::White);
-        debug_info_text.setFont(font);
-        debug_info_text.setPosition(15, 95);  // 调整平台信息位置，适应更大字体
-    }
+
+    platform_info_text.setCharacterSize(36);  // 从24增加到36 (1.5倍)
+    platform_info_text.setFillColor(sf::Color::White);
+    platform_info_text.setFont(font);
+    platform_info_text.setPosition(15, 95);  // 调整平台信息位置，适应更大字体
 
     player.init();
 }
@@ -78,9 +77,7 @@ void GameView::updateframe() {
     // 更新HP文本显示
     player_hp_text.setString("HP: " + std::to_string(frame_info->player_info.hp) + "/" + std::to_string(frame_info->player_info.max_hp));
     
-    if (debug) {
-        debug_info_text.setString(*debug_info);
-    }
+    platform_info_text.setString(*platform_info);
     player.update(frame_info->player_info);
     platforms.clear();
 
@@ -235,9 +232,7 @@ void GameView::render() {
     window.draw(total_score_text);
     window.draw(player_hp_text);
 
-    if (debug) {
-        window.draw(debug_info_text);
-    }
+    window.draw(platform_info_text);
 
     player.render();
 

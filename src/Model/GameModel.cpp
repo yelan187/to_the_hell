@@ -6,8 +6,13 @@ using Model::Entities::PlatformType;
 
 /*  GameModel.cpp - 游戏核心逻辑模型实现
     
-    本文件实现了SFML游戏的核心业务逻辑，包括实体管理、碰撞检测、事件系统、
+    本文件实现了SFML游戏的核心业务逻辑，包括实体管理、事件系统、
     音频控制、动态背景切换等功能。遵循MVVM架构模式，负责数据处理和状态管理。
+    
+    重构后的架构特点：
+    - Player类集成了技能系统和碰撞检测
+    - GameModel负责全局状态管理和实体协调
+    - 严格遵循MVVM分层，Model不依赖View层
 
 ==================== 构造函数和析构函数 ====================
 - GameModel()           // 构造函数，初始化窗口大小和背景状态
@@ -17,12 +22,12 @@ using Model::Entities::PlatformType;
 - initGame()            // 初始化游戏状态，重置配置，启动背景音乐
 - initPlatforms()       // 创建初始平台（包括边界平台和游戏平台）
 - initPlayer()          // 创建玩家并设置在平台上的初始位置
-- initSkills()          // 初始化技能系统（箭矢、冲刺、穿透）
+- initSkills()          // 初始化玩家技能系统（委托给Player类）
 - initEvents()          // 初始化游戏事件序列（难度递增、背景切换）
 - resetPlatformGenerateInterval()  // 重置平台生成间隔（含随机变化）
 
 ==================== 主要更新方法 ====================
-- update()              // 主更新循环：处理事件、实体更新、碰撞检测、边界检查
+- update()              // 主更新循环：处理事件、实体更新、Player碰撞检测、边界检查
 
 ==================== 实体生成方法 ====================
 - generatePlatform()    // 生成新平台（验证位置有效性，随机类型）
@@ -31,9 +36,8 @@ using Model::Entities::PlatformType;
 - createBullet()        // 创建子弹/箭矢（区分玩家和敌人子弹）
 
 ==================== 碰撞检测方法 ====================
-- checkBulletPlayerCollisions()     // 检测敌人子弹击中玩家（含碰撞缩减）
-- checkPlayerBulletEnemyCollisions() // 检测玩家箭矢击中敌人（加分、击杀计数）
-- checkPickupPlayerCollisions()     // 检测玩家拾取豆子（获得分数）
+- checkPlayerBulletsHitEnemies()    // 检测玩家箭矢击中敌人（加分、击杀计数）
+注：Player相关的碰撞检测已移至Player类中
 
 ==================== 玩家控制方法 ====================
 - playerJump()          // 玩家跳跃
@@ -44,7 +48,7 @@ using Model::Entities::PlatformType;
 - playerStopRight()     // 停止右移动作
 
 ==================== 技能系统方法 ====================
-- playerUseSkill()      // 使用技能：箭矢射击、冲刺传送、地面穿透
+- playerUseSkill()      // 委托给Player类的技能系统
 
 ==================== 工具方法 ====================
 - getPlatformTypeRand() // 根据配置概率随机获取平台类型
@@ -326,12 +330,12 @@ void GameModel::update(float delta_time) {
         // 使用Player类的碰撞检测系统
         int bullet_id = player->checkBulletCollisions();
         if (bullet_id != -1) {
-            player->beDamaged(bullet_id);
+            player->beDamagedByBullet(bullet_id);
         }
         
         int enemy_id = player->checkEnemyCollisions();
         if (enemy_id != -1) {
-            player->damage(enemy_id);
+            player->beDamagedByEnemy(enemy_id);
         }
         
         int pickup_id = player->checkPickupCollisions();
@@ -345,7 +349,8 @@ void GameModel::update(float delta_time) {
         return;
     }
     
-    checkPlayerBulletEnemyCollisions();
+    // 玩家子弹击中敌人的检测（这个需要在Model层处理，因为涉及分数和敌人删除）
+    checkPlayerBulletsHitEnemies();
     
     // 移除需要删除的拾取物已由Player::pickup处理
     total_score += 0; // score_gained 现在由 Player::pickup 内部处理
@@ -447,82 +452,6 @@ void GameModel::createBullet(sf::Vector2f position, sf::Vector2f velocity, int d
     
     bullets[next_bullet_id] = new Entities::Bullet(next_bullet_id, position, velocity, bullet_size, damage, is_player_bullet);
     next_bullet_id++;
-}
-
-// ==================== 碰撞检测方法 ====================
-
-bool GameModel::checkBulletPlayerCollisions() {
-    for (auto bullet_it = bullets.begin(); bullet_it != bullets.end(); ) {
-        if (!bullet_it->second->isPlayerBullet()) {
-            sf::Vector2f player_pos = player->getPosition();
-            sf::Vector2f player_size = player->getSize();
-            
-            float shrink_amount = player_size.x * Common::Config::GameConfig::PLAYER_COLLISION_SHRINK_RATIO;
-            sf::Vector2f effective_player_pos(player_pos.x + shrink_amount, player_pos.y);
-            sf::Vector2f effective_player_size(player_size.x - 2 * shrink_amount, player_size.y);
-            
-            if (bullet_it->second->collidesWith(effective_player_pos, effective_player_size)) {
-                // 玩家受到伤害
-                player->takeDamage(bullet_it->second->getDamage());
-                // 删除击中的子弹
-                delete bullet_it->second;
-                bullet_it = bullets.erase(bullet_it);
-                
-                // 如果玩家死亡，返回true
-                if (player->isDead()) {
-                    return true;
-                }
-            } else {
-                ++bullet_it;
-            }
-        } else {
-            ++bullet_it;
-        }
-    }
-    return false;
-}
-
-void GameModel::checkPlayerBulletEnemyCollisions() {
-    for (auto bullet_it = bullets.begin(); bullet_it != bullets.end(); ) {
-        if (bullet_it->second->isPlayerBullet()) {
-            bool hit_enemy = false;
-            for (auto enemy_it = enemies.begin(); enemy_it != enemies.end(); ) {
-                if (bullet_it->second->collidesWith(enemy_it->second->getPosition(), enemy_it->second->getSize())) {
-                    total_score += Common::Config::GameConfig::ENEMY_SCORE_VALUE;
-                    delete enemy_it->second;
-                    enemy_it = enemies.erase(enemy_it);
-                    hit_enemy = true;
-                    player->addKillCount();
-                    break;
-                } else {
-                    ++enemy_it;
-                }
-            }
-            
-            if (hit_enemy) {
-                delete bullet_it->second;
-                bullet_it = bullets.erase(bullet_it);
-            } else {
-                ++bullet_it;
-            }
-        } else {
-            ++bullet_it;
-        }
-    }
-}
-
-int GameModel::checkPickupPlayerCollisions() {
-    int score_gained = 0;
-    for (auto it = pickups.begin(); it != pickups.end(); ) {
-        if (it->second->collidesWith(player->getPosition(), player->getSize())) {
-            score_gained += it->second->getScore();
-            delete it->second;
-            it = pickups.erase(it);
-        } else {
-            ++it;
-        }
-    }
-    return score_gained;
 }
 
 // ==================== 玩家控制方法 ====================
@@ -720,4 +649,41 @@ void GameModel::handlePickup(int pickup_id) {
     // 移除拾取物
     delete pickup;
     pickups.erase(it);
+}
+
+// ==================== 玩家子弹击中敌人检测 ====================
+
+void GameModel::checkPlayerBulletsHitEnemies() {
+    for (auto bullet_it = bullets.begin(); bullet_it != bullets.end(); ) {
+        if (bullet_it->second->isPlayerBullet()) {
+            bool hit_enemy = false;
+            for (auto enemy_it = enemies.begin(); enemy_it != enemies.end(); ) {
+                if (bullet_it->second->collidesWith(enemy_it->second->getPosition(), enemy_it->second->getSize())) {
+                    // 增加分数
+                    total_score += Common::Config::GameConfig::ENEMY_SCORE_VALUE;
+                    // 删除敌人
+                    delete enemy_it->second;
+                    enemy_it = enemies.erase(enemy_it);
+                    hit_enemy = true;
+                    // 增加玩家击杀计数
+                    if (player) {
+                        player->addKillCount();
+                    }
+                    break;
+                } else {
+                    ++enemy_it;
+                }
+            }
+            
+            if (hit_enemy) {
+                // 删除击中的子弹
+                delete bullet_it->second;
+                bullet_it = bullets.erase(bullet_it);
+            } else {
+                ++bullet_it;
+            }
+        } else {
+            ++bullet_it;
+        }
+    }
 }

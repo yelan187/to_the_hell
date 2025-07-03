@@ -51,8 +51,8 @@ public:
     std::string* getGameTime() {
         return &game_time;
     }
-    std::string* getDebugInfo() {
-        return &debug_info;
+    std::string* getPlatformInfo() {
+        return &platform_info;
     }
     Common::FrameInfo* getFrameInfo() {
         return &frame_info;
@@ -112,7 +112,7 @@ private:
     Common::FrameInfo frame_info;
     std::string total_score;
     std::string game_time;
-    std::string debug_info;
+    std::string platform_info;
     // notification
     static void notification_callback(Common::NotificationId id, void* viewmodel);
     // others
@@ -127,12 +127,12 @@ private:
     std::map<PlayerState, sf::Texture> player_textures;
     void loadPlayerTextures();
     sf::Texture* getPlayerTexture(Model::Entities::PlayerState state);
-    void getPlatformInfo();
     void updateTotalScoreText();
     void updateGameTimeText();
-    void updateDebugInfoText() {
-        debug_info = model->getDebugInfo();
+    void updatePlatformInfoText() {
+        platform_info = model->getPlatformInfo();
     }
+    void updatePlatformsInfo(); // 更新FrameInfo中的平台信息
 
 // commands
 public:

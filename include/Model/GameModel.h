@@ -33,14 +33,14 @@ public:
 
 
     // interact with viewmodel
-    std::string getDebugInfo() {
-        std::string debug_info;
+    std::string getPlatformInfo() {
+        std::string platform_info;
         if (player) {
-            debug_info += "on_platform: " + std::to_string(player->getOnPlatformId()) + "\n";
+            platform_info += "on_platform: " + std::to_string(player->getOnPlatformId()) + "\n";
         } else {
-            debug_info += "Player not initialized\n";
+            platform_info += "Player not initialized\n";
         }
-        return debug_info;
+        return platform_info;
     }
 
 
@@ -146,9 +146,7 @@ private:
     void generatePlatform();
     void generateEnemy();
     void generatePickup();
-    bool checkBulletPlayerCollisions();
-    void checkPlayerBulletEnemyCollisions();
-    int checkPickupPlayerCollisions();
+    void checkPlayerBulletsHitEnemies(); // 检测玩家子弹击中敌人
     void cleanupOutOfBoundsEntities();
     
     // 平台相关方法

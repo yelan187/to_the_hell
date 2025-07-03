@@ -70,8 +70,8 @@ public:
     
     // === 碰撞检测系统 ===
     void pickup(int pickup_id);
-    void damage(int enemy_id);
-    void beDamaged(int bullet_id);
+    void beDamagedByEnemy(int enemy_id);      // 被敌人碰撞伤害
+    void beDamagedByBullet(int bullet_id);    // 被子弹击中伤害
     int checkBulletCollisions();  // 检测子弹碰撞，返回击中的子弹ID，-1表示无碰撞
     int checkEnemyCollisions();   // 检测敌人碰撞，返回击中的敌人ID，-1表示无碰撞
     int checkPickupCollisions(); // 检测拾取物碰撞，返回拾取物ID，-1表示无碰撞
