@@ -63,7 +63,7 @@ void Enemy::shoot() {
             sf::Vector2f bullet_velocity = direction * Common::Config::GameConfig::ENEMY_BULLET_SPEED;
             sf::Vector2f bullet_pos = position + size / 2.0f;
             
-            game_model->createBullet(bullet_pos, bullet_velocity, false);  // false 代表敌人子弹
+            game_model->createBullet(bullet_pos, bullet_velocity, Common::Config::GameConfig::BULLET_ENEMY_DAMAGE, false);  // false 代表敌人子弹
         }
         
         shoot_timer = 0.0f;

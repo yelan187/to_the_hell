@@ -21,15 +21,12 @@ public:
         Page(game_title, window_size, fps, window), 
         debug(debug),
         player(window, Common::Config::GameConfig::PLAYER_SIZE),
-        skill_bar(sf::Vector2f(10.0f, 100.0f), sf::Vector2f(50.0f, 50.0f)), // 左侧位置
+        skill_bar(sf::Vector2f(10.0f, 180.0f), sf::Vector2f(75.0f, 75.0f)),
         current_background_name(""),
         is_transitioning(false),
         transition_progress(0.0f)
     {
-        if (!font.loadFromFile("assets/fonts/fusion.ttf")) {
-            std::cerr << "Error loading font!" << std::endl;
-            return;
-        }
+        // 初始化移到init()方法中
     }
     
     // properties
@@ -109,6 +106,7 @@ private:
     sf::Text game_time_text;
     sf::Text total_score_text;
     sf::Text debug_info_text;
+    sf::Text player_hp_text;
     
     // 背景系统
     std::map<std::string, sf::Texture> background_textures; // 预加载的背景纹理

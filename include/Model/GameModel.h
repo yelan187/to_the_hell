@@ -58,7 +58,7 @@ public:
     // enemy
     std::map<int, Entities::Enemy*> getEnemies() const { return enemies; }
     // bullet
-    void createBullet(sf::Vector2f position, sf::Vector2f velocity, bool is_player_bullet = false);
+    void createBullet(sf::Vector2f position, sf::Vector2f velocity, int damage, bool is_player_bullet = false);
     std::map<int, Entities::Bullet*> getBullets() const { return bullets; }
     // pickups
     std::map<int, Entities::Pickup*> getPickups() const { return pickups; }

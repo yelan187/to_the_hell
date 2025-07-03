@@ -434,20 +434,20 @@ void GameModel::generatePickup() {
     }
 }
 
-void GameModel::createBullet(sf::Vector2f position, sf::Vector2f velocity, bool is_player_bullet) {
+void GameModel::createBullet(sf::Vector2f position, sf::Vector2f velocity, int damage, bool is_player_bullet) {
     sf::Vector2f bullet_size = is_player_bullet ? 
         Common::Config::GameConfig::BULLET_SIZE : 
         sf::Vector2f(Common::Config::GameConfig::BULLET_SIZE.x * 0.6f, Common::Config::GameConfig::BULLET_SIZE.y * 0.6f);
     
-    bullets[next_bullet_id] = new Entities::Bullet(next_bullet_id, position, velocity, bullet_size, is_player_bullet);
+    bullets[next_bullet_id] = new Entities::Bullet(next_bullet_id, position, velocity, bullet_size, damage, is_player_bullet);
     next_bullet_id++;
 }
 
 // ==================== 碰撞检测方法 ====================
 
 bool GameModel::checkBulletPlayerCollisions() {
-    for (const auto& bullet_pair : bullets) {
-        if (!bullet_pair.second->isPlayerBullet()) {
+    for (auto bullet_it = bullets.begin(); bullet_it != bullets.end(); ) {
+        if (!bullet_it->second->isPlayerBullet()) {
             sf::Vector2f player_pos = player->getPosition();
             sf::Vector2f player_size = player->getSize();
             
@@ -455,9 +455,22 @@ bool GameModel::checkBulletPlayerCollisions() {
             sf::Vector2f effective_player_pos(player_pos.x + shrink_amount, player_pos.y);
             sf::Vector2f effective_player_size(player_size.x - 2 * shrink_amount, player_size.y);
             
-            if (bullet_pair.second->collidesWith(effective_player_pos, effective_player_size)) {
-                return true;
+            if (bullet_it->second->collidesWith(effective_player_pos, effective_player_size)) {
+                // 玩家受到伤害
+                player->takeDamage(bullet_it->second->getDamage());
+                // 删除击中的子弹
+                delete bullet_it->second;
+                bullet_it = bullets.erase(bullet_it);
+                
+                // 如果玩家死亡，返回true
+                if (player->isDead()) {
+                    return true;
+                }
+            } else {
+                ++bullet_it;
             }
+        } else {
+            ++bullet_it;
         }
     }
     return false;
@@ -557,7 +570,7 @@ void GameModel::playerUseSkill(int skill_id, sf::Vector2f direction) {
             );
             
             sf::Vector2f arrow_velocity = sf::Vector2f(player_facing.x * Common::Config::GameConfig::BULLET_SPEED, 0.0f);
-            createBullet(arrow_pos, arrow_velocity, true);
+            createBullet(arrow_pos, arrow_velocity, Common::Config::GameConfig::BULLET_PLAYER_DAMAGE, true);
             break;
         }
         case 1: // SPRINT

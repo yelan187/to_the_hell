@@ -45,6 +45,9 @@ public:
             facing_direction = sf::Vector2f(1.0f, 0.0f);  // 默认面向右侧
             prev_rolling_associated_velocity = sf::Vector2f(0, 0);
             prev_collision_correction_velocity = sf::Vector2f(0, 0);
+            // 初始化HP系统
+            max_hp = Common::Config::GameConfig::PLAYER_MAX_HP;
+            hp = Common::Config::GameConfig::PLAYER_INITIAL_HP;
         }
 
     void updatePosition(float delta_time,sf::Vector2f additional_replacement = sf::Vector2f(0,0));
@@ -98,6 +101,13 @@ public:
     bool isOnPlatform() const { return on_platform; }
     bool isDead() const { return is_dead; }
     void setDead(bool dead) { is_dead = dead; }
+    
+    // HP系统
+    int getHP() const { return hp; }
+    int getMaxHP() const { return max_hp; }
+    void takeDamage(int damage);
+    void heal(int amount);
+    void setMaxHP(int max_hp) { this->max_hp = max_hp; hp = max_hp; }
 
     int getOnPlatformId() const {
         return on_platform_id;
@@ -118,6 +128,10 @@ private:
     bool on_platform;
     int on_platform_id;
     bool is_dead;
+    
+    // HP系统
+    int hp;
+    int max_hp;
 
     PlayerState state;
 

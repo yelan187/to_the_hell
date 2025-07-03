@@ -23,6 +23,8 @@ static float PLAYER_GRAVITY;                            // 玩家重力加速度
 static float PLAYER_MAX_FALL_SPEED;                     // 玩家最大下落速度
 static float PLAYER_FALL_ACCELERATION;                  // 玩家手动下落时的额外加速度
 static float PLAYER_COLLISION_SHRINK_RATIO;             // 玩家碰撞框水平方向缩小比例（0-1）
+static int PLAYER_MAX_HP;                               // 玩家最大生命值
+static int PLAYER_INITIAL_HP;                           // 玩家初始生命值
 
 // 平台配置
 static sf::Vector2f PLATFORM_SIZE;                      // 平台大小
@@ -64,6 +66,8 @@ static int PICKUP_STAR_SCORE;                           // 五角星豆子得分
 // 子弹配置
 static sf::Vector2f BULLET_SIZE;                        // 子弹大小
 static float BULLET_SPEED;                              // 玩家子弹速度
+static int BULLET_PLAYER_DAMAGE;                        // 玩家子弹伤害
+static int BULLET_ENEMY_DAMAGE;                         // 敌人子弹伤害
 
 // 技能配置
 static float SKILL_ARROW_COOLDOWN;                      // 箭矢技能冷却时间(秒)

@@ -16,6 +16,8 @@ float GameConfig::PLAYER_GRAVITY;
 float GameConfig::PLAYER_MAX_FALL_SPEED;
 float GameConfig::PLAYER_FALL_ACCELERATION;
 float GameConfig::PLAYER_COLLISION_SHRINK_RATIO;
+int GameConfig::PLAYER_MAX_HP;
+int GameConfig::PLAYER_INITIAL_HP;
 
 sf::Vector2f GameConfig::PLATFORM_SIZE;
 float GameConfig::PLATFORM_GENERATE_INTERVAL;
@@ -50,6 +52,8 @@ int GameConfig::PICKUP_STAR_SCORE;
 
 sf::Vector2f GameConfig::BULLET_SIZE;
 float GameConfig::BULLET_SPEED;
+int GameConfig::BULLET_PLAYER_DAMAGE;
+int GameConfig::BULLET_ENEMY_DAMAGE;
 
 float GameConfig::SKILL_ARROW_COOLDOWN;
 float GameConfig::SKILL_SPRINT_COOLDOWN;
@@ -79,6 +83,8 @@ void GameConfig::resetToInitialValues() {
     PLAYER_MAX_FALL_SPEED = 600.0f;                     // 玩家最大下落速度
     PLAYER_FALL_ACCELERATION = 300.0f;                  // 玩家手动下落时的额外加速度
     PLAYER_COLLISION_SHRINK_RATIO = 0.3f;               // 玩家碰撞框水平方向缩小比例（0-1）
+    PLAYER_MAX_HP = 3;                                  // 玩家最大生命值
+    PLAYER_INITIAL_HP = 3;                              // 玩家初始生命值
 
     // 平台配置
     PLATFORM_SIZE = sf::Vector2f(100.0f, 12.0f);        // 平台大小
@@ -117,6 +123,8 @@ void GameConfig::resetToInitialValues() {
     // 子弹配置
     BULLET_SIZE = sf::Vector2f(16.0f, 16.0f);           // 子弹大小
     BULLET_SPEED = 500.0f;                              // 玩家子弹速度
+    BULLET_PLAYER_DAMAGE = 1;                           // 玩家子弹伤害
+    BULLET_ENEMY_DAMAGE = 1;                            // 敌人子弹伤害
 
     // 技能配置
     SKILL_ARROW_COOLDOWN = 1.0f;                        // 箭矢技能冷却时间(秒)

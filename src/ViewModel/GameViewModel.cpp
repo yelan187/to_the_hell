@@ -275,11 +275,15 @@ void GameViewModel::forwarding() {
         frame_info.player_info.position = model->getPlayer()->getPosition();
         frame_info.player_info.size = model->getPlayer()->getSize();
         frame_info.player_info.texture = getPlayerTexture(model->getPlayer()->getState());
+        frame_info.player_info.hp = model->getPlayer()->getHP();
+        frame_info.player_info.max_hp = model->getPlayer()->getMaxHP();
     } else {
         // 如果player未初始化，设置默认值
         frame_info.player_info.position = sf::Vector2f(0, 0);
         frame_info.player_info.size = Common::Config::GameConfig::PLAYER_SIZE;
         frame_info.player_info.texture = nullptr;
+        frame_info.player_info.hp = 0;
+        frame_info.player_info.max_hp = Common::Config::GameConfig::PLAYER_MAX_HP;
     }  
     // 平台信息转换
     getPlatformInfo();

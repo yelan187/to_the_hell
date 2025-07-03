@@ -349,3 +349,20 @@ void Player::bounce(float bounce_force) {
         state = PlayerState::JUMPING_WALKING;
     }
 }
+
+// ==================== HP系统方法 ====================
+
+void Player::takeDamage(int damage) {
+    hp -= damage;
+    if (hp <= 0) {
+        hp = 0;
+        is_dead = true;
+    }
+}
+
+void Player::heal(int amount) {
+    hp += amount;
+    if (hp > max_hp) {
+        hp = max_hp;
+    }
+}

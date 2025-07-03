@@ -15,6 +15,8 @@ typedef struct frameInfo{
         sf::Vector2f position;       ///< 玩家位置
         sf::Vector2f size;           ///< 玩家大小
         sf::Texture* texture;        ///< 玩家纹理指针
+        int hp;                      ///< 当前生命值
+        int max_hp;                  ///< 最大生命值
     } player_info;
 
     /**

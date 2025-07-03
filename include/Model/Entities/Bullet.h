@@ -6,7 +6,7 @@ namespace Entities {
 
 class Bullet {
 public:
-    Bullet(int id, sf::Vector2f position, sf::Vector2f velocity, sf::Vector2f size, bool is_player_bullet = false);
+    Bullet(int id, sf::Vector2f position, sf::Vector2f velocity, sf::Vector2f size, int damage, bool is_player_bullet = false);
     
     void update(float delta_time);
     bool outOfWindow(sf::Vector2u window_size) const;
@@ -16,6 +16,7 @@ public:
     sf::Vector2f getSize() const { return size; }
     sf::Vector2f getVelocity() const { return velocity; }
     int getId() const { return id; }
+    int getDamage() const { return damage; }
     bool isPlayerBullet() const { return is_player_bullet; }
 
 private:
@@ -23,6 +24,7 @@ private:
     sf::Vector2f position;
     sf::Vector2f velocity;
     sf::Vector2f size;
+    int damage;
     bool is_player_bullet;
 };
 

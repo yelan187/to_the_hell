@@ -4,27 +4,39 @@
 using View::GameView;
 
 void GameView::init() {
+    // 加载字体
+    if (!font.loadFromFile("assets/fonts/fusion.ttf")) {
+        std::cerr << "Error loading font!" << std::endl;
+        return;
+    }
+    
     // 预加载所有背景
     preloadBackgrounds();
     
     // 设置默认背景
     switchBackground("assets/images/background/misty_forest_1.png");
     
-    total_score_text.setCharacterSize(24);
+    total_score_text.setCharacterSize(36);  // 从24增加到36 (1.5倍)
     total_score_text.setFillColor(sf::Color::White);
     total_score_text.setFont(font);
     total_score_text.setPosition(15,15);
 
-    game_time_text.setCharacterSize(24);
+    game_time_text.setCharacterSize(36);  // 从24增加到36 (1.5倍)
     game_time_text.setFillColor(sf::Color::White);
     game_time_text.setFont(font);
-    game_time_text.setPosition(15,40);
+    game_time_text.setPosition(15,55);  // 调整Y位置适应更大字体
+
+    // 初始化玩家HP文本
+    player_hp_text.setCharacterSize(36);  // 从24增加到36 (1.5倍)
+    player_hp_text.setFillColor(sf::Color::Red);
+    player_hp_text.setFont(font);
+    player_hp_text.setPosition(15, 135);  // 调整HP位置，适应更大字体
 
     if (debug) {
-        debug_info_text.setCharacterSize(24);
+        debug_info_text.setCharacterSize(36);  // 从24增加到36 (1.5倍)
         debug_info_text.setFillColor(sf::Color::White);
         debug_info_text.setFont(font);
-        debug_info_text.setPosition(15,65);
+        debug_info_text.setPosition(15, 95);  // 调整平台信息位置，适应更大字体
     }
 
     player.init();
@@ -61,6 +73,10 @@ void GameView::updateframe() {
     
     total_score_text.setString(*total_score);
     game_time_text.setString(*game_time);
+    
+    // 更新HP文本显示
+    player_hp_text.setString("HP: " + std::to_string(frame_info->player_info.hp) + "/" + std::to_string(frame_info->player_info.max_hp));
+    
     if (debug) {
         debug_info_text.setString(*debug_info);
     }
@@ -207,6 +223,7 @@ void GameView::render() {
     
     window.draw(game_time_text);
     window.draw(total_score_text);
+    window.draw(player_hp_text);
 
     if (debug) {
         window.draw(debug_info_text);
