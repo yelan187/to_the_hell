@@ -2,17 +2,30 @@
 
 #include <SFML/Graphics.hpp>
 #include <memory>
+#include <map>
 
 #include "Common/Config/Config.h"
+#include "Common/SkillID.h"
 
 namespace Model {
     class GameModel;
+    namespace Entities {
+        class Platform;
+        class Enemy;
+        class Bullet;
+        class Pickup;
+        class Skill;
+    }
 }
 
 namespace Model {
 namespace Entities {
 
 class Platform;
+class Enemy;
+class Bullet;
+class Pickup;
+class Skill;
 
 enum class PlayerState {
     IDLE,
@@ -49,6 +62,19 @@ public:
             max_hp = Common::Config::GameConfig::PLAYER_MAX_HP;
             hp = Common::Config::GameConfig::PLAYER_INITIAL_HP;
         }
+
+    // === 技能系统 ===
+    std::map<Common::SkillID, std::shared_ptr<Skill>>& getSkills() { return skills; }
+    void updateSkills(float delta_time);
+    void initSkills();
+    
+    // === 碰撞检测系统 ===
+    void pickup(int pickup_id);
+    void damage(int enemy_id);
+    void beDamaged(int bullet_id);
+    int checkBulletCollisions();  // 检测子弹碰撞，返回击中的子弹ID，-1表示无碰撞
+    int checkEnemyCollisions();   // 检测敌人碰撞，返回击中的敌人ID，-1表示无碰撞
+    int checkPickupCollisions(); // 检测拾取物碰撞，返回拾取物ID，-1表示无碰撞
 
     void updatePosition(float delta_time,sf::Vector2f additional_replacement = sf::Vector2f(0,0));
     void updateVelocity(float delta_time);
@@ -121,9 +147,12 @@ public:
         this->position = position;
     }
 
-private:
-
+public:
     GameModel* game_model;
+    // 技能系统
+    std::map<Common::SkillID, std::shared_ptr<Skill>> skills;
+
+private:
 
     bool on_platform;
     int on_platform_id;

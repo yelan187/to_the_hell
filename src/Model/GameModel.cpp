@@ -92,11 +92,7 @@ GameModel::~GameModel() {
     cleanup(bullets);
     cleanup(pickups);
     
-    // 清理技能容器
-    for (auto* skill : skills) {
-        delete skill;
-    }
-    skills.clear();
+    // 技能现在在Player类中管理，不需要在这里清理
     
     // 清理事件容器
     for (auto* event : events) {
@@ -164,14 +160,10 @@ void GameModel::initPlayer() {
 }
 
 void GameModel::initSkills() {
-    for (auto* skill : skills) {
-        delete skill;
+    // 玩家技能初始化现在在Player类中处理
+    if (player) {
+        player->initSkills();
     }
-    skills.clear();
-    
-    skills.push_back(new Entities::Skill(Entities::SkillType::ARROW_SHOT, Common::Config::GameConfig::SKILL_ARROW_COOLDOWN));
-    skills.push_back(new Entities::Skill(Entities::SkillType::SPRINT, Common::Config::GameConfig::SKILL_SPRINT_COOLDOWN));
-    skills.push_back(new Entities::Skill(Entities::SkillType::GROUND_PENETRATION, Common::Config::GameConfig::SKILL_GROUND_PENETRATION_COOLDOWN));
 }
 
 void GameModel::initEvents() {
@@ -318,20 +310,34 @@ void GameModel::update(float delta_time) {
         }
     }
     
-    // 技能更新
-    {
-        for (auto* skill : skills) {
-            skill->update(delta_time);
-        }
+    // 更新玩家技能
+    if (player) {
+        player->updateSkills(delta_time);
+        
+        // 冲刺技能重置逻辑
         if (player->getKillCount() == Common::Config::GameConfig::SKILL_SPRINT_RESET_KILL_COUNT) {
-            skills[1]->resetCD();
+            auto& skills = player->getSkills();
+            auto sprint_it = skills.find(Common::SkillID::SPRINT);
+            if (sprint_it != skills.end()) {
+                sprint_it->second->resetCD();
+            }
         }
-    }
-    // 碰撞检测
-    if (checkBulletPlayerCollisions()) {
-        player->setDead(true);
-        gameOver();
-        return;
+        
+        // 使用Player类的碰撞检测系统
+        int bullet_id = player->checkBulletCollisions();
+        if (bullet_id != -1) {
+            player->beDamaged(bullet_id);
+        }
+        
+        int enemy_id = player->checkEnemyCollisions();
+        if (enemy_id != -1) {
+            player->damage(enemy_id);
+        }
+        
+        int pickup_id = player->checkPickupCollisions();
+        if (pickup_id != -1) {
+            player->pickup(pickup_id);
+        }
     }
     
     if (player && player->isDead()) {
@@ -341,8 +347,8 @@ void GameModel::update(float delta_time) {
     
     checkPlayerBulletEnemyCollisions();
     
-    int score_gained = checkPickupPlayerCollisions();
-    total_score += score_gained;
+    // 移除需要删除的拾取物已由Player::pickup处理
+    total_score += 0; // score_gained 现在由 Player::pickup 内部处理
     
     // 边界检查（上下边界都算失败）
     sf::Vector2f player_pos = player->getPosition();
@@ -529,7 +535,12 @@ void GameModel::playerDown() {
     if (!player->isOnPlatform()) {
         player->fall();
     } else {
-        playerUseSkill(2); // 使用冲刺技能
+        // 在平台上时使用地面穿透技能
+        auto& skills = player->getSkills();
+        auto ground_penetration_it = skills.find(Common::SkillID::GROUND_PENETRATION);
+        if (ground_penetration_it != skills.end()) {
+            ground_penetration_it->second->use();
+        }
     }
 }
 
@@ -551,45 +562,16 @@ void GameModel::playerStopRight() {
 
 // ==================== 技能系统方法 ====================
 
-void GameModel::playerUseSkill(int skill_id, sf::Vector2f direction) {
+void GameModel::playerUseSkill(Common::SkillID skill_id) {
     if (!player) return;
     
-    if (skill_id < 0 || skill_id >= static_cast<int>(skills.size())) return;
-    if (!skills[skill_id]->canUse()) return;
+    auto& skills = player->getSkills();
+    auto skill_it = skills.find(skill_id);
+    if (skill_it == skills.end()) return;
     
-    skills[skill_id]->use();
-    sf::Vector2f player_facing = player->getFacingDirection();
-    
-    switch (skill_id) {
-        case 0: // ARROW_SHOT
-        {
-            sf::Vector2f player_pos = player->getPosition();
-            sf::Vector2f arrow_pos = sf::Vector2f(
-                player_pos.x + Common::Config::GameConfig::PLAYER_SIZE.x / 2, 
-                player_pos.y + Common::Config::GameConfig::PLAYER_SIZE.y / 2 - Common::Config::GameConfig::BULLET_SIZE.y / 2
-            );
-            
-            sf::Vector2f arrow_velocity = sf::Vector2f(player_facing.x * Common::Config::GameConfig::BULLET_SPEED, 0.0f);
-            createBullet(arrow_pos, arrow_velocity, Common::Config::GameConfig::BULLET_PLAYER_DAMAGE, true);
-            break;
-        }
-        case 1: // SPRINT
-        {
-            sf::Vector2f sprint_replacement = sf::Vector2f(
-                player_facing.x * Common::Config::GameConfig::SKILL_SPRINT_DISTANCE, 
-                0.0f
-            );
-            player->updatePosition(0.0f, sprint_replacement);
-            player->resetKillCount();
-            break;
-        }
-        case 2:
-        {
-            player->groundPenetration();
-            break;
-        }
-        default:
-            break;
+    auto skill = skill_it->second;
+    if (skill->canUse()) {
+        skill->use(); // 这会调用execute()方法
     }
 }
 
@@ -715,4 +697,27 @@ void GameModel::setBackground(const std::string& background_file) {
         background_changed = true;
         std::cout << "Background changed to: " << background_file << std::endl;
     }
+}
+
+void GameModel::removeBullet(int id) {
+    auto it = bullets.find(id);
+    if (it != bullets.end()) {
+        delete it->second;
+        bullets.erase(it);
+    }
+}
+
+void GameModel::handlePickup(int pickup_id) {
+    auto it = pickups.find(pickup_id);
+    if (it == pickups.end()) return;
+    
+    Entities::Pickup* pickup = it->second;
+    if (!pickup) return;
+    
+    // 根据拾取物类型加分
+    total_score += pickup->getScore();
+    
+    // 移除拾取物
+    delete pickup;
+    pickups.erase(it);
 }

@@ -71,6 +71,7 @@ static int BULLET_ENEMY_DAMAGE;                         // 敌人子弹伤害
 
 // 技能配置
 static float SKILL_ARROW_COOLDOWN;                      // 箭矢技能冷却时间(秒)
+static int SKILL_ARROW_DAMAGE;                          // 箭矢技能伤害
 static float SKILL_SPRINT_COOLDOWN;                     // 冲刺技能冷却时间(秒)
 static float SKILL_SPRINT_DURATION;                     // 冲刺持续时间(秒)
 static float SKILL_SPRINT_SPEED_MULTIPLIER;             // 冲刺速度倍数

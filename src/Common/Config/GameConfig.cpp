@@ -56,6 +56,7 @@ int GameConfig::BULLET_PLAYER_DAMAGE;
 int GameConfig::BULLET_ENEMY_DAMAGE;
 
 float GameConfig::SKILL_ARROW_COOLDOWN;
+int GameConfig::SKILL_ARROW_DAMAGE;
 float GameConfig::SKILL_SPRINT_COOLDOWN;
 float GameConfig::SKILL_SPRINT_DURATION;
 float GameConfig::SKILL_SPRINT_SPEED_MULTIPLIER;
@@ -128,6 +129,7 @@ void GameConfig::resetToInitialValues() {
 
     // 技能配置
     SKILL_ARROW_COOLDOWN = 1.0f;                        // 箭矢技能冷却时间(秒)
+    SKILL_ARROW_DAMAGE = 10;                            // 箭矢技能伤害
     SKILL_SPRINT_COOLDOWN = 5.0f;                       // 冲刺技能冷却时间(秒)
     SKILL_SPRINT_DURATION = 1.0f;                       // 冲刺持续时间(秒)
     SKILL_SPRINT_SPEED_MULTIPLIER = 2.0f;               // 冲刺速度倍数

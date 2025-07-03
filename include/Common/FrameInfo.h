@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <chrono>
+#include "Common/SkillID.h"
 
 namespace Common {
 // accessible for view/viewmodel layers to bind properties
@@ -78,9 +79,9 @@ typedef struct frameInfo{
      * @brief 技能状态信息（View层版本）
      */
     typedef struct {
-        int skill_type;              ///< 技能类型（0=箭矢射击, 1=冲刺）
-        float cooldown_progress;     ///< 冷却进度（0.0=可用, 1.0=完全冷却）
-        bool is_available;           ///< 是否可用（用于UI显示状态）
+        Common::SkillID skill_id;        ///< 技能ID（使用枚举类型）
+        float cooldown_progress;         ///< 冷却进度（0.0=可用, 1.0=完全冷却）
+        bool is_available;               ///< 是否可用（用于UI显示状态）
     } SkillInfo;
     std::vector<SkillInfo> skills_info;          ///< 技能信息列表（按技能ID顺序）
     

@@ -121,9 +121,9 @@ void GameViewModel::playerStopDown() {
     }
 }
 
-void GameViewModel::playerUseSkill(int skill_id, sf::Vector2f direction) {
+void GameViewModel::playerUseSkill(Common::SkillID skill_id) {
     // 将技能使用请求委托给Model层处理
-    model->playerUseSkill(skill_id, direction);
+    model->playerUseSkill(skill_id);
 }
 
 void GameViewModel::loadPlayerTextures() {
@@ -331,12 +331,15 @@ void GameViewModel::forwarding() {
 
     // 技能信息转换
     std::vector<Common::FrameInfo::SkillInfo> skills_info;
-    for (auto* skill : model->getSkills()) {
-        Common::FrameInfo::SkillInfo skill_info;
-        skill_info.skill_type = static_cast<int>(skill->getType());
-        skill_info.cooldown_progress = skill->getCooldownProgress();
-        skill_info.is_available = skill->isAvailable();
-        skills_info.push_back(skill_info);
+    if (model->getPlayer()) {
+        auto& player_skills = model->getPlayer()->getSkills();
+        for (const auto& skill_pair : player_skills) {
+            Common::FrameInfo::SkillInfo skill_info;
+            skill_info.skill_id = skill_pair.first;
+            skill_info.cooldown_progress = skill_pair.second->getCooldownProgress();
+            skill_info.is_available = skill_pair.second->isAvailable();
+            skills_info.push_back(skill_info);
+        }
     }
     frame_info.skills_info = skills_info;
 

@@ -1,5 +1,6 @@
 #include <iostream>
 #include "View/GameView.h"
+#include "Common/SkillID.h"
 
 using View::GameView;
 
@@ -132,18 +133,18 @@ void GameView::handleInput(const sf::Event& event) {
             case sf::Keyboard::D:
                 playerRightCommand->execute();
                 break;
-            case sf::Keyboard::J: // 箭矢射击技能（技能ID = 0）
+            case sf::Keyboard::J: // 箭矢射击技能
                 {
                     Common::PlayerSkillParam skill_param;
-                    skill_param.value.skill_id = 0;
+                    skill_param.value.skill_id = static_cast<int>(Common::SkillID::ARROW_SHOT);
                     skill_param.value.direction = sf::Vector2f(1.0f, 0.0f);
                     playerSkillCommand->execute(skill_param);
                 }
                 break;
-            case sf::Keyboard::U: // 冲刺技能（技能ID = 1）
+            case sf::Keyboard::U: // 冲刺技能
                 {
                     Common::PlayerSkillParam skill_param;
-                    skill_param.value.skill_id = 1;
+                    skill_param.value.skill_id = static_cast<int>(Common::SkillID::SPRINT);
                     skill_param.value.direction = sf::Vector2f(1.0f, 0.0f);
                     playerSkillCommand->execute(skill_param);
                 }
@@ -174,8 +175,17 @@ void GameView::handleInput(const sf::Event& event) {
             int clicked_skill = skill_bar.getClickedSkill(mouse_pos);
             
             if (clicked_skill >= 0) {
+                // 将点击的技能索引映射到对应的SkillID
+                Common::SkillID skill_id;
+                switch (clicked_skill) {
+                    case 0: skill_id = Common::SkillID::ARROW_SHOT; break;
+                    case 1: skill_id = Common::SkillID::SPRINT; break;
+                    case 2: skill_id = Common::SkillID::GROUND_PENETRATION; break;
+                    default: return; // 无效索引
+                }
+                
                 Common::PlayerSkillParam skill_param;
-                skill_param.value.skill_id = clicked_skill;
+                skill_param.value.skill_id = static_cast<int>(skill_id);
                 skill_param.value.direction = sf::Vector2f(1.0f, 0.0f); // 默认方向
                 playerSkillCommand->execute(skill_param);
             }

@@ -57,11 +57,27 @@ public:
 
     // enemy
     std::map<int, Entities::Enemy*> getEnemies() const { return enemies; }
+    Entities::Enemy* getEnemyById(int id) const {
+        auto it = enemies.find(id);
+        return (it != enemies.end()) ? it->second : nullptr;
+    }
+    
     // bullet
     void createBullet(sf::Vector2f position, sf::Vector2f velocity, int damage, bool is_player_bullet = false);
     std::map<int, Entities::Bullet*> getBullets() const { return bullets; }
+    Entities::Bullet* getBulletById(int id) const {
+        auto it = bullets.find(id);
+        return (it != bullets.end()) ? it->second : nullptr;
+    }
+    void removeBullet(int id);
+    
     // pickups
     std::map<int, Entities::Pickup*> getPickups() const { return pickups; }
+    Entities::Pickup* getPickupById(int id) const {
+        auto it = pickups.find(id);
+        return (it != pickups.end()) ? it->second : nullptr;
+    }
+    void handlePickup(int pickup_id);  // 处理拾取物逻辑
     // player
     sf::Vector2f getPlayerPosition() const { return player->getPosition(); }
     Entities::Player* getPlayer() const { return player; }
@@ -72,9 +88,7 @@ public:
     void playerStopLeft();
     void playerStopRight();
     // skills
-    std::vector<Entities::Skill*> getSkills() const { return skills; }
-    // skill_id: 0=箭矢射击, 1=冲刺
-    void playerUseSkill(int skill_id, sf::Vector2f direction = sf::Vector2f(1.0f, 0.0f));
+    void playerUseSkill(Common::SkillID skill_id);
     
     // background
     std::string getCurrentBackground() const { return current_background; }
@@ -112,9 +126,6 @@ private:
     std::map<int, Entities::Enemy*> enemies;
     std::map<int, Entities::Bullet*> bullets;
     std::map<int, Entities::Pickup*> pickups;
-    
-    // 技能系统
-    std::vector<Entities::Skill*> skills;
     
     // 事件系统
     std::vector<Entities::Event*> events;
