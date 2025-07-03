@@ -157,6 +157,10 @@ public:
         this->position = position;
     }
 
+    // expose some api to effect
+    void addMaxJumpCount(int count) {
+        max_jump_count += count;
+    }
 public:
     GameModel* game_model;
     // skill

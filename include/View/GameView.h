@@ -5,8 +5,10 @@
 #include <vector>
 #include "Common/Config/Config.h"
 #include "Common/FrameInfo.h"
+#include "Common/ChoicesInfo.h"
 #include "View/Page.h"
 #include "View/UI/Player.h"
+#include "View/UI/Choice.h"    // 选择UI组件
 #include "View/UI/Platform.h"
 #include "View/UI/Enemy.h"     // 敌人UI组件
 #include "View/UI/Bullet.h"    // 子弹UI组件
@@ -24,7 +26,8 @@ public:
         skill_bar(sf::Vector2f(10.0f, 180.0f), sf::Vector2f(75.0f, 75.0f)),
         current_background_name(""),
         is_transitioning(false),
-        transition_progress(0.0f)
+        transition_progress(0.0f),
+        dummy_command(nullptr)
     {
         // 初始化移到init()方法中
     }
@@ -32,6 +35,9 @@ public:
     // properties
     void setFrameInfo(Common::FrameInfo* frame_info) {
         this->frame_info = frame_info;
+    }
+    void setChoicesInfo(Common::ChoicesInfo* choices_info) {
+        this->choices_info = choices_info;
     }
     void setTotalScore(std::string* total_score) {
         this->total_score = total_score;
@@ -76,6 +82,10 @@ public:
         playerSkillCommand = command;
     }
     
+    void setChooseCommand(Common::CommandBase* command){
+        chooseCommand = command;
+    }
+
     // notification
     Common::NotificationFunc getNotificationCallback() {
         return &notification_callback;
@@ -86,6 +96,8 @@ public:
     void handleInput(const sf::Event& event) override;
 private:
     void updateframe();
+    void endChoose();
+    void choose();
     void gameOver();
     void preloadBackgrounds(); // 预加载所有背景图片
     void setBackgroundScale(sf::Sprite& sprite, const sf::Texture& texture); // 设置背景缩放
@@ -93,6 +105,7 @@ private:
     void updateBackgroundTransition(float delta_time); // 更新背景过渡效果
     // properties
     Common::FrameInfo* frame_info;
+    Common::ChoicesInfo* choices_info;
     std::string* total_score;
     std::string* game_time;
     std::string* platform_info;
@@ -127,6 +140,9 @@ private:
     // 技能栏
     View::UI::SkillBar skill_bar;
 
+    // choices
+    std::vector<View::UI::Choice*> choices;
+
     // commands
     Common::CommandBase* playerLeftCommand;
     Common::CommandBase* playerRightCommand;
@@ -138,6 +154,9 @@ private:
     Common::CommandBase* playerStopDownCommand;
     Common::CommandBase* gameover_command;
     Common::CommandBase* playerSkillCommand;
+    Common::CommandBase* chooseCommand;
+
+    Common::CommandBase* dummy_command;
 };
 
 }

@@ -46,4 +46,6 @@ typedef struct {
 } PlayerSkillParamValue;
 typedef CommandTypeParam<PlayerSkillParamValue> PlayerSkillParam;
 
+typedef CommandTypeParam<int> ChooseParam;
+
 }

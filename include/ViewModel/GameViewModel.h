@@ -1,7 +1,9 @@
 #pragma once
 
+#include "Common/Config/GameConfig.h"
 #include "Common/CommandBase.h"
 #include "Common/NotificationBase.h"
+#include "Common/ChoicesInfo.h"
 #include "Common/FrameInfo.h"
 #include "Common/SkillID.h"
 
@@ -55,7 +57,9 @@ public:
     Common::FrameInfo* getFrameInfo() {
         return &frame_info;
     }
-
+    Common::ChoicesInfo* getChoicesInfo() {
+        return &choices_info;
+    }
     // commands
     Common::CommandBase* getPlayerLeftCommand() {
         return &playerLeft_command;
@@ -89,6 +93,10 @@ public:
     Common::CommandBase* getPlayerSkillCommand() {
         return &playerSkill_command;
     }
+    // effect
+    Common::CommandBase* getChooseCommand() {
+        return &choose_command;
+    }
 
     void playerJump();
     void playerDown();
@@ -111,6 +119,7 @@ private:
     std::string total_score;
     std::string game_time;
     std::string platform_info;
+    Common::ChoicesInfo choices_info;
     // notification
     static void notification_callback(Common::NotificationId id, void* viewmodel);
     // others
@@ -233,7 +242,16 @@ public:
     private:
         GameViewModel* view_model;
     };
-
+    class ChooseCommand : public Common::CommandBase {
+    public:
+        ChooseCommand(GameViewModel* view_model) : view_model(view_model) {}
+        void execute(Common::CommandParam& params) override {
+            auto& choice_param = dynamic_cast<Common::ChooseParam&>(params);
+            view_model->model->choose(choice_param.value);
+        }
+    private:
+        GameViewModel* view_model;
+    };
 private:
     PlayerLeftCommand playerLeft_command;
     PlayerRightCommand playerRight_command;
@@ -247,6 +265,7 @@ private:
     
     // 技能命令实例
     PlayerSkillCommand playerSkill_command;
+    ChooseCommand choose_command;
 };
 
 }

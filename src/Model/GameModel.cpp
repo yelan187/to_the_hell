@@ -50,6 +50,9 @@ using Model::Entities::PlatformType;
 ==================== 技能系统方法 ====================
 - playerUseSkill()      // 委托给Player类的技能系统
 
+==================== 效果系统方法 ====================
+- choose()              // 选择一个效果
+
 ==================== 工具方法 ====================
 - getPlatformTypeRand() // 根据配置概率随机获取平台类型
 - isPlatformPositionValid() // 验证平台位置有效性（避免重叠、保持间距）
@@ -127,7 +130,13 @@ void GameModel::initGame() {
     initPlayer();
     initSkills();
     initEvents();
-    
+    // just for test
+    {
+        effects.push_back(new Entities::JumpStrength(this));
+        effects.push_back(new Entities::JumpStrength(this));
+        effects.push_back(new Entities::JumpStrength(this));
+    }
+
     startBackgroundMusic();
 }
 
@@ -183,6 +192,13 @@ void GameModel::initEvents() {
     events.push_back(new Entities::Event(5.0f, "Scroll Speed Increased", []() {
         Common::Config::GameConfig::SCROLL_SPEED *= 1.2f;
     }));
+    
+    // just for test
+    {
+        events.push_back(new Entities::Event(7.0f, "Choose Effect Test", [this](){
+            trigger.fire(Common::NotificationId::Choose);
+        }));
+    };
 
     // 10秒: 敌人生成频率增加
     events.push_back(new Entities::Event(10.0f, "Enemy Spawn Rate Increased", [this]() {
@@ -488,6 +504,14 @@ void GameModel::playerUseSkill(Common::SkillID skill_id) {
     if (skill->canUse()) {
         skill->use(); // 这会调用execute()方法
     }
+}
+
+// ==================== 效果系统方法 ====================
+
+void GameModel::choose(int index) {
+    effects[index]->apply();
+    std::cout << "Effect " << index << " applied." << std::endl;
+    trigger.fire(Common::NotificationId::EndChoose);
 }
 
 // ==================== 工具方法 ====================

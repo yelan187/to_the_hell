@@ -16,7 +16,8 @@ GameViewModel::GameViewModel(sf::Vector2u window_size) :
     playerStopJump_command(this),
     playerStopDown_command(this),
     update_command(this),
-    playerSkill_command(this)
+    playerSkill_command(this),
+    choose_command(this)
 {
     init_keystate();
     loadPlayerTextures();
@@ -326,7 +327,19 @@ void GameViewModel::notification_callback(Common::NotificationId id, void* view_
             game_view_model->trigger.fire(Common::NotificationId::GameOver);
             break;
         case Common::NotificationId::Choose:
-            game_view_model->trigger.fire(Common::NotificationId::Choose);
+            {
+                game_view_model->choices_info.clear();
+                for (int i = 0 ; i < Common::Config::GameConfig::MAX_CHOICES; i++){
+                    Common::choiceInfo info;
+                    info.name = game_view_model->model->getEffectName(i);
+                    info.description = game_view_model->model->getEffectDescription(i);
+                    game_view_model->choices_info.push_back(info);
+                }
+                game_view_model->trigger.fire(Common::NotificationId::Choose);
+            }
+            break;
+        case Common::NotificationId::EndChoose:
+            game_view_model->trigger.fire(Common::NotificationId::EndChoose);
             break;
     }
 }

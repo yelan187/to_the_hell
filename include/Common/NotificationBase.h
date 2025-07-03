@@ -14,7 +14,8 @@ enum class NotificationId {
     // Game
     ChangeGameFrame,                    
     GameOver,
-    Choose
+    Choose,
+    EndChoose
 };
 
 // callback function type for notifications

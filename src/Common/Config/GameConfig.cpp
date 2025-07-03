@@ -72,6 +72,8 @@ float GameConfig::SKILL_GROUND_PENETRATION_COOLDOWN;
 float GameConfig::SCROLL_SPEED;
 float GameConfig::BACKGROUND_TRANSITION_SPEED;
 
+int GameConfig::MAX_CHOICES;
+
 // 恢复所有配置为初始值
 void GameConfig::resetToInitialValues() {
     
@@ -149,6 +151,9 @@ void GameConfig::resetToInitialValues() {
     
     // 背景配置
     BACKGROUND_TRANSITION_SPEED = 2.0f;                 // 背景过渡速度（2秒完成过渡）
+
+    // 效果配置
+    MAX_CHOICES = 3;                                    // 最大选择数量
 }
 
 }

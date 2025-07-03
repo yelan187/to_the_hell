@@ -33,13 +33,20 @@ void GameView::init() {
     player_hp_text.setFont(font);
     player_hp_text.setPosition(15, 135);  // 调整HP位置，适应更大字体
 
-
     platform_info_text.setCharacterSize(36);  // 从24增加到36 (1.5倍)
     platform_info_text.setFillColor(sf::Color::White);
     platform_info_text.setFont(font);
     platform_info_text.setPosition(15, 95);  // 调整平台信息位置，适应更大字体
 
     player.init();
+
+    choices.clear();
+    for (int i = 0; i < Common::Config::GameConfig::MAX_CHOICES; ++i) {
+        choices.push_back(
+            new View::UI::Choice(window, i)
+        );
+        choices[i]->init();
+    }
 }
 
 
@@ -54,10 +61,29 @@ void GameView::notification_callback(Common::NotificationId id, void* view) {
         case Common::NotificationId::GameOver:
             game_view->gameOver();
             break;
+        case Common::NotificationId::Choose:
+            game_view->choose();
+            break;
+        case Common::NotificationId::EndChoose:
+            game_view->endChoose();
+            break;
     }
 }
 
 // update
+void GameView::endChoose() {
+    update_command = dummy_command;
+    dummy_command = nullptr;
+}
+
+void GameView::choose() {
+    dummy_command = update_command;
+    update_command = nullptr;
+    for (int index = 0; index < Common::Config::GameConfig::MAX_CHOICES; ++index) {
+        choices[index]->update((*choices_info)[index]);
+    }
+}
+
 void GameView::gameOver() {
     Common::GameOverCommandParam param;
     param.value.total_score = *total_score;
@@ -163,6 +189,14 @@ void GameView::handleInput(const sf::Event& event) {
             case sf::Keyboard::S:
                 playerStopDownCommand->execute();
                 break;
+            case sf::Keyboard::Num1:
+            case sf::Keyboard::Num2:
+            case sf::Keyboard::Num3:
+                {
+                    Common::ChooseParam param;
+                    param.value = event.key.code - sf::Keyboard::Num1;
+                    chooseCommand->execute(param);
+                }
             default:
                 break;
         }
@@ -254,6 +288,17 @@ void GameView::render() {
     // 渲染技能栏
     skill_bar.render(window);
     
+    if (update_command == nullptr) {
+        sf::RectangleShape overlay;
+        overlay.setSize(sf::Vector2f(window_size.x, window_size.y));
+        overlay.setPosition(0, 0);
+        overlay.setFillColor(sf::Color(0, 0, 0, 128));
+        window.draw(overlay);
+        for(auto& choice : choices) {
+            choice->render();
+        }
+    }
+
     window.display();
 }
 

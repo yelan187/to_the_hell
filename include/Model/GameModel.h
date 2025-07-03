@@ -3,6 +3,7 @@
 #include "Model/Model.h"
 #include "Model/Entities/Player.h"
 #include "Model/Entities/Platform.h"
+#include "Model/Entities/Effect.h"
 #include "Model/Entities/Enemy.h"
 #include "Model/Entities/Bullet.h"
 #include "Model/Entities/Pickup.h"
@@ -73,7 +74,6 @@ public:
         auto it = pickups.find(id);
         return (it != pickups.end()) ? it->second : nullptr;
     }
-    void handlePickup(int pickup_id);  // 处理拾取物逻辑
     // player
     sf::Vector2f getPlayerPosition() const { return player->getPosition(); }
     Entities::Player* getPlayer() const { return player; }
@@ -85,7 +85,10 @@ public:
     void playerStopRight();
     // skills
     void playerUseSkill(Common::SkillID skill_id);
-    
+    // effect
+    std::string getEffectName(int index) { return effects[index]->getName(); }
+    std::string getEffectDescription(int index) { return effects[index]->getDescription(); }
+    void choose(int index);
     // background
     std::string getCurrentBackground() const { return current_background; }
     void setBackground(const std::string& background_file);
@@ -103,7 +106,6 @@ public:
     bool isBackgroundMusicPlaying() const;
     // others
     void update(float delta_time);
-    
 private:
     bool init;
     int next_platform_id = 0;
@@ -127,6 +129,9 @@ private:
     std::vector<Entities::Event*> events;
     int next_event_id = 0;
     
+    // Effects
+    std::vector<Entities::Effect*> effects; // 存储所有特效
+
     // 音频系统
     sf::Music background_music;
     
@@ -143,7 +148,6 @@ private:
     void generateEnemy();
     void generatePickup();
     void checkPlayerBulletsHitEnemies(); // 检测玩家子弹击中敌人
-    void cleanupOutOfBoundsEntities();
     
     // 平台相关方法
     Entities::PlatformType getPlatformTypeRand();

@@ -16,7 +16,7 @@ void GameApp::run() {
     while (window.isOpen()) {
         Common::UpdateParam param;
         param.value = 1.0f / fps;
-        page->update_command->execute(param);
+        if (page->update_command) page->update_command->execute(param);
         page->render();
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -108,6 +108,7 @@ void GameApp::initMainMenu() {
 }
 
 void GameApp::initGame() {
+    Common::Config::GameConfig::resetToInitialValues();
     game_view = std::make_shared<View::GameView>(
         game_title, window_size, fps, window, debug
     );
@@ -120,6 +121,7 @@ void GameApp::initGame() {
     game_view->setGameTime(game_view_model->getGameTime());
     game_view->setPlatformInfo(game_view_model->getPlatformInfo());
     game_view->setFrameInfo(game_view_model->getFrameInfo());
+    game_view->setChoicesInfo(game_view_model->getChoicesInfo());
     // commands
     game_view->setPlayerLeftCommand(game_view_model->getPlayerLeftCommand());
     game_view->setPlayerRightCommand(game_view_model->getPlayerRightCommand());
@@ -134,7 +136,8 @@ void GameApp::initGame() {
     
     // commands 技能命令绑定
     game_view->setPlayerSkillCommand(game_view_model->getPlayerSkillCommand());
-    
+    game_view->setChooseCommand(game_view_model->getChooseCommand());
+
     // notification
     game_view_model->getTrigger().add(
         game_view->getNotificationCallback(),
