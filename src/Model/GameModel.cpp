@@ -4,51 +4,66 @@
 using Model::GameModel;
 using Model::Entities::PlatformType;
 
-/*  本文件的各部分（待更新）：
+/*  GameModel.cpp - 游戏核心逻辑模型实现
+    
+    本文件实现了SFML游戏的核心业务逻辑，包括实体管理、碰撞检测、事件系统、
+    音频控制、动态背景切换等功能。遵循MVVM架构模式，负责数据处理和状态管理。
 
 ==================== 构造函数和析构函数 ====================
-- GameModel()           // 构造函数，初始化游戏
-- ~GameModel()          // 析构函数，清理所有资源（优化了重复代码）
+- GameModel()           // 构造函数，初始化窗口大小和背景状态
+- ~GameModel()          // 析构函数，清理所有资源（玩家、平台、敌人等）
 
 ==================== 游戏初始化方法 ====================
-- initGame()            // 初始化游戏状态和参数
-- initPlatforms()       // 创建初始平台
-- initPlayer()          // 创建玩家并设置初始位置
-- initSkills()          // 初始化技能系统
-- resetPlatformGenerateInterval()  // 重置平台生成间隔
+- initGame()            // 初始化游戏状态，重置配置，启动背景音乐
+- initPlatforms()       // 创建初始平台（包括边界平台和游戏平台）
+- initPlayer()          // 创建玩家并设置在平台上的初始位置
+- initSkills()          // 初始化技能系统（箭矢、冲刺、穿透）
+- initEvents()          // 初始化游戏事件序列（难度递增、背景切换）
+- resetPlatformGenerateInterval()  // 重置平台生成间隔（含随机变化）
 
 ==================== 主要更新方法 ====================
-- update()              // 主更新循环，处理所有游戏逻辑
+- update()              // 主更新循环：处理事件、实体更新、碰撞检测、边界检查
 
 ==================== 实体生成方法 ====================
-- generatePlatform()    // 生成新平台
-- generateEnemy()       // 生成敌人
-- generatePickup()      // 生成拾取物（豆子）
-- createBullet()        // 创建子弹/箭矢
+- generatePlatform()    // 生成新平台（验证位置有效性，随机类型）
+- generateEnemy()       // 从窗口四边随机生成敌人
+- generatePickup()      // 生成拾取物（星星豆子或平台豆子）
+- createBullet()        // 创建子弹/箭矢（区分玩家和敌人子弹）
 
 ==================== 碰撞检测方法 ====================
-- checkBulletPlayerCollisions()     // 检测子弹击中玩家
-- checkPlayerBulletEnemyCollisions() // 检测玩家箭矢击中敌人
-- checkPickupPlayerCollisions()     // 检测玩家拾取豆子
+- checkBulletPlayerCollisions()     // 检测敌人子弹击中玩家（含碰撞缩减）
+- checkPlayerBulletEnemyCollisions() // 检测玩家箭矢击中敌人（加分、击杀计数）
+- checkPickupPlayerCollisions()     // 检测玩家拾取豆子（获得分数）
 
 ==================== 玩家控制方法 ====================
 - playerJump()          // 玩家跳跃
-- playerDown()          // 玩家下落
+- playerDown()          // 玩家下落/在平台上时使用穿透技能
 - playerWalkLeft()      // 玩家左移
 - playerWalkRight()     // 玩家右移
-- playerStopLeft()      // 停止左移
-- playerStopRight()     // 停止右移
+- playerStopLeft()      // 停止左移动作
+- playerStopRight()     // 停止右移动作
 
 ==================== 技能系统方法 ====================
-- playerUseSkill()      // 使用技能（箭矢射击/冲刺）
+- playerUseSkill()      // 使用技能：箭矢射击、冲刺传送、地面穿透
 
 ==================== 工具方法 ====================
-- getPlatformTypeRand() // 随机获取平台类型
-- isPlatformPositionValid() // 验证平台位置有效性
+- getPlatformTypeRand() // 根据配置概率随机获取平台类型
+- isPlatformPositionValid() // 验证平台位置有效性（避免重叠、保持间距）
 
-==================== 通知方法 ====================
-- fire()                // 发送游戏帧更新通知
-- gameOver()            // 发送游戏结束通知
+==================== 音频系统方法 ====================
+- startBackgroundMusic() // 启动循环背景音乐（自动音量控制）
+- stopBackgroundMusic()  // 停止背景音乐播放
+- isBackgroundMusicPlaying() // 检查背景音乐播放状态
+
+==================== 动态背景系统方法 ====================
+- setBackground()       // 设置新背景图片路径（触发背景切换）
+- getCurrentBackground() // 获取当前背景图片路径
+- isBackgroundChanged() // 检查背景是否需要切换
+- markBackgroundAsLoaded() // 标记背景已加载完成
+
+==================== 通知和生命周期方法 ====================
+- fire()                // 发送游戏帧更新通知到ViewModel
+- gameOver()            // 游戏结束处理：停止音乐、发送结束通知
 
 */
 
@@ -96,15 +111,24 @@ void GameModel::initGame() {
     // 重置所有配置为初始值
     Common::Config::GameConfig::resetToInitialValues();
     
+    // 初始化游戏状态
     total_score = 0;
     game_time = 0;
     resetPlatformGenerateInterval();
     enemy_generate_interval = Common::Config::GameConfig::ENEMY_GENERATE_INTERVAL;
     pickup_generate_interval = Common::Config::GameConfig::PICKUP_GENERATE_INTERVAL;
+    
+    // 初始化背景系统
+    current_background = "assets/images/background/misty_forest.png";
+    background_changed = false;
+    
+    // 初始化游戏实体
     initPlatforms();
     initPlayer();
     initSkills();
     initEvents();
+    
+    startBackgroundMusic();
 }
 
 void GameModel::initPlatforms() {
@@ -165,13 +189,16 @@ void GameModel::initEvents() {
     }));
     
     // 10秒: 敌人生成频率增加
-    events.push_back(new Entities::Event(10.0f, "Enemy Spawn Rate Increased", []() {
+    events.push_back(new Entities::Event(10.0f, "Enemy Spawn Rate Increased", [this]() {
         Common::Config::GameConfig::ENEMY_SPAWN_MIN_INTERVAL /= 1.3f;
         Common::Config::GameConfig::ENEMY_SPAWN_MAX_INTERVAL /= 1.3f;
+
+        // 切换到更危险的背景
+        setBackground("assets/images/background/misty_forest_2.png");
     }));
     
-    // 20秒: 危险平台概率增加
-    events.push_back(new Entities::Event(20.0f, "More Dangerous Platforms", []() {
+    // 20秒: 危险平台概率增加 + 背景切换到更暗的场景
+    events.push_back(new Entities::Event(20.0f, "More Dangerous Platforms", [this]() {
         Common::Config::GameConfig::PLATFORM_SPIKED_PROBABILITY *= 1.5f;
         Common::Config::GameConfig::PLATFORM_FRAGILE_PROBABILITY *= 1.3f;
         // 调整普通平台概率保持平衡
@@ -182,6 +209,7 @@ void GameModel::initEvents() {
         if (non_normal < 0.9f) {
             Common::Config::GameConfig::PLATFORM_NORMAL_PROBABILITY = 1.0f - non_normal;
         }
+        
     }));
 }
 
@@ -316,8 +344,9 @@ void GameModel::update(float delta_time) {
     int score_gained = checkPickupPlayerCollisions();
     total_score += score_gained;
     
-    // 边界检查
-    if (player->getPosition().y + player->getSize().y >= window_size.y) {
+    // 边界检查（上下边界都算失败）
+    sf::Vector2f player_pos = player->getPosition();
+    if (player_pos.y <= 0 || player_pos.y + player->getSize().y >= window_size.y) {
         gameOver();
         return;
     }
@@ -628,4 +657,49 @@ bool GameModel::isPlatformPositionValid(sf::Vector2f position, sf::Vector2f size
     }
     
     return true;
+}
+
+// ==================== 音频系统方法 ====================
+
+void GameModel::startBackgroundMusic() {
+    // 停止当前音乐（如果正在播放）
+    stopBackgroundMusic();
+    
+    // 加载背景音乐文件
+    if (!background_music.openFromFile("assets/music/Things That Scheme in the Dark - Evan Call.mp3")) {
+        std::cout << "Warning: Failed to load background music file" << std::endl;
+        return;
+    }
+    
+    // 设置循环播放
+    background_music.setLoop(true);
+    
+    // 设置音量（范围：0-100）
+    background_music.setVolume(50.0f);
+    
+    // 开始播放
+    background_music.play();
+    
+    std::cout << "Background music started" << std::endl;
+}
+
+void GameModel::stopBackgroundMusic() {
+    if (background_music.getStatus() == sf::Music::Playing) {
+        background_music.stop();
+        std::cout << "Background music stopped" << std::endl;
+    }
+}
+
+bool GameModel::isBackgroundMusicPlaying() const {
+    return background_music.getStatus() == sf::Music::Playing;
+}
+
+// ==================== 背景系统方法 ====================
+
+void GameModel::setBackground(const std::string& background_file) {
+    if (current_background != background_file) {
+        current_background = background_file;
+        background_changed = true;
+        std::cout << "Background changed to: " << background_file << std::endl;
+    }
 }

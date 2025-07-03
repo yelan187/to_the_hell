@@ -81,6 +81,16 @@ typedef struct frameInfo{
         bool is_available;           ///< 是否可用（用于UI显示状态）
     } SkillInfo;
     std::vector<SkillInfo> skills_info;          ///< 技能信息列表（按技能ID顺序）
+    
+    /**
+     * @struct BackgroundInfo
+     * @brief 背景信息（View层版本）
+     */
+    typedef struct {
+        std::string background_file; ///< 背景图片文件路径
+        bool changed;                ///< 背景是否已改变（用于View层重新加载）
+    } BackgroundInfo;
+    BackgroundInfo background_info;              ///< 背景信息
 } FrameInfo;
 
 }

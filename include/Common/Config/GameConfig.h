@@ -77,6 +77,9 @@ static float SKILL_GROUND_PENETRATION_COOLDOWN;
 // 游戏流程配置
 static float SCROLL_SPEED;                              // 滚动速度
 
+// 背景配置
+static float BACKGROUND_TRANSITION_SPEED;               // 背景过渡速度（每秒完成度）
+
 // 配置管理函数
 static void resetToInitialValues();                     // 恢复所有配置为初始值
 

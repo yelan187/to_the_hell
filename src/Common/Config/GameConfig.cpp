@@ -60,6 +60,7 @@ int GameConfig::SKILL_SPRINT_RESET_KILL_COUNT;
 float GameConfig::SKILL_GROUND_PENETRATION_COOLDOWN;
 
 float GameConfig::SCROLL_SPEED;
+float GameConfig::BACKGROUND_TRANSITION_SPEED;
 
 // 恢复所有配置为初始值
 void GameConfig::resetToInitialValues() {
@@ -98,9 +99,9 @@ void GameConfig::resetToInitialValues() {
     ENEMY_SPEED = 50.0f;                                // 敌人移动速度
     ENEMY_SHOOT_INTERVAL = 2.0f;                        // 敌人射击间隔时间(秒)
     ENEMY_BULLET_SPEED = 200.0f;                        // 敌人子弹速度
-    ENEMY_GENERATE_INTERVAL = 3.0f;                     // 敌人生成间隔时间(秒)，用于初始设置
-    ENEMY_SPAWN_MIN_INTERVAL = 3.0f;                    // 敌人生成最小间隔
-    ENEMY_SPAWN_MAX_INTERVAL = 6.0f;                    // 敌人生成最大间隔
+    ENEMY_GENERATE_INTERVAL = 5.0f;                     // 敌人生成间隔时间(秒)，用于初始设置
+    ENEMY_SPAWN_MIN_INTERVAL = 5.0f;                    // 敌人生成最小间隔
+    ENEMY_SPAWN_MAX_INTERVAL = 8.0f;                    // 敌人生成最大间隔
     ENEMY_SCORE_VALUE = 5;                              // 击败敌人得分
 
     // 豆子配置
@@ -128,6 +129,9 @@ void GameConfig::resetToInitialValues() {
 
     // 游戏流程配置
     SCROLL_SPEED = 100.0f;                              // 滚动速度
+    
+    // 背景配置
+    BACKGROUND_TRANSITION_SPEED = 2.0f;                 // 背景过渡速度（2秒完成过渡）
 }
 
 }

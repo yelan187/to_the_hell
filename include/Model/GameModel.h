@@ -9,6 +9,7 @@
 #include "Model/Entities/Skill.h"
 #include "Model/Entities/Event.h"
 #include "Common/Config/Config.h"
+#include <SFML/Audio.hpp>
 #include <chrono>
 #include <map>
 
@@ -29,6 +30,8 @@ class GameModel : public Model {
 public:
     GameModel(sf::Vector2u window_size);
     ~GameModel();
+
+
     // interact with viewmodel
     std::string getDebugInfo() {
         std::string debug_info;
@@ -39,8 +42,12 @@ public:
         }
         return debug_info;
     }
+
+
     int getTotalScore() { return total_score; }
     std::chrono::seconds getDuration() { return std::chrono::seconds(static_cast<int>(game_time)); }
+    
+    
     // platform
     std::map<int, Entities::Platform*> getPlatforms() const { return platforms; }
     Entities::Platform* getPlatformById(int id) const { 
@@ -68,10 +75,22 @@ public:
     std::vector<Entities::Skill*> getSkills() const { return skills; }
     // skill_id: 0=箭矢射击, 1=冲刺
     void playerUseSkill(int skill_id, sf::Vector2f direction = sf::Vector2f(1.0f, 0.0f));
+    
+    // background
+    std::string getCurrentBackground() const { return current_background; }
+    void setBackground(const std::string& background_file);
+    bool isBackgroundChanged() const { return background_changed; }
+    void markBackgroundAsLoaded() { background_changed = false; }
+    
     // gameover
     void gameOver() {
+        stopBackgroundMusic();  // 停止背景音乐
         trigger.fire(Common::NotificationId::GameOver);
     }
+    // audio
+    void startBackgroundMusic();
+    void stopBackgroundMusic();
+    bool isBackgroundMusicPlaying() const;
     // others
     void update(float delta_time);
     
@@ -100,6 +119,13 @@ private:
     // 事件系统
     std::vector<Entities::Event*> events;
     int next_event_id = 0;
+    
+    // 音频系统
+    sf::Music background_music;
+    
+    // 背景系统
+    std::string current_background;
+    bool background_changed;
 
     void initPlatforms();
     void initPlayer();

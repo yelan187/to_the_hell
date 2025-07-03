@@ -336,6 +336,13 @@ void GameViewModel::forwarding() {
     }
     frame_info.skills_info = skills_info;
 
+    // 背景信息转换
+    frame_info.background_info.background_file = model->getCurrentBackground();
+    frame_info.background_info.changed = model->isBackgroundChanged();
+    if (model->isBackgroundChanged()) {
+        model->markBackgroundAsLoaded(); // 标记为已加载
+    }
+
     trigger.fire(Common::NotificationId::ChangeGameFrame);
 }
 
