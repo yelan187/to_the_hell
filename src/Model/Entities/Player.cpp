@@ -1,10 +1,15 @@
 #include "Model/Entities/Player.h"
+#include "Model/Entities/Platform.h"
+#include "Model/Entities/Skill.h"
+#include "Model/Entities/Enemy.h"
+#include "Model/Entities/Bullet.h"
+#include "Model/Entities/Pickup.h"
 #include "Model/GameModel.h"
 #include <cmath>
 
 using Model::Entities::Player;
 
-void Player::jump(float scroll_speed) {
+void Player::jump() {
     if (jump_counter >= max_jump_count) {
         return;
     }
@@ -23,17 +28,36 @@ void Player::fall() {
 }
 
 void Player::groundPenetration(){
+    // 只有在平台上时才能使用地面穿透
+    if (!on_platform || on_platform_id == -1) {
+        return;
+    }
+    
     Platform* current_platform = game_model->getPlatformById(on_platform_id);
-    sf::Vector2f p = position + sf::Vector2f(0, size.y + current_platform->getSize().y + 2);
+    if (!current_platform) {
+        return; // 当前平台不存在
+    }
+    
+    // 计算穿透后的位置（在当前平台下方一点）
+    sf::Vector2f target_position = sf::Vector2f(
+        position.x, // 保持X坐标不变
+        position.y + size.y + current_platform->getSize().y + 5.0f // Y坐标向下穿透
+    );
+    
+    // 检查目标位置是否会与其他平台碰撞
     for (auto& platform_pair : game_model->getPlatforms()) {
         Platform* platform = platform_pair.second;
-        bool res = collisionDetection(platform, p);
-        if (res) {
-            return;
+        if (platform == current_platform) continue; // 跳过当前平台
+        
+        bool would_collide = collisionDetection(platform, target_position);
+        if (would_collide) {
+            return; // 如果会碰撞其他平台，则不执行穿透
         }
     }
-    position = p;
-    velocity.y = current_platform->getVelocity().y;
+    
+    // 执行穿透：更新位置和状态
+    position = target_position;
+    velocity.y = 0.0f; // 重置垂直速度
     on_platform = false;
     on_platform_id = -1;
 }
@@ -175,9 +199,12 @@ void Player::updateVelocity(float delta_time) {
 
     prev_collision_direction = collision_direction;
     collision_direction = CollisionDirection::NONE;
-    // std::cout << "prev_rolling_associated_velocity: " << prev_rolling_associated_velocity.x << std::endl;
-    // std::cout << "Velocity: " << velocity.x << ", " << velocity.y << std::endl;
-    // std::cout << "on_platform_id: "<< on_platform_id << std::endl;
+    // if(Common::Config::GlobalConfig::DEBUG_MODE){
+    //     std::cout << "prev_rolling_associated_velocity: " << prev_rolling_associated_velocity.x << std::endl;
+    //     std::cout << "Velocity: " << velocity.x << ", " << velocity.y << std::endl;
+    //     std::cout << "on_platform_id: "<< on_platform_id << std::endl;
+    // }
+
 }
 
 void Player::updateAcceleration(float delta_time) {
@@ -185,12 +212,6 @@ void Player::updateAcceleration(float delta_time) {
         acceleration = gravity;
     } else {
         acceleration = sf::Vector2f(0, 0);
-    }
-}
-
-void Player::updateSkills(float delta_time){
-    for (auto& skill : skills) {
-        skill.second->update(delta_time);
     }
 }
 
@@ -352,41 +373,138 @@ void Player::bounce(float bounce_force) {
     }
 }
 
-void Player::initSkills() {
-    skills.clear();
-    
-    skills[Common::SkillID::ARROW_SHOT] = std::make_shared<Entities::ArrowShot>(this);
-    skills[Common::SkillID::SPRINT] = std::make_shared<Entities::Sprint>(this);
-    skills[Common::SkillID::GROUND_PENETRATION] = std::make_shared<Entities::GroundPenetration>(this);
+// ==================== HP系统方法 ====================
 
-}
-
-void Player::damage(int enemy_id) {
-    int damage = skills[Common::SkillID::ARROW_SHOT]->getDamage();
-    auto enemy_it = game_model->getEnemies().find(enemy_id);
-    Entities::Enemy* enemy = enemy_it->second;
-    enemy->hp -= damage;
-    if (enemy->hp <= 0) {
-        delete enemy;
-        game_model->getEnemies().erase(enemy_it);
-        addKillCount();
-    }
-}
-
-void Player::beDamaged(int bullet_id){
-    auto bullet_it = game_model->getBullets().find(bullet_id);
-    int damage = bullet_it->second->getDamage();
-    delete bullet_it->second;
-    game_model->getBullets().erase(bullet_it);
+void Player::takeDamage(int damage) {
     hp -= damage;
     if (hp <= 0) {
+        hp = 0;
         is_dead = true;
     }
 }
 
+void Player::heal(int amount) {
+    hp += amount;
+    if (hp > max_hp) {
+        hp = max_hp;
+    }
+}
+
+// ==================== 技能系统方法 ====================
+
+void Player::initSkills() {
+    skills.clear();
+    skills[Common::SkillID::ARROW_SHOT] = std::make_shared<ArrowShot>(this);
+    skills[Common::SkillID::SPRINT] = std::make_shared<Sprint>(this);
+    skills[Common::SkillID::GROUND_PENETRATION] = std::make_shared<GroundPenetration>(this);
+}
+
+void Player::updateSkills(float delta_time) {
+    for (auto& skill_pair : skills) {
+        skill_pair.second->update(delta_time);
+    }
+}
+
+// ==================== 碰撞检测系统 ====================
+
+int Player::checkBulletCollisions() {
+    // 获取玩家碰撞框（应用水平缩小）
+    sf::Vector2f shrunk_size = sf::Vector2f(
+        size.x * (1.0f - Common::Config::GameConfig::PLAYER_COLLISION_SHRINK_RATIO),
+        size.y
+    );
+    sf::Vector2f shrunk_position = sf::Vector2f(
+        position.x + (size.x - shrunk_size.x) / 2.0f,
+        position.y
+    );
+
+    for (auto& bullet_pair : game_model->getBullets()) {
+        Bullet* bullet = bullet_pair.second;
+        if (!bullet || bullet->isPlayerBullet()) continue; // 跳过玩家子弹
+
+        sf::Vector2f bullet_pos = bullet->getPosition();
+        sf::Vector2f bullet_size = bullet->getSize();
+
+        // 检测碰撞
+        bool collision = (shrunk_position.x < bullet_pos.x + bullet_size.x &&
+                         shrunk_position.x + shrunk_size.x > bullet_pos.x &&
+                         shrunk_position.y < bullet_pos.y + bullet_size.y &&
+                         shrunk_position.y + shrunk_size.y > bullet_pos.y);
+
+        if (collision) {
+            return bullet_pair.first; // 返回子弹ID
+        }
+    }
+    return -1; // 无碰撞
+}
+
+int Player::checkEnemyCollisions() {
+    for (auto& enemy_pair : game_model->getEnemies()) {
+        Enemy* enemy = enemy_pair.second;
+        if (!enemy) continue;
+
+        sf::Vector2f enemy_pos = enemy->getPosition();
+        sf::Vector2f enemy_size = enemy->getSize();
+
+        // 检测碰撞
+        bool collision = (position.x < enemy_pos.x + enemy_size.x &&
+                         position.x + size.x > enemy_pos.x &&
+                         position.y < enemy_pos.y + enemy_size.y &&
+                         position.y + size.y > enemy_pos.y);
+
+        if (collision) {
+            return enemy_pair.first; // 返回敌人ID
+        }
+    }
+    return -1; // 无碰撞
+}
+
+int Player::checkPickupCollisions() {
+    for (auto& pickup_pair : game_model->getPickups()) {
+        Pickup* pickup = pickup_pair.second;
+        if (!pickup) continue;
+
+        sf::Vector2f pickup_pos = pickup->getPosition();
+        sf::Vector2f pickup_size = pickup->getSize();
+
+        // 检测碰撞
+        bool collision = (position.x < pickup_pos.x + pickup_size.x &&
+                         position.x + size.x > pickup_pos.x &&
+                         position.y < pickup_pos.y + pickup_size.y &&
+                         position.y + size.y > pickup_pos.y);
+
+        if (collision) {
+            return pickup_pair.first; // 返回拾取物ID
+        }
+    }
+    return -1; // 无碰撞
+}
+
 void Player::pickup(int pickup_id) {
-    auto pickup_it = game_model->getPickups().find(pickup_id);
-    pickup_it->second->bePickedup();
-    delete pickup_it->second;
-    game_model->getPickups().erase(pickup_it);
+    Pickup* pickup = game_model->getPickupById(pickup_id);
+    if (!pickup) return;
+
+    // 根据拾取物类型处理
+    game_model->handlePickup(pickup_id);
+}
+
+void Player::beDamagedByEnemy(int enemy_id) {
+    Enemy* enemy = game_model->getEnemyById(enemy_id);
+    if (!enemy) return;
+
+    // 玩家受到敌人伤害
+    takeDamage(Common::Config::GameConfig::ENEMY_CONTACT_DAMAGE); // 使用配置中的敌人接触伤害
+    
+    // 可以添加击退效果等
+}
+
+void Player::beDamagedByBullet(int bullet_id) {
+    Bullet* bullet = game_model->getBulletById(bullet_id);
+    if (!bullet || bullet->isPlayerBullet()) return;
+
+    // 玩家受到子弹伤害
+    takeDamage(bullet->getDamage());
+    
+    // 移除子弹
+    game_model->removeBullet(bullet_id);
 }

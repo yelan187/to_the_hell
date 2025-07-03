@@ -1,13 +1,19 @@
 #include "Model/Entities/Skill.h"
 #include "Model/Entities/Player.h"
 #include "Model/GameModel.h"
+#include "Model/Entities/Player.h"
+#include "Model/GameModel.h"
 
 using Model::Entities::Skill;
-using Model::Entities::Platform;
+using Model::Entities::ArrowShot;
+using Model::Entities::Sprint;
+using Model::Entities::GroundPenetration;
 
+// === Skill 基类实现 ===
 Skill::Skill(Player* player)
-: player(player),current_cooldown(0),is_available(true),level(1)
-{}
+    : player(player), id(Common::SkillID::ARROW_SHOT), cooldown_time(1.0f), 
+      current_cooldown(0.0f), is_available(true), level(1), damage(0) {
+}
 
 void Skill::update(float delta_time) {
     if (current_cooldown > 0.0f) {
@@ -32,7 +38,7 @@ void Skill::use() {
     if (canUse()) {
         current_cooldown = cooldown_time;
         is_available = false;
-        execute();
+        execute(); // 执行技能效果
     }
 }
 
@@ -41,54 +47,29 @@ float Skill::getCooldownProgress() const {
     return current_cooldown / cooldown_time;
 }
 
-// ArrowShot
-
-void Model::Entities::ArrowShot::execute() {
-    sf::Vector2f player_size = player->getSize();
-    sf::Vector2f player_facing = player->getFacingDirection();
-    sf::Vector2f player_pos = player->getPosition();
-    sf::Vector2f arrow_pos = sf::Vector2f(
-        player_pos.x + player_size.x / 2, 
-        player_pos.y + player_size.y / 2 - Common::Config::GameConfig::BULLET_SIZE.y / 2
-    );
-    sf::Vector2f arrow_velocity = sf::Vector2f(player_facing.x * Common::Config::GameConfig::BULLET_SPEED, 0.0f);
-    player->game_model->createBullet(arrow_pos, arrow_velocity, damage, true);
-
-};
-
-// Sprint
-void Model::Entities::Sprint::execute() {
-    sf::Vector2f player_facing = player->getFacingDirection();
-    sf::Vector2f sprint_replacement = sf::Vector2f(
-        player_facing.x * Common::Config::GameConfig::SKILL_SPRINT_DISTANCE, 
-        0.0f
-    );
-    player->updatePosition(0.0f, sprint_replacement);
-    player->resetKillCount();
-}
-void Model::Entities::Sprint::update(float delta_time) {
-    Skill::update(delta_time);
-    if (player->getKillCount() == Common::Config::GameConfig::SKILL_SPRINT_RESET_KILL_COUNT) {
-        resetCD();
-    }
+// === ArrowShot 实现 ===
+void ArrowShot::execute() {
+    // 创建玩家子弹
+    sf::Vector2f bullet_position = player->getPosition() + sf::Vector2f(player->getSize().x / 2, player->getSize().y / 2);
+    sf::Vector2f bullet_velocity = player->getFacingDirection() * Common::Config::GameConfig::BULLET_SPEED;
+    player->game_model->createBullet(bullet_position, bullet_velocity, damage, true);
 }
 
-// GroundPenetration
-void Model::Entities::GroundPenetration::execute() {
-    auto game_model = player->game_model;
-    Platform* current_platform = game_model->getPlatformById(player->getOnPlatformId());
-    sf::Vector2f p = player->getPosition() + sf::Vector2f(0, player->getSize().y + current_platform->getSize().y + 2);
-    for (auto& platform_pair : game_model->getPlatforms()) {
-        Platform* platform = platform_pair.second;
-        bool res = player->collisionDetection(platform, p);
-        if (res) {
-            return;
-        }
-    }
-    player->setPosition(p);
-    player->setVelocity(
-        sf::Vector2f(player->getVelocity().x, current_platform->getVelocity().y)
-    );
-    player->setOnPlatform(false);
-    player->setOnPlatformId(-1);
-};
+// === Sprint 实现 ===
+void Sprint::execute() {
+    // 冲刺逻辑 - 瞬间位移
+    sf::Vector2f sprint_displacement = player->getFacingDirection() * Common::Config::GameConfig::SKILL_SPRINT_DISTANCE;
+    player->updatePosition(0.0f, sprint_displacement); // 使用additional_replacement参数进行瞬间位移
+    player->resetKillCount(); // 冲刺后重置击杀计数
+}
+
+void Sprint::update(float delta_time) {
+    Skill::update(delta_time); // 调用基类更新
+    // 可以在这里添加冲刺持续效果的逻辑
+}
+
+// === GroundPenetration 实现 ===
+void GroundPenetration::execute() {
+    // 地面穿透逻辑
+    player->groundPenetration();
+}

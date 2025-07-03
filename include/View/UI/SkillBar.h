@@ -3,6 +3,7 @@
 #include <vector>
 #include "View/UI/Skill.h"
 #include "Common/NotificationBase.h"
+#include "Common/SkillID.h"
 
 namespace View {
 namespace UI {
@@ -20,6 +21,9 @@ private:
     sf::Vector2f skill_size;
     float skill_spacing;
     std::vector<Skill> skills;
+    
+    // 辅助方法：将Common::SkillID映射到View层SkillType
+    SkillType mapSkillIDToType(Common::SkillID skill_id) const;
 };
 
 }

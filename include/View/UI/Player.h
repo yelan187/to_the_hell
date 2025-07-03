@@ -19,9 +19,6 @@ public:
     sf::Vector2f size;
     sf::RectangleShape rect;
     
-    sf::RectangleShape health_bar;
-    sf::RectangleShape health_bar_background;
-    
 private:
     sf::RenderWindow& window;
 };

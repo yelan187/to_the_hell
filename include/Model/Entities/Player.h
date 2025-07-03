@@ -2,20 +2,30 @@
 
 #include <SFML/Graphics.hpp>
 #include <memory>
+#include <map>
 
-#include "Model/Entities/Enemy.h"
-#include "Model/Entities/Platform.h"
-#include "Model/Entities/Bullet.h"
-#include "Model/Entities/Pickup.h"
-#include "Model/Entities/Skill.h"
 #include "Common/Config/Config.h"
+#include "Common/SkillID.h"
 
 namespace Model {
     class GameModel;
+    namespace Entities {
+        class Platform;
+        class Enemy;
+        class Bullet;
+        class Pickup;
+        class Skill;
+    }
 }
 
 namespace Model {
 namespace Entities {
+
+class Platform;
+class Enemy;
+class Bullet;
+class Pickup;
+class Skill;
 
 enum class PlayerState {
     IDLE,
@@ -49,17 +59,27 @@ public:
             facing_direction = sf::Vector2f(1.0f, 0.0f);  // 默认面向右侧
             prev_rolling_associated_velocity = sf::Vector2f(0, 0);
             prev_collision_correction_velocity = sf::Vector2f(0, 0);
+            // 初始化HP系统
+            max_hp = Common::Config::GameConfig::PLAYER_MAX_HP;
+            hp = Common::Config::GameConfig::PLAYER_INITIAL_HP;
         }
 
-    std::map<Common::SkillID, std::shared_ptr<Skill>>& getSkills() { return skills; }      
+    // === 技能系统 ===
+    std::map<Common::SkillID, std::shared_ptr<Skill>>& getSkills() { return skills; }
     void updateSkills(float delta_time);
+    void initSkills();
+    
+    // === 碰撞检测系统 ===
+    void pickup(int pickup_id);
+    void beDamagedByEnemy(int enemy_id);      // 被敌人碰撞伤害
+    void beDamagedByBullet(int bullet_id);    // 被子弹击中伤害
+    int checkBulletCollisions();  // 检测子弹碰撞，返回击中的子弹ID，-1表示无碰撞
+    int checkEnemyCollisions();   // 检测敌人碰撞，返回击中的敌人ID，-1表示无碰撞
+    int checkPickupCollisions(); // 检测拾取物碰撞，返回拾取物ID，-1表示无碰撞
+
     void updatePosition(float delta_time,sf::Vector2f additional_replacement = sf::Vector2f(0,0));
     void updateVelocity(float delta_time);
     void updateAcceleration(float delta_time);
-
-    void pickup(int pickup_id);
-    void damage(int enemy_id);
-    void beDamaged(int bullet_id);
 
     void setVelocity(sf::Vector2f v) {
         velocity = v;
@@ -75,7 +95,7 @@ public:
     void handleCollision(Platform* platform, sf::Vector2f prev_position, float delta_time);
     bool collisionDetection(Platform* platform);
     bool collisionDetection(Platform* platform, sf::Vector2f position);
-    void jump(float scroll_speed);
+    void jump();
     void fall();
     void walkLeft();
     void walkRight();
@@ -95,8 +115,7 @@ public:
     void addKillCount(int count = 1) {
         killcounter += count;
     }
-    int getHP() const {return hp;}
-    int getMaxHP() const {return max_hp;}
+
     int getKillCount() const { return killcounter; }
     PlayerState getState() const { return state; }
     sf::Vector2f getPosition() const { return position; }
@@ -110,6 +129,13 @@ public:
     bool isOnPlatform() const { return on_platform; }
     bool isDead() const { return is_dead; }
     void setDead(bool dead) { is_dead = dead; }
+    
+    // HP系统
+    int getHP() const { return hp; }
+    int getMaxHP() const { return max_hp; }
+    void takeDamage(int damage);
+    void heal(int amount);
+    void setMaxHP(int max_hp) { this->max_hp = max_hp; hp = max_hp; }
 
     int getOnPlatformId() const {
         return on_platform_id;
@@ -130,7 +156,8 @@ public:
     void setPosition(const sf::Vector2f& position) {
         this->position = position;
     }
-    void initSkills();
+
+public:
     GameModel* game_model;
     // skill
     std::map<Common::SkillID, std::shared_ptr<Skill>> skills;
@@ -140,12 +167,13 @@ private:
     int on_platform_id;
 
     bool is_dead;
+    
+    // HP系统
+    int hp;
+    int max_hp;
 
     PlayerState state;
 
-
-    int hp;
-    int max_hp;
     sf::Vector2f size;
     sf::Vector2f position;
     sf::Vector2f acceleration;

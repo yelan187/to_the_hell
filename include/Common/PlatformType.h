@@ -3,6 +3,7 @@
 namespace Common {
 
 enum class PlatformType {
+    WALL,       // 墙壁平台
     NORMAL,     // 普通平台
     SPIKED,     // 带刺平台（踩上即死）
     ROLLING,    // 滚动平台（左右滚动，在平台上时人物会以一定速度水平位移）

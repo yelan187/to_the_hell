@@ -122,9 +122,9 @@ void GameViewModel::playerStopDown() {
     }
 }
 
-void GameViewModel::playerUseSkill(Common::SkillID skill_id, sf::Vector2f direction) {
+void GameViewModel::playerUseSkill(Common::SkillID skill_id) {
     // 将技能使用请求委托给Model层处理
-    model->playerUseSkill(skill_id, direction);
+    model->playerUseSkill(skill_id);
 }
 
 void GameViewModel::loadPlayerTextures() {
@@ -280,7 +280,7 @@ sf::Texture* GameViewModel::getPlatformTexture(Common::PlatformType type, bool r
     }
 }
 
-void GameViewModel::getPlatformInfo() {
+void GameViewModel::updatePlatformsInfo() {
     std::map<int, Model::Entities::Platform*> platforms = model->getPlatforms();
     
     std::vector<int> platforms_id;
@@ -331,14 +331,25 @@ void GameViewModel::notification_callback(Common::NotificationId id, void* view_
 void GameViewModel::forwarding() {
     updateGameTimeText();
     updateTotalScoreText();
-    updateDebugInfoText();
-    frame_info.player_info.position = model->getPlayer()->getPosition();
-    frame_info.player_info.size = model->getPlayer()->getSize();
-    frame_info.player_info.texture = getPlayerTexture(model->getPlayer()->getState());
-    frame_info.player_info.hp = model->getPlayer()->getHP();
-    frame_info.player_info.max_hp = model->getPlayer()->getMaxHP();
+    updatePlatformInfoText();
+    
+    // 检查player是否已初始化，避免空指针访问
+    if (model->getPlayer() != nullptr) {
+        frame_info.player_info.position = model->getPlayer()->getPosition();
+        frame_info.player_info.size = model->getPlayer()->getSize();
+        frame_info.player_info.texture = getPlayerTexture(model->getPlayer()->getState());
+        frame_info.player_info.hp = model->getPlayer()->getHP();
+        frame_info.player_info.max_hp = model->getPlayer()->getMaxHP();
+    } else {
+        // 如果player未初始化，设置默认值
+        frame_info.player_info.position = sf::Vector2f(0, 0);
+        frame_info.player_info.size = Common::Config::GameConfig::PLAYER_SIZE;
+        frame_info.player_info.texture = nullptr;
+        frame_info.player_info.hp = 0;
+        frame_info.player_info.max_hp = Common::Config::GameConfig::PLAYER_MAX_HP;
+    }  
     // 平台信息转换
-    getPlatformInfo();
+    updatePlatformsInfo();
     
     // 敌人信息转换
     std::vector<int> enemies_id;
@@ -383,15 +394,24 @@ void GameViewModel::forwarding() {
 
     // 技能信息转换
     std::vector<Common::FrameInfo::SkillInfo> skills_info;
-    for (auto& pair : model->getPlayer()->getSkills()) {
-        auto skill = pair.second;
-        Common::FrameInfo::SkillInfo skill_info;
-        skill_info.skill_id = skill->getSkillID();
-        skill_info.cooldown_progress = skill->getCooldownProgress();
-        skill_info.is_available = skill->isAvailable();
-        skills_info.push_back(skill_info);
+    if (model->getPlayer()) {
+        auto& player_skills = model->getPlayer()->getSkills();
+        for (const auto& skill_pair : player_skills) {
+            Common::FrameInfo::SkillInfo skill_info;
+            skill_info.skill_id = skill_pair.first;
+            skill_info.cooldown_progress = skill_pair.second->getCooldownProgress();
+            skill_info.is_available = skill_pair.second->isAvailable();
+            skills_info.push_back(skill_info);
+        }
     }
     frame_info.skills_info = skills_info;
+
+    // 背景信息转换
+    frame_info.background_info.background_file = model->getCurrentBackground();
+    frame_info.background_info.changed = model->isBackgroundChanged();
+    if (model->isBackgroundChanged()) {
+        model->markBackgroundAsLoaded(); // 标记为已加载
+    }
 
     trigger.fire(Common::NotificationId::ChangeGameFrame);
 }

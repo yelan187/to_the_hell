@@ -80,11 +80,21 @@ typedef struct frameInfo{
      * @brief 技能状态信息（View层版本）
      */
     typedef struct {
-        Common::SkillID skill_id;
-        float cooldown_progress;     ///< 冷却进度（0.0=可用, 1.0=完全冷却）
-        bool is_available;           ///< 是否可用（用于UI显示状态）
+        Common::SkillID skill_id;        ///< 技能ID（使用枚举类型）
+        float cooldown_progress;         ///< 冷却进度（0.0=可用, 1.0=完全冷却）
+        bool is_available;               ///< 是否可用（用于UI显示状态）
     } SkillInfo;
     std::vector<SkillInfo> skills_info;          ///< 技能信息列表（按技能ID顺序）
+    
+    /**
+     * @struct BackgroundInfo
+     * @brief 背景信息（View层版本）
+     */
+    typedef struct {
+        std::string background_file; ///< 背景图片文件路径
+        bool changed;                ///< 背景是否已改变（用于View层重新加载）
+    } BackgroundInfo;
+    BackgroundInfo background_info;              ///< 背景信息
 } FrameInfo;
 
 }

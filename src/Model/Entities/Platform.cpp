@@ -4,12 +4,11 @@
 
 using Model::Entities::Platform;
 
-Platform::Platform(int id, PlatformType type, sf::Vector2f position, sf::Vector2f size, float scroll_speed) {
+Platform::Platform(int id, PlatformType type, sf::Vector2f position, sf::Vector2f size) {
     this->id = id;
     this->size = size;
     this->type = type;
     this->position = position;
-    this->velocity = sf::Vector2f(0, -scroll_speed);
     
     // 初始化所有成员变量
     rolling_speed = 0.0f;
@@ -45,8 +44,11 @@ Platform::Platform(int id, PlatformType type, sf::Vector2f position, sf::Vector2
 }
 
 void Platform::update(float delta_time) {
-    // 基础位置更新
-    position = position + delta_time * velocity;
+    if (type == PlatformType::WALL) {
+        return;
+    }
+    // 基础位置更新 - 使用全局滚动速度
+    position.y -= Common::Config::GameConfig::SCROLL_SPEED * delta_time;
     
     // 根据平台类型更新特殊行为
     switch (type) {
@@ -80,7 +82,11 @@ void Platform::onPlayerLanded() {
 sf::Vector2f Platform::getRollingVelocity() const {
     if (type == PlatformType::ROLLING) {
         float horizontal_speed = rolling_direction_right ? rolling_speed : -rolling_speed;
-        return sf::Vector2f(horizontal_speed, velocity.y);
+        return sf::Vector2f(horizontal_speed, -Common::Config::GameConfig::SCROLL_SPEED);
     }
-    return velocity;
+    return sf::Vector2f(0, -Common::Config::GameConfig::SCROLL_SPEED);
+}
+
+sf::Vector2f Platform::getVelocity() const {
+    return sf::Vector2f(0, -Common::Config::GameConfig::SCROLL_SPEED);
 }

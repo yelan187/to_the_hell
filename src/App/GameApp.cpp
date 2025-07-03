@@ -118,7 +118,7 @@ void GameApp::initGame() {
     // properties
     game_view->setTotalScore(game_view_model->getTotalScore());
     game_view->setGameTime(game_view_model->getGameTime());
-    game_view->setDebugInfo(game_view_model->getDebugInfo());
+    game_view->setPlatformInfo(game_view_model->getPlatformInfo());
     game_view->setFrameInfo(game_view_model->getFrameInfo());
     // commands
     game_view->setPlayerLeftCommand(game_view_model->getPlayerLeftCommand());

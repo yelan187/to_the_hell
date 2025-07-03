@@ -9,14 +9,14 @@ namespace Entities {
 using Common::PlatformType;
 class Platform{
 public:
-    Platform(int id, PlatformType type, sf::Vector2f position, sf::Vector2f size, float scroll_speed);
+    Platform(int id, PlatformType type, sf::Vector2f position, sf::Vector2f size);
 
     bool outOfWindow(sf::Vector2u window_size) const {
         return position.y + size.y < 0;
     }
     sf::Vector2f getPosition() const    {return position;}
     sf::Vector2f getSize() const        {return size;}
-    sf::Vector2f getVelocity() const    {return velocity;}
+    sf::Vector2f getVelocity() const;
     void update(float delta_time);
     
     // 平台状态和特殊效果方法
@@ -34,7 +34,6 @@ public:
     PlatformType type;
     sf::Vector2f size;
     sf::Vector2f position;
-    sf::Vector2f velocity;
     
 private:
     // 滚动平台相关

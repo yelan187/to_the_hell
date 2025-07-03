@@ -10,10 +10,25 @@ namespace Model {
         class Player;  // 前向声明Player类
     }
 }
+#include "Common/SkillID.h"
+#include "Common/Config/Config.h"
+
+namespace Model {
+    class GameModel;
+    namespace Entities {
+        class Player;  // 前向声明Player类
+    }
+}
 
 namespace Model {
 namespace Entities {
 
+// 技能类型枚举
+enum class SkillType {
+    ARROW_SHOT,  // 箭矢射击
+    SPRINT,      // 冲刺
+    GROUND_PENETRATION
+};
 
 // 技能类 - 管理技能冷却和可用性
 class Skill {
@@ -44,6 +59,7 @@ protected:
     int damage;
 };
 
+// 箭矢射击技能
 class ArrowShot : public Skill {
 public:
     ArrowShot(Player* player) : Skill(player) {
@@ -53,6 +69,8 @@ public:
     }
     void execute() override;
 };
+
+// 冲刺技能
 class Sprint : public Skill {
 public:
     Sprint(Player* player) : Skill(player) {
@@ -62,6 +80,8 @@ public:
     void execute() override;
     void update(float delta_time) override;
 };
+
+// 地面穿透技能
 class GroundPenetration : public Skill {
 public:
     GroundPenetration(Player* player) : Skill(player) {
@@ -70,5 +90,6 @@ public:
     }
     void execute() override;
 };
+
 }
 }

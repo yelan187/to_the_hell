@@ -16,8 +16,6 @@ enum class PickupType {
 class Pickup {
 public:
     Pickup(int id, PickupType type, sf::Vector2f position, sf::Vector2f size, GameModel* game_model, int platform_id = -1);
-    
-    void bePickedup();
 
     void update(float delta_time);
     bool outOfWindow(sf::Vector2u window_size) const;
@@ -39,7 +37,6 @@ private:
     sf::Vector2f velocity;
     GameModel* game_model;
     int platform_id; // -1表示不在平台上（空中豆子）
-    float scroll_speed;
     
     void updateMovement(float delta_time);
 };

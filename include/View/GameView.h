@@ -21,12 +21,12 @@ public:
         Page(game_title, window_size, fps, window), 
         debug(debug),
         player(window, Common::Config::GameConfig::PLAYER_SIZE),
-        skill_bar(sf::Vector2f(10.0f, 100.0f), sf::Vector2f(50.0f, 50.0f)) // 左侧位置
+        skill_bar(sf::Vector2f(10.0f, 180.0f), sf::Vector2f(75.0f, 75.0f)),
+        current_background_name(""),
+        is_transitioning(false),
+        transition_progress(0.0f)
     {
-        if (!font.loadFromFile("assets/fonts/fusion.ttf")) {
-            std::cerr << "Error loading font!" << std::endl;
-            return;
-        }
+        // 初始化移到init()方法中
     }
     
     // properties
@@ -39,10 +39,8 @@ public:
     void setGameTime(std::string* game_time) {
         this->game_time = game_time;
     }
-    void setDebugInfo(std::string* debug_info) {
-        if (debug) {
-            this->debug_info = debug_info;
-        }
+    void setPlatformInfo(std::string* platform_info) {
+        this->platform_info = platform_info;
     }
     // commands
     void setPlayerLeftCommand(Common::CommandBase* command) {
@@ -89,11 +87,15 @@ public:
 private:
     void updateframe();
     void gameOver();
+    void preloadBackgrounds(); // 预加载所有背景图片
+    void setBackgroundScale(sf::Sprite& sprite, const sf::Texture& texture); // 设置背景缩放
+    void switchBackground(const std::string& background_file); // 切换背景（带淡入淡出）
+    void updateBackgroundTransition(float delta_time); // 更新背景过渡效果
     // properties
     Common::FrameInfo* frame_info;
     std::string* total_score;
     std::string* game_time;
-    std::string* debug_info;
+    std::string* platform_info;
     // notification
     static void notification_callback(Common::NotificationId id, void* view);
     // game info
@@ -101,7 +103,16 @@ private:
     sf::Font font;
     sf::Text game_time_text;
     sf::Text total_score_text;
-    sf::Text debug_info_text;
+    sf::Text platform_info_text;
+    sf::Text player_hp_text;
+    
+    // 背景系统
+    std::map<std::string, sf::Texture> background_textures; // 预加载的背景纹理
+    sf::Sprite current_background_sprite;  // 当前背景精灵
+    sf::Sprite next_background_sprite;     // 下一个背景精灵（用于淡入淡出）
+    std::string current_background_name;   // 当前背景名称
+    bool is_transitioning;                 // 是否正在过渡
+    float transition_progress;             // 过渡进度 (0.0 - 1.0)
     // player info
     View::UI::Player player;
     // platform info
