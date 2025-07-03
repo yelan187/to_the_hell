@@ -84,7 +84,9 @@ cd build/bin
 
 - [くらげ工匠](http://www.kurage-kosho.info) - 提供了游戏所需音效
 
-- [game-icons](https://game-icons.net) - 提供了技能图标
+- [game-icons](https://game-icons.net) - 提供了图标
+
+- [open game art](https://opengameart.org) - 提供了纹理
 
 ### ✨ 角色设计灵感
 

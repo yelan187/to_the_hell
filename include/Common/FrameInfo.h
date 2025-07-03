@@ -30,6 +30,7 @@ typedef struct frameInfo{
         sf::Vector2f size;           ///< 平台大小
         int platform_type;           ///< 平台类型（对应PlatformType枚举的int值）
         bool rolling_direction;      ///< 滚动方向（true=右，false=左）仅滚动平台使用
+        sf::Texture* texture;        ///< 平台纹理指针（用于渲染）
     } PlatformInfo;
     std::map<int, PlatformInfo> platforms_info;  ///< 平台信息映射表（ID -> 信息）
     std::vector<int> platforms_id;               ///< 平台ID列表（用于遍历顺序）

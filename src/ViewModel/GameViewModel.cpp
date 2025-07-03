@@ -20,6 +20,7 @@ GameViewModel::GameViewModel(sf::Vector2u window_size) :
 {
     init_keystate();
     loadPlayerTextures();
+    loadPlatformTextures();
 }
 
 void GameViewModel::updateGameTimeText() {
@@ -219,6 +220,66 @@ sf::Texture* GameViewModel::getPlayerTexture(Model::Entities::PlayerState state)
     return &player_textures[PlayerState::IDLE_R]; // Default to idle right texture
 }
 
+void GameViewModel::loadPlatformTextures() {
+    try {
+        sf::Texture normal_texture;
+        normal_texture.loadFromFile("assets/images/platform/platform_normal.png");
+        platform_textures[Common::PlatformType::NORMAL] = normal_texture;
+    } catch (const std::exception& e) {
+        std::cout << "Error loading normal platform texture: " << e.what() << std::endl;
+    }
+    try {
+        sf::Texture spiked_texture;
+        spiked_texture.loadFromFile("assets/images/platform/platform_spiked.png");
+        platform_textures[Common::PlatformType::SPIKED] = spiked_texture;
+    } catch (const std::exception& e) {
+        std::cout << "Error loading spiked platform texture: " << e.what() << std::endl;
+    }
+    try {
+        sf::Texture rolling_texture;
+        rolling_texture.loadFromFile("assets/images/platform/platform_rolling_r.png");
+        platform_textures[Common::PlatformType::ROLLING] = rolling_texture;
+    } catch (const std::exception& e) {
+        std::cout << "Error loading rolling platform texture: " << e.what() << std::endl;
+    }
+    try {
+        sf::Texture rolling_l_texture;
+        rolling_l_texture.loadFromFile("assets/images/platform/platform_rolling_l.png");
+        platform_textures[Common::PlatformType::ROLLING_L] = rolling_l_texture;
+    } catch (const std::exception& e) {
+        std::cout << "Error loading left rolling platform texture: " << e.what() << std::endl;
+    }
+    try {
+        sf::Texture fragile_texture;
+        fragile_texture.loadFromFile("assets/images/platform/platform_fragile.png");
+        platform_textures[Common::PlatformType::FRAGILE] = fragile_texture;
+    } catch (const std::exception& e) {
+        std::cout << "Error loading fragile platform texture: " << e.what() << std::endl;
+    }
+    try {
+        sf::Texture bouncy_texture;
+        bouncy_texture.loadFromFile("assets/images/platform/platform_bouncy.png");
+        platform_textures[Common::PlatformType::BOUNCY] = bouncy_texture;
+    } catch (const std::exception& e) {
+        std::cout << "Error loading bouncy platform texture: " << e.what() << std::endl;
+    }
+}
+
+sf::Texture* GameViewModel::getPlatformTexture(Common::PlatformType type, bool rolling_r) {
+    if (type == Common::PlatformType::ROLLING) {
+        // 滚动平台需要根据方向返回不同的纹理
+        if (rolling_r) {
+            return &platform_textures[Common::PlatformType::ROLLING];
+        } else {
+            return &platform_textures[Common::PlatformType::ROLLING_L];
+        }
+    }
+    auto it = platform_textures.find(type);
+    if (it != platform_textures.end()) {
+        return &it->second;
+    }
+}
+
 void GameViewModel::getPlatformInfo() {
     std::map<int, Model::Entities::Platform*> platforms = model->getPlatforms();
     
@@ -246,7 +307,9 @@ void GameViewModel::getPlatformInfo() {
                 platform_info[pair.first].color = sf::Color::Green; // 弹跳平台 - 绿色椭圆形状
                 break;
         }
-        platform_info[pair.first].rolling_direction = pair.second->getRollingDirection();
+        bool rolling_direction = pair.second->getRollingDirection();
+        platform_info[pair.first].rolling_direction = rolling_direction;
+        platform_info[pair.first].texture = getPlatformTexture(pair.second->type,rolling_direction);
     }
     frame_info.platforms_id = platforms_id;
     frame_info.platforms_info = platform_info;

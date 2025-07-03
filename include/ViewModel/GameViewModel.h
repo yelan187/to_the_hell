@@ -4,6 +4,7 @@
 #include "Common/NotificationBase.h"
 #include "Common/FrameInfo.h"
 #include "Common/SkillID.h"
+#include "Common/PlatformType.h"
 
 #include "ViewModel/ViewModel.h"
 #include "Model/GameModel.h"
@@ -33,9 +34,7 @@ public:
         SPRINTING_L,
         SPRINTING_R
     };
-    enum class PlatformType {
-        NORMAL
-    };
+
     GameViewModel(sf::Vector2u windowSize);
     virtual ~GameViewModel() = default;
 
@@ -127,6 +126,9 @@ private:
     std::map<PlayerState, sf::Texture> player_textures;
     void loadPlayerTextures();
     sf::Texture* getPlayerTexture(Model::Entities::PlayerState state);
+    std::map<Common::PlatformType, sf::Texture> platform_textures;
+    void loadPlatformTextures();
+    sf::Texture* getPlatformTexture(Common::PlatformType type,bool rolling_r);
     void getPlatformInfo();
     void updateTotalScoreText();
     void updateGameTimeText();

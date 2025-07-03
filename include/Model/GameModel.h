@@ -12,12 +12,6 @@
 #include <chrono>
 #include <map>
 
-// 前向声明
-namespace Model {
-    namespace Entities {
-        enum class PlatformType;
-    }
-}
 
 namespace Model {
 /**
