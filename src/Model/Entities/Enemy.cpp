@@ -13,6 +13,9 @@ Enemy::Enemy(int id, EnemyType type, sf::Vector2f position, sf::Vector2f size, G
     move_speed = Common::Config::GameConfig::ENEMY_SPEED; // 敌人移动速度
     velocity = sf::Vector2f(0, 0);
     facing_direction = sf::Vector2f(1.0f, 0.0f);  // 默认面向右侧
+    hp = Common::Config::GameConfig::ENEMY_MAX_HP; // 敌人最大生命值
+    max_hp = Common::Config::GameConfig::ENEMY_MAX_HP; // 敌人最大生命值
+    damage = Common::Config::GameConfig::ENEMY_DAMAGE; // 敌人伤害值
 }
 
 void Enemy::update(float delta_time) {
@@ -63,7 +66,7 @@ void Enemy::shoot() {
             sf::Vector2f bullet_velocity = direction * Common::Config::GameConfig::ENEMY_BULLET_SPEED;
             sf::Vector2f bullet_pos = position + size / 2.0f;
             
-            game_model->createBullet(bullet_pos, bullet_velocity, false);  // false 代表敌人子弹
+            game_model->createBullet(bullet_pos, bullet_velocity,damage,false);  // false 代表敌人子弹
         }
         
         shoot_timer = 0.0f;

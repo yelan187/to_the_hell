@@ -3,6 +3,11 @@
 #include <SFML/Graphics.hpp>
 #include <memory>
 
+#include "Model/Entities/Enemy.h"
+#include "Model/Entities/Platform.h"
+#include "Model/Entities/Bullet.h"
+#include "Model/Entities/Pickup.h"
+#include "Model/Entities/Skill.h"
 #include "Common/Config/Config.h"
 
 namespace Model {
@@ -11,8 +16,6 @@ namespace Model {
 
 namespace Model {
 namespace Entities {
-
-class Platform;
 
 enum class PlayerState {
     IDLE,
@@ -35,7 +38,8 @@ public:
     Player(sf::Vector2f position, sf::Vector2f size, GameModel* game_model)
         : position(position), size(size), on_platform(false), on_platform_id(-1), 
           state(PlayerState::IDLE), game_model(game_model), is_dead(false), jump_counter(0), 
-          max_jump_count(2), killcounter(0) 
+          max_jump_count(2), killcounter(0), max_hp(Common::Config::GameConfig::PLAYER_MAX_HP),
+          hp(Common::Config::GameConfig::PLAYER_MAX_HP)
         {
             walking_speed = Common::Config::GameConfig::PLAYER_WALK_SPEED;
             jumping_speed = Common::Config::GameConfig::PLAYER_JUMP_FORCE;
@@ -47,9 +51,15 @@ public:
             prev_collision_correction_velocity = sf::Vector2f(0, 0);
         }
 
+    std::map<Common::SkillID, std::shared_ptr<Skill>>& getSkills() { return skills; }      
+    void updateSkills(float delta_time);
     void updatePosition(float delta_time,sf::Vector2f additional_replacement = sf::Vector2f(0,0));
     void updateVelocity(float delta_time);
     void updateAcceleration(float delta_time);
+
+    void pickup(int pickup_id);
+    void damage(int enemy_id);
+    void beDamaged(int bullet_id);
 
     void setVelocity(sf::Vector2f v) {
         velocity = v;
@@ -85,6 +95,8 @@ public:
     void addKillCount(int count = 1) {
         killcounter += count;
     }
+    int getHP() const {return hp;}
+    int getMaxHP() const {return max_hp;}
     int getKillCount() const { return killcounter; }
     PlayerState getState() const { return state; }
     sf::Vector2f getPosition() const { return position; }
@@ -103,6 +115,14 @@ public:
         return on_platform_id;
     }
 
+    void setOnPlatform(bool on_platform) {
+        this->on_platform = on_platform;
+    }
+
+    void setOnPlatformId(int platform_id) {
+        on_platform_id = platform_id;
+    }
+
     void setPosition(float x, float y) {
         position.x = x;
         position.y = y;
@@ -110,17 +130,22 @@ public:
     void setPosition(const sf::Vector2f& position) {
         this->position = position;
     }
+    void initSkills();
+    GameModel* game_model;
+    // skill
+    std::map<Common::SkillID, std::shared_ptr<Skill>> skills;
 
 private:
-
-    GameModel* game_model;
-
     bool on_platform;
     int on_platform_id;
+
     bool is_dead;
 
     PlayerState state;
 
+
+    int hp;
+    int max_hp;
     sf::Vector2f size;
     sf::Vector2f position;
     sf::Vector2f acceleration;

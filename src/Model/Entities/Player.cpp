@@ -1,5 +1,4 @@
 #include "Model/Entities/Player.h"
-#include "Model/Entities/Platform.h"
 #include "Model/GameModel.h"
 #include <cmath>
 
@@ -176,9 +175,9 @@ void Player::updateVelocity(float delta_time) {
 
     prev_collision_direction = collision_direction;
     collision_direction = CollisionDirection::NONE;
-    std::cout << "prev_rolling_associated_velocity: " << prev_rolling_associated_velocity.x << std::endl;
-    std::cout << "Velocity: " << velocity.x << ", " << velocity.y << std::endl;
-    std::cout << "on_platform_id: "<< on_platform_id << std::endl;
+    // std::cout << "prev_rolling_associated_velocity: " << prev_rolling_associated_velocity.x << std::endl;
+    // std::cout << "Velocity: " << velocity.x << ", " << velocity.y << std::endl;
+    // std::cout << "on_platform_id: "<< on_platform_id << std::endl;
 }
 
 void Player::updateAcceleration(float delta_time) {
@@ -189,8 +188,14 @@ void Player::updateAcceleration(float delta_time) {
     }
 }
 
+void Player::updateSkills(float delta_time){
+    for (auto& skill : skills) {
+        skill.second->update(delta_time);
+    }
+}
+
 void Player::update(float delta_time) {
-    
+    updateSkills(delta_time);
     // 处理滚动平台效果 - 移动到updateVelocity中处理
     updatePosition(delta_time);
     updateVelocity(delta_time);
@@ -345,4 +350,43 @@ void Player::bounce(float bounce_force) {
     } else if (state == PlayerState::WALKING) {
         state = PlayerState::JUMPING_WALKING;
     }
+}
+
+void Player::initSkills() {
+    skills.clear();
+    
+    skills[Common::SkillID::ARROW_SHOT] = std::make_shared<Entities::ArrowShot>(this);
+    skills[Common::SkillID::SPRINT] = std::make_shared<Entities::Sprint>(this);
+    skills[Common::SkillID::GROUND_PENETRATION] = std::make_shared<Entities::GroundPenetration>(this);
+
+}
+
+void Player::damage(int enemy_id) {
+    int damage = skills[Common::SkillID::ARROW_SHOT]->getDamage();
+    auto enemy_it = game_model->getEnemies().find(enemy_id);
+    Entities::Enemy* enemy = enemy_it->second;
+    enemy->hp -= damage;
+    if (enemy->hp <= 0) {
+        delete enemy;
+        game_model->getEnemies().erase(enemy_it);
+        addKillCount();
+    }
+}
+
+void Player::beDamaged(int bullet_id){
+    auto bullet_it = game_model->getBullets().find(bullet_id);
+    int damage = bullet_it->second->getDamage();
+    delete bullet_it->second;
+    game_model->getBullets().erase(bullet_it);
+    hp -= damage;
+    if (hp <= 0) {
+        is_dead = true;
+    }
+}
+
+void Player::pickup(int pickup_id) {
+    auto pickup_it = game_model->getPickups().find(pickup_id);
+    pickup_it->second->bePickedup();
+    delete pickup_it->second;
+    game_model->getPickups().erase(pickup_it);
 }

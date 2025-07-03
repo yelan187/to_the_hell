@@ -3,6 +3,7 @@
 #include "Common/CommandBase.h"
 #include "Common/NotificationBase.h"
 #include "Common/FrameInfo.h"
+#include "Common/SkillID.h"
 
 #include "ViewModel/ViewModel.h"
 #include "Model/GameModel.h"
@@ -102,7 +103,7 @@ public:
 
     void forwarding();
     // 技能方法
-    void playerUseSkill(int skill_id, sf::Vector2f direction = sf::Vector2f(1.0f, 0.0f));
+    void playerUseSkill(Common::SkillID skill_id, sf::Vector2f direction = sf::Vector2f(1.0f, 0.0f));
 
 private:
     // model
@@ -222,7 +223,7 @@ public:
         PlayerSkillCommand(GameViewModel* view_model) : view_model(view_model) {}
         void execute() override {
             // 默认使用技能0 (箭矢射击)，向右发射
-            view_model->playerUseSkill(0, sf::Vector2f(1.0f, 0.0f));
+            view_model->playerUseSkill(Common::SkillID::ARROW_SHOT, sf::Vector2f(1.0f, 0.0f));
         }
         void execute(Common::CommandParam& params) override {
             auto& skill_param = dynamic_cast<Common::PlayerSkillParam&>(params);

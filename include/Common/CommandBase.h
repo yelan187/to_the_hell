@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Common/PageState.h"
+#include "Common/SkillID.h"
 #include <chrono>
 #include <SFML/Graphics.hpp>
 
@@ -40,7 +41,7 @@ typedef CommandTypeParam<GameOverParamValue> GameOverCommandParam;
 
 // 玩家技能命令参数
 typedef struct {
-    int skill_id;
+    Common::SkillID skill_id;
     sf::Vector2f direction;
 } PlayerSkillParamValue;
 typedef CommandTypeParam<PlayerSkillParamValue> PlayerSkillParam;

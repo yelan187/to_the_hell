@@ -8,6 +8,7 @@
 #include "Model/Entities/Pickup.h"
 #include "Model/Entities/Skill.h"
 #include "Common/Config/Config.h"
+#include "Common/SkillID.h"
 #include <chrono>
 #include <map>
 
@@ -38,6 +39,7 @@ public:
         }
         return debug_info;
     }
+    void addScore(int score) { total_score += score; }
     int getTotalScore() { return total_score; }
     std::chrono::seconds getDuration() { return std::chrono::seconds(static_cast<int>(game_time)); }
     // platform
@@ -48,12 +50,12 @@ public:
     }
 
     // enemy
-    std::map<int, Entities::Enemy*> getEnemies() const { return enemies; }
+    std::map<int, Entities::Enemy*>& getEnemies() { return enemies; }
     // bullet
-    void createBullet(sf::Vector2f position, sf::Vector2f velocity, bool is_player_bullet = false);
-    std::map<int, Entities::Bullet*> getBullets() const { return bullets; }
+    void createBullet(sf::Vector2f position, sf::Vector2f velocity, int damage, bool is_player_bullet = false);
+    std::map<int, Entities::Bullet*>& getBullets() { return bullets; }
     // pickups
-    std::map<int, Entities::Pickup*> getPickups() const { return pickups; }
+    std::map<int, Entities::Pickup*>& getPickups() { return pickups; }
     // player
     sf::Vector2f getPlayerPosition() const { return player->getPosition(); }
     Entities::Player* getPlayer() const { return player; }
@@ -63,10 +65,8 @@ public:
     void playerWalkRight();
     void playerStopLeft();
     void playerStopRight();
-    // skills
-    std::vector<Entities::Skill*> getSkills() const { return skills; }
     // skill_id: 0=箭矢射击, 1=冲刺
-    void playerUseSkill(int skill_id, sf::Vector2f direction = sf::Vector2f(1.0f, 0.0f));
+    void playerUseSkill(Common::SkillID skill_id, sf::Vector2f direction = sf::Vector2f(1.0f, 0.0f));
     // gameover
     void gameOver() {
         trigger.fire(Common::NotificationId::GameOver);
@@ -95,19 +95,15 @@ private:
     std::map<int, Entities::Enemy*> enemies;
     std::map<int, Entities::Bullet*> bullets;
     std::map<int, Entities::Pickup*> pickups;
-    
-    // 技能系统
-    std::vector<Entities::Skill*> skills;
 
     void initPlatforms();
     void initPlayer();
     void initGame();
-    void initSkills();  // 初始化技能
     void generatePlatform();
     void generateEnemy();
     void generatePickup();
-    bool checkBulletPlayerCollisions();
-    void checkPlayerBulletEnemyCollisions();
+    int checkBulletPlayerCollisions();
+    int checkPlayerBulletEnemyCollisions();
     int checkPickupPlayerCollisions();
     void cleanupOutOfBoundsEntities();
     

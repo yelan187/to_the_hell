@@ -20,6 +20,9 @@ public:
     bool outOfWindow(sf::Vector2u window_size) const;
     bool collidesWith(sf::Vector2f target_pos, sf::Vector2f target_size) const;
     
+    int getHp() const { return hp; }
+    int getMaxHp() const { return max_hp; }
+    int getDamage() const { return damage; }
     sf::Vector2f getPosition() const { return position; }
     sf::Vector2f getSize() const { return size; }
     EnemyType getType() const { return type; }
@@ -28,6 +31,8 @@ public:
     
     bool canShoot() const;
     void shoot();
+
+    int hp;
 
 private:
     int id;
@@ -41,6 +46,9 @@ private:
     float shoot_timer;
     float shoot_interval;
     float move_speed;
+
+    int max_hp;
+    int damage;
     
     void updateMovement(float delta_time);
     void updateShooting(float delta_time);

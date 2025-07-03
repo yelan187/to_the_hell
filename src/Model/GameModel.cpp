@@ -14,7 +14,6 @@ using Model::Entities::PlatformType;
 - initGame()            // 初始化游戏状态和参数
 - initPlatforms()       // 创建初始平台
 - initPlayer()          // 创建玩家并设置初始位置
-- initSkills()          // 初始化技能系统
 - resetPlatformGenerateInterval()  // 重置平台生成间隔
 
 ==================== 主要更新方法 ====================
@@ -77,12 +76,6 @@ GameModel::~GameModel() {
     cleanup(enemies);
     cleanup(bullets);
     cleanup(pickups);
-    
-    // 清理技能容器
-    for (auto* skill : skills) {
-        delete skill;
-    }
-    skills.clear();
 }
 
 // ==================== 游戏初始化方法 ====================
@@ -96,7 +89,6 @@ void GameModel::initGame() {
     pickup_generate_interval = Common::Config::GameConfig::PICKUP_GENERATE_INTERVAL;
     initPlatforms();
     initPlayer();
-    initSkills();
 }
 
 void GameModel::initPlatforms() {
@@ -129,17 +121,7 @@ void GameModel::initPlayer() {
     
     player = new Entities::Player(player_position, player_size, this);
     player->setVelocity(platforms[2]->getVelocity());
-}
-
-void GameModel::initSkills() {
-    for (auto* skill : skills) {
-        delete skill;
-    }
-    skills.clear();
-    
-    skills.push_back(new Entities::Skill(Entities::SkillType::ARROW_SHOT, Common::Config::GameConfig::SKILL_ARROW_COOLDOWN));
-    skills.push_back(new Entities::Skill(Entities::SkillType::SPRINT, Common::Config::GameConfig::SKILL_SPRINT_COOLDOWN));
-    skills.push_back(new Entities::Skill(Entities::SkillType::GROUND_PENETRATION, Common::Config::GameConfig::SKILL_GROUND_PENETRATION_COOLDOWN));
+    player->initSkills();
 }
 
 void GameModel::resetPlatformGenerateInterval() {
@@ -241,35 +223,29 @@ void GameModel::update(float delta_time) {
             ++it;
         }
     }
-    
-    // 技能更新
-    {
-        for (auto* skill : skills) {
-            skill->update(delta_time);
-        }
-        if (player->getKillCount() == Common::Config::GameConfig::SKILL_SPRINT_RESET_KILL_COUNT) {
-            skills[1]->resetCD();
-        }
-    }
+
     // 碰撞检测
-    if (checkBulletPlayerCollisions()) {
-        player->setDead(true);
-        gameOver();
-        return;
+    int bullet_id = checkBulletPlayerCollisions();
+    if (bullet_id!=-1) {
+        player->beDamaged(bullet_id);
     }
     
-    if (player && player->isDead()) {
-        gameOver();
-        return;
+    int enemy_id = checkPlayerBulletEnemyCollisions();
+    if (enemy_id != -1) {
+        player->damage(enemy_id);
     }
     
-    checkPlayerBulletEnemyCollisions();
-    
-    int score_gained = checkPickupPlayerCollisions();
-    total_score += score_gained;
-    
+    int pickup_id = checkPickupPlayerCollisions();
+    if (pickup_id != -1) {
+        player->pickup(pickup_id);
+    }
+
     // 边界检查
     if (player->getPosition().y + player->getSize().y >= window_size.y) {
+        player->kill();
+    }
+
+    if (player && player->isDead()) {
         gameOver();
         return;
     }
@@ -357,18 +333,18 @@ void GameModel::generatePickup() {
     }
 }
 
-void GameModel::createBullet(sf::Vector2f position, sf::Vector2f velocity, bool is_player_bullet) {
+void GameModel::createBullet(sf::Vector2f position, sf::Vector2f velocity, int damage, bool is_player_bullet) {
     sf::Vector2f bullet_size = is_player_bullet ? 
         Common::Config::GameConfig::BULLET_SIZE : 
         sf::Vector2f(Common::Config::GameConfig::BULLET_SIZE.x * 0.6f, Common::Config::GameConfig::BULLET_SIZE.y * 0.6f);
     
-    bullets[next_bullet_id] = new Entities::Bullet(next_bullet_id, position, velocity, bullet_size, is_player_bullet);
+    bullets[next_bullet_id] = new Entities::Bullet(next_bullet_id, position, velocity, bullet_size, damage, is_player_bullet);
     next_bullet_id++;
 }
 
 // ==================== 碰撞检测方法 ====================
 
-bool GameModel::checkBulletPlayerCollisions() {
+int GameModel::checkBulletPlayerCollisions() {
     for (const auto& bullet_pair : bullets) {
         if (!bullet_pair.second->isPlayerBullet()) {
             sf::Vector2f player_pos = player->getPosition();
@@ -379,24 +355,23 @@ bool GameModel::checkBulletPlayerCollisions() {
             sf::Vector2f effective_player_size(player_size.x - 2 * shrink_amount, player_size.y);
             
             if (bullet_pair.second->collidesWith(effective_player_pos, effective_player_size)) {
-                return true;
+                return bullet_pair.second->getId();
             }
         }
     }
-    return false;
+    return -1;
 }
 
-void GameModel::checkPlayerBulletEnemyCollisions() {
+int GameModel::checkPlayerBulletEnemyCollisions() {
+    int enemy_id = -1;
     for (auto bullet_it = bullets.begin(); bullet_it != bullets.end(); ) {
         if (bullet_it->second->isPlayerBullet()) {
             bool hit_enemy = false;
             for (auto enemy_it = enemies.begin(); enemy_it != enemies.end(); ) {
                 if (bullet_it->second->collidesWith(enemy_it->second->getPosition(), enemy_it->second->getSize())) {
                     total_score += Common::Config::GameConfig::ENEMY_SCORE_VALUE;
-                    delete enemy_it->second;
-                    enemy_it = enemies.erase(enemy_it);
+                    enemy_id = enemy_it->second->getId();
                     hit_enemy = true;
-                    player->addKillCount();
                     break;
                 } else {
                     ++enemy_it;
@@ -413,20 +388,19 @@ void GameModel::checkPlayerBulletEnemyCollisions() {
             ++bullet_it;
         }
     }
+    return enemy_id;
 }
 
 int GameModel::checkPickupPlayerCollisions() {
-    int score_gained = 0;
     for (auto it = pickups.begin(); it != pickups.end(); ) {
         if (it->second->collidesWith(player->getPosition(), player->getSize())) {
-            score_gained += it->second->getScore();
-            delete it->second;
-            it = pickups.erase(it);
+            return it->second->getId();
+            break;
         } else {
             ++it;
         }
     }
-    return score_gained;
+    return -1;
 }
 
 // ==================== 玩家控制方法 ====================
@@ -439,7 +413,7 @@ void GameModel::playerDown() {
     if (!player->isOnPlatform()) {
         player->fall();
     } else {
-        playerUseSkill(2); // 使用冲刺技能
+        playerUseSkill(Common::SkillID::GROUND_PENETRATION);
     }
 }
 
@@ -461,46 +435,12 @@ void GameModel::playerStopRight() {
 
 // ==================== 技能系统方法 ====================
 
-void GameModel::playerUseSkill(int skill_id, sf::Vector2f direction) {
+void GameModel::playerUseSkill(Common::SkillID skill_id, sf::Vector2f direction) {
     if (!player) return;
+
+    if (!player->skills[skill_id]->canUse()) return;
     
-    if (skill_id < 0 || skill_id >= static_cast<int>(skills.size())) return;
-    if (!skills[skill_id]->canUse()) return;
-    
-    skills[skill_id]->use();
-    sf::Vector2f player_facing = player->getFacingDirection();
-    
-    switch (skill_id) {
-        case 0: // ARROW_SHOT
-        {
-            sf::Vector2f player_pos = player->getPosition();
-            sf::Vector2f arrow_pos = sf::Vector2f(
-                player_pos.x + player_size.x / 2, 
-                player_pos.y + player_size.y / 2 - Common::Config::GameConfig::BULLET_SIZE.y / 2
-            );
-            
-            sf::Vector2f arrow_velocity = sf::Vector2f(player_facing.x * Common::Config::GameConfig::BULLET_SPEED, 0.0f);
-            createBullet(arrow_pos, arrow_velocity, true);
-            break;
-        }
-        case 1: // SPRINT
-        {
-            sf::Vector2f sprint_replacement = sf::Vector2f(
-                player_facing.x * Common::Config::GameConfig::SKILL_SPRINT_DISTANCE, 
-                0.0f
-            );
-            player->updatePosition(0.0f, sprint_replacement);
-            player->resetKillCount();
-            break;
-        }
-        case 2:
-        {
-            player->groundPenetration();
-            break;
-        }
-        default:
-            break;
-    }
+    player->skills[skill_id]->use();
 }
 
 // ==================== 工具方法 ====================

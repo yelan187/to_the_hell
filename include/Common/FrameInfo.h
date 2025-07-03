@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <chrono>
+#include "Common/SkillID.h"
 
 namespace Common {
 // accessible for view/viewmodel layers to bind properties
@@ -15,6 +16,8 @@ typedef struct frameInfo{
         sf::Vector2f position;       ///< 玩家位置
         sf::Vector2f size;           ///< 玩家大小
         sf::Texture* texture;        ///< 玩家纹理指针
+        int hp;                      ///< 玩家生命值
+        int max_hp;                  ///< 玩家最大生命值
     } player_info;
 
     /**
@@ -76,7 +79,7 @@ typedef struct frameInfo{
      * @brief 技能状态信息（View层版本）
      */
     typedef struct {
-        int skill_type;              ///< 技能类型（0=箭矢射击, 1=冲刺）
+        Common::SkillID skill_id;
         float cooldown_progress;     ///< 冷却进度（0.0=可用, 1.0=完全冷却）
         bool is_available;           ///< 是否可用（用于UI显示状态）
     } SkillInfo;

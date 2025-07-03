@@ -2,8 +2,8 @@
 
 using Model::Entities::Bullet;
 
-Bullet::Bullet(int id, sf::Vector2f position, sf::Vector2f velocity, sf::Vector2f size, bool is_player_bullet)
-    : id(id), position(position), velocity(velocity), size(size), is_player_bullet(is_player_bullet) {
+Bullet::Bullet(int id, sf::Vector2f position, sf::Vector2f velocity, sf::Vector2f size, int damage, bool is_player_bullet)
+    : id(id), position(position), velocity(velocity), size(size), is_player_bullet(is_player_bullet), damage(damage) {
 }
 
 void Bullet::update(float delta_time) {

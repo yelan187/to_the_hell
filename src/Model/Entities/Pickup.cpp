@@ -21,6 +21,10 @@ Pickup::Pickup(int id, PickupType type, sf::Vector2f position, sf::Vector2f size
     }
 }
 
+void Pickup::bePickedup() {
+    game_model->addScore(getScore());
+}
+
 void Pickup::update(float delta_time) {
     updateMovement(delta_time);
     position += velocity * delta_time;

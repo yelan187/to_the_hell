@@ -17,6 +17,8 @@ class Pickup {
 public:
     Pickup(int id, PickupType type, sf::Vector2f position, sf::Vector2f size, GameModel* game_model, int platform_id = -1);
     
+    void bePickedup();
+
     void update(float delta_time);
     bool outOfWindow(sf::Vector2u window_size) const;
     bool collidesWith(sf::Vector2f target_pos, sf::Vector2f target_size) const;

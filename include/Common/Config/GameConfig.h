@@ -23,6 +23,7 @@ static float PLAYER_GRAVITY;                            // 玩家重力加速度
 static float PLAYER_MAX_FALL_SPEED;                     // 玩家最大下落速度
 static float PLAYER_FALL_ACCELERATION;                  // 玩家手动下落时的额外加速度
 static float PLAYER_COLLISION_SHRINK_RATIO;             // 玩家碰撞框水平方向缩小比例（0-1）
+static int PLAYER_MAX_HP;
 
 // 平台配置
 static sf::Vector2f PLATFORM_SIZE;                      // 平台大小
@@ -45,6 +46,8 @@ static sf::Vector2f ENEMY_SIZE;                         // 敌人大小
 static float ENEMY_SPEED;                               // 敌人移动速度
 static float ENEMY_SHOOT_INTERVAL;                      // 敌人射击间隔时间(秒)
 static float ENEMY_BULLET_SPEED;                        // 敌人子弹速度
+static int ENEMY_DAMAGE;                              // 敌人对玩家造成的伤害
+static int ENEMY_MAX_HP;                               // 敌人最大生命值
 
 static float ENEMY_GENERATE_INTERVAL;                   // 敌人生成间隔时间(秒)，用于初始设置
 static float ENEMY_SPAWN_MIN_INTERVAL;                  // 敌人生成最小间隔
@@ -67,6 +70,7 @@ static float BULLET_SPEED;                              // 玩家子弹速度
 
 // 技能配置
 static float SKILL_ARROW_COOLDOWN;                      // 箭矢技能冷却时间(秒)
+static int SKILL_ARROW_DAMAGE;                          // 箭矢技能伤害
 static float SKILL_SPRINT_COOLDOWN;                     // 冲刺技能冷却时间(秒)
 static float SKILL_SPRINT_DURATION;                     // 冲刺持续时间(秒)
 static float SKILL_SPRINT_SPEED_MULTIPLIER;             // 冲刺速度倍数

@@ -16,8 +16,8 @@ float GameConfig::PLAYER_JUMP_FORCE = 350.0f;               // 玩家跳跃力�
 float GameConfig::PLAYER_GRAVITY = 500.0f;                  // 玩家重力加速度
 float GameConfig::PLAYER_MAX_FALL_SPEED = 600.0f;           // 玩家最大下落速度
 float GameConfig::PLAYER_FALL_ACCELERATION = 300.0f;        // 玩家手动下落时的额外加速度
-
 float GameConfig::PLAYER_COLLISION_SHRINK_RATIO = 0.3f;     // 玩家碰撞框水平方向缩小比例（0-1）
+int GameConfig::PLAYER_MAX_HP = 2;                          // 玩家最大生命值
 
 // 平台配置
 sf::Vector2f GameConfig::PLATFORM_SIZE(100.0f, 12.0f);
@@ -40,6 +40,8 @@ sf::Vector2f GameConfig::ENEMY_SIZE(40.0f, 40.0f);
 float GameConfig::ENEMY_SPEED = 50.0f;                      // 敌人移动速度
 float GameConfig::ENEMY_SHOOT_INTERVAL = 2.0f;              // 敌人射击间隔时间(秒)
 float GameConfig::ENEMY_BULLET_SPEED = 200.0f;              // 敌人子弹速度
+int GameConfig::ENEMY_DAMAGE = 1;                     // 敌人对玩家造成的伤害
+int GameConfig::ENEMY_MAX_HP = 2;
 
 float GameConfig::ENEMY_GENERATE_INTERVAL = 3.0f;           // 敌人生成间隔时间(秒)，用于初始设置
 float GameConfig::ENEMY_SPAWN_MIN_INTERVAL = 3.0f;          // 敌人生成最小间隔
@@ -62,6 +64,7 @@ float GameConfig::BULLET_SPEED = 500.0f;                    // 玩家子弹速�
 
 // 技能配置
 float GameConfig::SKILL_ARROW_COOLDOWN = 1.0f;              // 箭矢技能冷却时间(秒)
+int GameConfig::SKILL_ARROW_DAMAGE = 2;
 float GameConfig::SKILL_SPRINT_COOLDOWN = 5.0f;             // 冲刺技能冷却时间(秒)
 float GameConfig::SKILL_SPRINT_DURATION = 1.0f;             // 冲刺持续时间(秒)
 float GameConfig::SKILL_SPRINT_SPEED_MULTIPLIER = 2.0f;     // 冲刺速度倍数

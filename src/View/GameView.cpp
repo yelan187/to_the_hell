@@ -105,18 +105,18 @@ void GameView::handleInput(const sf::Event& event) {
             case sf::Keyboard::D:
                 playerRightCommand->execute();
                 break;
-            case sf::Keyboard::J: // 箭矢射击技能（技能ID = 0）
+            case sf::Keyboard::J:
                 {
                     Common::PlayerSkillParam skill_param;
-                    skill_param.value.skill_id = 0;
+                    skill_param.value.skill_id = Common::SkillID::ARROW_SHOT;
                     skill_param.value.direction = sf::Vector2f(1.0f, 0.0f);
                     playerSkillCommand->execute(skill_param);
                 }
                 break;
-            case sf::Keyboard::U: // 冲刺技能（技能ID = 1）
+            case sf::Keyboard::U:
                 {
                     Common::PlayerSkillParam skill_param;
-                    skill_param.value.skill_id = 1;
+                    skill_param.value.skill_id = Common::SkillID::SPRINT;
                     skill_param.value.direction = sf::Vector2f(1.0f, 0.0f);
                     playerSkillCommand->execute(skill_param);
                 }
@@ -140,18 +140,6 @@ void GameView::handleInput(const sf::Event& event) {
                 break;
             default:
                 break;
-        }
-    } else if (event.type == sf::Event::MouseButtonPressed) {
-        if (event.mouseButton.button == sf::Mouse::Left) {
-            sf::Vector2f mouse_pos(static_cast<float>(event.mouseButton.x), static_cast<float>(event.mouseButton.y));
-            int clicked_skill = skill_bar.getClickedSkill(mouse_pos);
-            
-            if (clicked_skill >= 0) {
-                Common::PlayerSkillParam skill_param;
-                skill_param.value.skill_id = clicked_skill;
-                skill_param.value.direction = sf::Vector2f(1.0f, 0.0f); // 默认方向
-                playerSkillCommand->execute(skill_param);
-            }
         }
     } else if (event.type == sf::Event::KeyReleased) {
         switch (event.key.code) {

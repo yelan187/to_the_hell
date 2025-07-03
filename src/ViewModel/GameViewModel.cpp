@@ -121,7 +121,7 @@ void GameViewModel::playerStopDown() {
     }
 }
 
-void GameViewModel::playerUseSkill(int skill_id, sf::Vector2f direction) {
+void GameViewModel::playerUseSkill(Common::SkillID skill_id, sf::Vector2f direction) {
     // 将技能使用请求委托给Model层处理
     model->playerUseSkill(skill_id, direction);
 }
@@ -271,7 +271,9 @@ void GameViewModel::forwarding() {
     updateDebugInfoText();
     frame_info.player_info.position = model->getPlayer()->getPosition();
     frame_info.player_info.size = model->getPlayer()->getSize();
-    frame_info.player_info.texture = getPlayerTexture(model->getPlayer()->getState());  
+    frame_info.player_info.texture = getPlayerTexture(model->getPlayer()->getState());
+    frame_info.player_info.hp = model->getPlayer()->getHP();
+    frame_info.player_info.max_hp = model->getPlayer()->getMaxHP();
     // 平台信息转换
     getPlatformInfo();
     
@@ -318,9 +320,10 @@ void GameViewModel::forwarding() {
 
     // 技能信息转换
     std::vector<Common::FrameInfo::SkillInfo> skills_info;
-    for (auto* skill : model->getSkills()) {
+    for (auto& pair : model->getPlayer()->getSkills()) {
+        auto skill = pair.second;
         Common::FrameInfo::SkillInfo skill_info;
-        skill_info.skill_type = static_cast<int>(skill->getType());
+        skill_info.skill_id = skill->getSkillID();
         skill_info.cooldown_progress = skill->getCooldownProgress();
         skill_info.is_available = skill->isAvailable();
         skills_info.push_back(skill_info);
