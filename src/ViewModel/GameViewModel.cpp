@@ -269,9 +269,18 @@ void GameViewModel::forwarding() {
     updateGameTimeText();
     updateTotalScoreText();
     updateDebugInfoText();
-    frame_info.player_info.position = model->getPlayer()->getPosition();
-    frame_info.player_info.size = model->getPlayer()->getSize();
-    frame_info.player_info.texture = getPlayerTexture(model->getPlayer()->getState());  
+    
+    // 检查player是否已初始化，避免空指针访问
+    if (model->getPlayer() != nullptr) {
+        frame_info.player_info.position = model->getPlayer()->getPosition();
+        frame_info.player_info.size = model->getPlayer()->getSize();
+        frame_info.player_info.texture = getPlayerTexture(model->getPlayer()->getState());
+    } else {
+        // 如果player未初始化，设置默认值
+        frame_info.player_info.position = sf::Vector2f(0, 0);
+        frame_info.player_info.size = Common::Config::GameConfig::PLAYER_SIZE;
+        frame_info.player_info.texture = nullptr;
+    }  
     // 平台信息转换
     getPlatformInfo();
     

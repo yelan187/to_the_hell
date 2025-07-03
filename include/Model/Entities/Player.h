@@ -65,7 +65,7 @@ public:
     void handleCollision(Platform* platform, sf::Vector2f prev_position, float delta_time);
     bool collisionDetection(Platform* platform);
     bool collisionDetection(Platform* platform, sf::Vector2f position);
-    void jump(float scroll_speed);
+    void jump();
     void fall();
     void walkLeft();
     void walkRight();

@@ -75,7 +75,10 @@ static int SKILL_SPRINT_RESET_KILL_COUNT;
 static float SKILL_GROUND_PENETRATION_COOLDOWN;
 
 // 游戏流程配置
-static float INITIAL_SCROLL_SPEED;                      // 初始滚动速度
+static float SCROLL_SPEED;                              // 滚动速度
+
+// 配置管理函数
+static void resetToInitialValues();                     // 恢复所有配置为初始值
 
 private:
     GameConfig() = default;                              // 静态类，禁止实例化

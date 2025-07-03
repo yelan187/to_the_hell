@@ -4,7 +4,7 @@
 using Model::GameModel;
 using Model::Entities::PlatformType;
 
-/*  本文件的各部分：
+/*  本文件的各部分（待更新）：
 
 ==================== 构造函数和析构函数 ====================
 - GameModel()           // 构造函数，初始化游戏
@@ -56,8 +56,7 @@ using Model::Entities::PlatformType;
 
 GameModel::GameModel(sf::Vector2u window_size) : 
     Model(window_size), init(false) {
-    initGame();
-    init = true;
+    // 在构造函数中不要调用initGame，等到第一次update时调用
 }
 
 GameModel::~GameModel() {
@@ -83,13 +82,21 @@ GameModel::~GameModel() {
         delete skill;
     }
     skills.clear();
+    
+    // 清理事件容器
+    for (auto* event : events) {
+        delete event;
+    }
+    events.clear();
 }
 
 // ==================== 游戏初始化方法 ====================
 
 void GameModel::initGame() {
+    // 重置所有配置为初始值
+    Common::Config::GameConfig::resetToInitialValues();
+    
     total_score = 0;
-    scroll_speed = Common::Config::GameConfig::INITIAL_SCROLL_SPEED;
     game_time = 0;
     resetPlatformGenerateInterval();
     enemy_generate_interval = Common::Config::GameConfig::ENEMY_GENERATE_INTERVAL;
@@ -97,23 +104,24 @@ void GameModel::initGame() {
     initPlatforms();
     initPlayer();
     initSkills();
+    initEvents();
 }
 
 void GameModel::initPlatforms() {
     platforms[next_platform_id++] = new Entities::Platform(next_platform_id, PlatformType::NORMAL, 
-        sf::Vector2f(-200, -500), sf::Vector2f(200,window_size.y + 500), 0);
+        sf::Vector2f(-200, -500), sf::Vector2f(200,window_size.y + 500));
     platforms[next_platform_id++] = new Entities::Platform(next_platform_id, PlatformType::NORMAL, 
-        sf::Vector2f(window_size.x, -500), sf::Vector2f(200,window_size.y + 500), 0);
+        sf::Vector2f(window_size.x, -500), sf::Vector2f(200,window_size.y + 500));
     
     const int initial_platforms = 3;
     for (int i = 0; i < initial_platforms; ++i) {
         sf::Vector2f position(
-            static_cast<float>(rand() % static_cast<int>(window_size.x - platform_size.x)),
+            static_cast<float>(rand() % static_cast<int>(window_size.x - Common::Config::GameConfig::PLATFORM_SIZE.x)),
             static_cast<float>(window_size.y / 2 + (window_size.y * 2 / 3) / initial_platforms * i)
         );
         
         PlatformType type = PlatformType::NORMAL;
-        platforms[next_platform_id] = new Entities::Platform(next_platform_id, type, position, platform_size, scroll_speed);
+        platforms[next_platform_id] = new Entities::Platform(next_platform_id, type, position, Common::Config::GameConfig::PLATFORM_SIZE);
     }
     next_platform_id += initial_platforms;
 }
@@ -123,11 +131,11 @@ void GameModel::initPlayer() {
     sf::Vector2f platform_size = platforms[2]->getSize();
     
     sf::Vector2f player_position = sf::Vector2f(
-        platform_pos.x + platform_size.x / 2 - player_size.x / 2,
-        platform_pos.y - player_size.y
+        platform_pos.x + platform_size.x / 2 - Common::Config::GameConfig::PLAYER_SIZE.x / 2,
+        platform_pos.y - Common::Config::GameConfig::PLAYER_SIZE.y
     );
     
-    player = new Entities::Player(player_position, player_size, this);
+    player = new Entities::Player(player_position, Common::Config::GameConfig::PLAYER_SIZE, this);
     player->setVelocity(platforms[2]->getVelocity());
 }
 
@@ -140,6 +148,41 @@ void GameModel::initSkills() {
     skills.push_back(new Entities::Skill(Entities::SkillType::ARROW_SHOT, Common::Config::GameConfig::SKILL_ARROW_COOLDOWN));
     skills.push_back(new Entities::Skill(Entities::SkillType::SPRINT, Common::Config::GameConfig::SKILL_SPRINT_COOLDOWN));
     skills.push_back(new Entities::Skill(Entities::SkillType::GROUND_PENETRATION, Common::Config::GameConfig::SKILL_GROUND_PENETRATION_COOLDOWN));
+}
+
+void GameModel::initEvents() {
+    // 清理现有事件
+    for (auto* event : events) {
+        delete event;
+    }
+    events.clear();
+    next_event_id = 0;
+    
+    // 创建游戏变化事件序列 - 使用简化的Event构造函数
+    // 5秒: 滚动速度增加
+    events.push_back(new Entities::Event(5.0f, "Scroll Speed Increased", []() {
+        Common::Config::GameConfig::SCROLL_SPEED *= 1.2f;
+    }));
+    
+    // 10秒: 敌人生成频率增加
+    events.push_back(new Entities::Event(10.0f, "Enemy Spawn Rate Increased", []() {
+        Common::Config::GameConfig::ENEMY_SPAWN_MIN_INTERVAL /= 1.3f;
+        Common::Config::GameConfig::ENEMY_SPAWN_MAX_INTERVAL /= 1.3f;
+    }));
+    
+    // 20秒: 危险平台概率增加
+    events.push_back(new Entities::Event(20.0f, "More Dangerous Platforms", []() {
+        Common::Config::GameConfig::PLATFORM_SPIKED_PROBABILITY *= 1.5f;
+        Common::Config::GameConfig::PLATFORM_FRAGILE_PROBABILITY *= 1.3f;
+        // 调整普通平台概率保持平衡
+        float non_normal = Common::Config::GameConfig::PLATFORM_ROLLING_PROBABILITY + 
+                            Common::Config::GameConfig::PLATFORM_BOUNCY_PROBABILITY + 
+                            Common::Config::GameConfig::PLATFORM_FRAGILE_PROBABILITY + 
+                            Common::Config::GameConfig::PLATFORM_SPIKED_PROBABILITY;
+        if (non_normal < 0.9f) {
+            Common::Config::GameConfig::PLATFORM_NORMAL_PROBABILITY = 1.0f - non_normal;
+        }
+    }));
 }
 
 void GameModel::resetPlatformGenerateInterval() {
@@ -161,6 +204,11 @@ void GameModel::update(float delta_time) {
         - static_cast<int>(prev_time)%Common::Config::GameConfig::SCORE_UPDATE_INTERVAL >= 1) 
     {
         total_score += Common::Config::GameConfig::SCORE_INCREMENT;
+    }
+
+    // 更新事件系统
+    for (auto* event : events) {
+        event->update(game_time);
     }
 
     // 平台生成和更新
@@ -213,7 +261,7 @@ void GameModel::update(float delta_time) {
     // 子弹更新
     for (auto it = bullets.begin(); it != bullets.end(); ) {
         Entities::Bullet* bullet = it->second;
-        bullet->update(delta_time, scroll_speed);
+        bullet->update(delta_time);
         if (bullet->outOfWindow(window_size)) {
             delete bullet;
             it = bullets.erase(it);
@@ -284,14 +332,14 @@ void GameModel::generatePlatform() {
     
     for (int attempt = 0; attempt < max_attempts; ++attempt) {
         sf::Vector2f position(
-            static_cast<float>(rand() % static_cast<int>(window_size.x - platform_size.x)),
+            static_cast<float>(rand() % static_cast<int>(window_size.x - Common::Config::GameConfig::PLATFORM_SIZE.x)),
             window_size.y
         );
         
-        if (isPlatformPositionValid(position, platform_size)) {
+        if (isPlatformPositionValid(position, Common::Config::GameConfig::PLATFORM_SIZE)) {
             PlatformType type = getPlatformTypeRand();
             platforms[next_platform_id++] = new Entities::Platform(
-                next_platform_id, type, position, platform_size, scroll_speed);
+                next_platform_id, type, position, Common::Config::GameConfig::PLATFORM_SIZE);
             return;
         }
     }
@@ -432,7 +480,7 @@ int GameModel::checkPickupPlayerCollisions() {
 // ==================== 玩家控制方法 ====================
 
 void GameModel::playerJump() {
-    player->jump(scroll_speed);
+    player->jump();
 }
 
 void GameModel::playerDown() {
@@ -475,8 +523,8 @@ void GameModel::playerUseSkill(int skill_id, sf::Vector2f direction) {
         {
             sf::Vector2f player_pos = player->getPosition();
             sf::Vector2f arrow_pos = sf::Vector2f(
-                player_pos.x + player_size.x / 2, 
-                player_pos.y + player_size.y / 2 - Common::Config::GameConfig::BULLET_SIZE.y / 2
+                player_pos.x + Common::Config::GameConfig::PLAYER_SIZE.x / 2, 
+                player_pos.y + Common::Config::GameConfig::PLAYER_SIZE.y / 2 - Common::Config::GameConfig::BULLET_SIZE.y / 2
             );
             
             sf::Vector2f arrow_velocity = sf::Vector2f(player_facing.x * Common::Config::GameConfig::BULLET_SPEED, 0.0f);

@@ -5,7 +5,7 @@
 
 using Model::Entities::Player;
 
-void Player::jump(float scroll_speed) {
+void Player::jump() {
     if (jump_counter >= max_jump_count) {
         return;
     }

@@ -1,4 +1,5 @@
 #include "Model/Entities/Bullet.h"
+#include "Common/Config/Config.h"
 
 using Model::Entities::Bullet;
 
@@ -8,14 +9,10 @@ Bullet::Bullet(int id, sf::Vector2f position, sf::Vector2f velocity, sf::Vector2
 
 void Bullet::update(float delta_time) {
     position += velocity * delta_time;
-}
-
-void Bullet::update(float delta_time, float scroll_speed) {
-    position += velocity * delta_time;
     
     // 如果是玩家箭矢，抵消滚动影响，保持水平飞行
     if (is_player_bullet) {
-        position.y -= scroll_speed * delta_time;  // 抵消向上滚动
+        position.y -= Common::Config::GameConfig::SCROLL_SPEED * delta_time;  // 抵消向上滚动
     }
 }
 

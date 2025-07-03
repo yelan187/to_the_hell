@@ -8,8 +8,7 @@ using Model::Entities::Pickup;
 Pickup::Pickup(int id, PickupType type, sf::Vector2f position, sf::Vector2f size, GameModel* game_model, int platform_id)
     : id(id), type(type), position(position), size(size), game_model(game_model), platform_id(platform_id) {
     
-    scroll_speed = 100.0f;
-    velocity = sf::Vector2f(0, -scroll_speed);
+    velocity = sf::Vector2f(0, -Common::Config::GameConfig::SCROLL_SPEED);
     
     // 如果是普通豆子且指定了平台ID，定位到平台上方
     if (platform_id != -1 && type == PickupType::NORMAL_DOT) {
@@ -33,15 +32,15 @@ void Pickup::updateMovement(float delta_time) {
         if (platforms.find(platform_id) != platforms.end()) {
             sf::Vector2f platform_pos = platforms[platform_id]->getPosition();
             position.y = platform_pos.y - size.y;
-            velocity = sf::Vector2f(0, -scroll_speed);
+            velocity = sf::Vector2f(0, -Common::Config::GameConfig::SCROLL_SPEED);
         } else {
             // 平台已销毁，脱离平台
-            velocity = sf::Vector2f(0, -scroll_speed);
+            velocity = sf::Vector2f(0, -Common::Config::GameConfig::SCROLL_SPEED);
             platform_id = -1;
         }
     } else {
         // 自由移动（五角星豆子或脱离平台的普通豆子）
-        velocity = sf::Vector2f(0, -scroll_speed);
+        velocity = sf::Vector2f(0, -Common::Config::GameConfig::SCROLL_SPEED);
         
         // 普通豆子尝试附着到新平台
         if (type == PickupType::NORMAL_DOT) {
@@ -59,7 +58,7 @@ void Pickup::updateMovement(float delta_time) {
                 if (x_overlap && y_contact) {
                     platform_id = platform_pair.first;
                     position.y = platform_pos.y - size.y;
-                    velocity = sf::Vector2f(0, -scroll_speed);
+                    velocity = sf::Vector2f(0, -Common::Config::GameConfig::SCROLL_SPEED);
                     break;
                 }
             }

@@ -37,7 +37,6 @@ private:
     sf::Vector2f velocity;
     GameModel* game_model;
     int platform_id; // -1表示不在平台上（空中豆子）
-    float scroll_speed;
     
     void updateMovement(float delta_time);
 };

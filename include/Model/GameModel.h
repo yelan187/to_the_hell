@@ -7,6 +7,7 @@
 #include "Model/Entities/Bullet.h"
 #include "Model/Entities/Pickup.h"
 #include "Model/Entities/Skill.h"
+#include "Model/Entities/Event.h"
 #include "Common/Config/Config.h"
 #include <chrono>
 #include <map>
@@ -73,8 +74,6 @@ public:
     }
     // others
     void update(float delta_time);
-    sf::Vector2f platform_size = Common::Config::GameConfig::PLATFORM_SIZE;
-    sf::Vector2f player_size = Common::Config::GameConfig::PLAYER_SIZE;
     
 private:
     bool init;
@@ -85,7 +84,6 @@ private:
     
     int total_score;
     float game_time;
-    float scroll_speed;
     float platform_generate_interval;
     float enemy_generate_interval;
     float pickup_generate_interval;
@@ -98,11 +96,16 @@ private:
     
     // 技能系统
     std::vector<Entities::Skill*> skills;
+    
+    // 事件系统
+    std::vector<Entities::Event*> events;
+    int next_event_id = 0;
 
     void initPlatforms();
     void initPlayer();
     void initGame();
     void initSkills();  // 初始化技能
+    void initEvents();  // 初始化事件系统
     void generatePlatform();
     void generateEnemy();
     void generatePickup();
