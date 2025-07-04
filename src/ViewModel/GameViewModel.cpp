@@ -129,68 +129,50 @@ void GameViewModel::playerUseSkill(Common::SkillID skill_id) {
 }
 
 void GameViewModel::loadPlayerTextures() {
-    // std::cout << "Loading player textures..." << std::endl;
-    // Load textures for different player states
-    try {
-        sf::Texture idle_l_texture;
-        idle_l_texture.loadFromFile("assets/images/player/player_idle_l.png");
+    // 加载玩家各种状态的纹理资源
+    sf::Texture idle_l_texture;
+    if (idle_l_texture.loadFromFile("assets/images/player/player_idle_l.png")) {
         player_textures[PlayerState::IDLE_L] = idle_l_texture;
-    } catch (const std::exception& e) {
-        std::cout << "Error loading player textures: " << e.what() << std::endl;
     }
-    try {
-        sf::Texture idle_r_texture;
-        idle_r_texture.loadFromFile("assets/images/player/player_idle_r.png");
+    
+    sf::Texture idle_r_texture;
+    if (idle_r_texture.loadFromFile("assets/images/player/player_idle_r.png")) {
         player_textures[PlayerState::IDLE_R] = idle_r_texture;
-    } catch (const std::exception& e) {
-        std::cout << "Error loading player textures: " << e.what() << std::endl;
     }
-    try {
-        sf::Texture walk_l_texture;
-        walk_l_texture.loadFromFile("assets/images/player/player_walk_l.png");
+    
+    sf::Texture walk_l_texture;
+    if (walk_l_texture.loadFromFile("assets/images/player/player_walk_l.png")) {
         player_textures[PlayerState::WALKING_L] = walk_l_texture;
-    } catch (const std::exception& e) {
-        std::cout << "Error loading player textures: " << e.what() << std::endl;
     }
-    try {
-        sf::Texture walk_r_texture;
-        walk_r_texture.loadFromFile("assets/images/player/player_walk_r.png");
+    
+    sf::Texture walk_r_texture;
+    if (walk_r_texture.loadFromFile("assets/images/player/player_walk_r.png")) {
         player_textures[PlayerState::WALKING_R] = walk_r_texture;
-    } catch (const std::exception& e) {
-        std::cout << "Error loading player textures: " << e.what() << std::endl;
     }
-    try {
-        sf::Texture jump_l_texture;
-        jump_l_texture.loadFromFile("assets/images/player/player_jump_l.png");
+    
+    sf::Texture jump_l_texture;
+    if (jump_l_texture.loadFromFile("assets/images/player/player_jump_l.png")) {
         player_textures[PlayerState::JUMPING_L] = jump_l_texture;
-    } catch (const std::exception& e) {
-        std::cout << "Error loading player textures: " << e.what() << std::endl;
     }
-    try {
-        sf::Texture jump_r_texture;
-        jump_r_texture.loadFromFile("assets/images/player/player_jump_r.png");
+    
+    sf::Texture jump_r_texture;
+    if (jump_r_texture.loadFromFile("assets/images/player/player_jump_r.png")) {
         player_textures[PlayerState::JUMPING_R] = jump_r_texture;
-    } catch (const std::exception& e) {
-        std::cout << "Error loading player textures: " << e.what() << std::endl;
     }
-    try {
-        sf::Texture sprint_l_texture;
-        sprint_l_texture.loadFromFile("assets/images/player/player_sprint_l.png");
+    
+    sf::Texture sprint_l_texture;
+    if (sprint_l_texture.loadFromFile("assets/images/player/player_sprint_l.png")) {
         player_textures[PlayerState::SPRINTING_L] = sprint_l_texture;
-    } catch (const std::exception& e) {
-        std::cout << "Error loading player textures: " << e.what() << std::endl;
     }
-    try {
-        sf::Texture sprint_r_texture;
-        sprint_r_texture.loadFromFile("assets/images/player/player_sprint_r.png");
+    
+    sf::Texture sprint_r_texture;
+    if (sprint_r_texture.loadFromFile("assets/images/player/player_sprint_r.png")) {
         player_textures[PlayerState::SPRINTING_R] = sprint_r_texture;
-    } catch (const std::exception& e) {
-        std::cout << "Error loading player textures: " << e.what() << std::endl;
     }
-    // std::cout << "Player textures loaded successfully." << std::endl;
 }
 
 sf::Texture* GameViewModel::getPlayerTexture(Model::Entities::PlayerState state) {
+    // 根据玩家状态和面向方向返回对应的纹理
     switch (state) {
         case Model::Entities::PlayerState::IDLE:
             if (player_towards == towards::LEFT) {
@@ -218,57 +200,46 @@ sf::Texture* GameViewModel::getPlayerTexture(Model::Entities::PlayerState state)
                 return &player_textures[PlayerState::SPRINTING_R];
             }
     }
-    return &player_textures[PlayerState::IDLE_R]; // Default to idle right texture
+    // 默认返回向右的空闲纹理
+    return &player_textures[PlayerState::IDLE_R];
 }
 
 void GameViewModel::loadPlatformTextures() {
-    try {
-        sf::Texture normal_texture;
-        normal_texture.loadFromFile("assets/images/platform/platform_normal.png");
+    // 加载各种类型平台的纹理资源
+    sf::Texture normal_texture;
+    if (normal_texture.loadFromFile("assets/images/platform/platform_normal.png")) {
         platform_textures[Common::PlatformType::NORMAL] = normal_texture;
-    } catch (const std::exception& e) {
-        std::cout << "Error loading normal platform texture: " << e.what() << std::endl;
     }
-    try {
-        sf::Texture spiked_texture;
-        spiked_texture.loadFromFile("assets/images/platform/platform_spiked.png");
+    
+    sf::Texture spiked_texture;
+    if (spiked_texture.loadFromFile("assets/images/platform/platform_spiked.png")) {
         platform_textures[Common::PlatformType::SPIKED] = spiked_texture;
-    } catch (const std::exception& e) {
-        std::cout << "Error loading spiked platform texture: " << e.what() << std::endl;
     }
-    try {
-        sf::Texture rolling_texture;
-        rolling_texture.loadFromFile("assets/images/platform/platform_rolling_r.png");
+    
+    sf::Texture rolling_texture;
+    if (rolling_texture.loadFromFile("assets/images/platform/platform_rolling_r.png")) {
         platform_textures[Common::PlatformType::ROLLING] = rolling_texture;
-    } catch (const std::exception& e) {
-        std::cout << "Error loading rolling platform texture: " << e.what() << std::endl;
     }
-    try {
-        sf::Texture rolling_l_texture;
-        rolling_l_texture.loadFromFile("assets/images/platform/platform_rolling_l.png");
+    
+    sf::Texture rolling_l_texture;
+    if (rolling_l_texture.loadFromFile("assets/images/platform/platform_rolling_l.png")) {
         platform_textures[Common::PlatformType::ROLLING_L] = rolling_l_texture;
-    } catch (const std::exception& e) {
-        std::cout << "Error loading left rolling platform texture: " << e.what() << std::endl;
     }
-    try {
-        sf::Texture fragile_texture;
-        fragile_texture.loadFromFile("assets/images/platform/platform_fragile.png");
+    
+    sf::Texture fragile_texture;
+    if (fragile_texture.loadFromFile("assets/images/platform/platform_fragile.png")) {
         platform_textures[Common::PlatformType::FRAGILE] = fragile_texture;
-    } catch (const std::exception& e) {
-        std::cout << "Error loading fragile platform texture: " << e.what() << std::endl;
     }
-    try {
-        sf::Texture bouncy_texture;
-        bouncy_texture.loadFromFile("assets/images/platform/platform_bouncy.png");
+    
+    sf::Texture bouncy_texture;
+    if (bouncy_texture.loadFromFile("assets/images/platform/platform_bouncy.png")) {
         platform_textures[Common::PlatformType::BOUNCY] = bouncy_texture;
-    } catch (const std::exception& e) {
-        std::cout << "Error loading bouncy platform texture: " << e.what() << std::endl;
     }
 }
 
 sf::Texture* GameViewModel::getPlatformTexture(Common::PlatformType type, bool rolling_r) {
+    // 根据平台类型返回对应的纹理，滚动平台需要考虑方向
     if (type == Common::PlatformType::ROLLING) {
-        // 滚动平台需要根据方向返回不同的纹理
         if (rolling_r) {
             return &platform_textures[Common::PlatformType::ROLLING];
         } else {
@@ -279,6 +250,9 @@ sf::Texture* GameViewModel::getPlatformTexture(Common::PlatformType type, bool r
     if (it != platform_textures.end()) {
         return &it->second;
     }
+    
+    // 如果找不到对应的纹理，返回空指针（使用后备颜色渲染）
+    return nullptr;
 }
 
 void GameViewModel::updatePlatformsInfo() {

@@ -77,8 +77,21 @@ using Model::Entities::PlatformType;
 // ==================== 构造函数和析构函数 ====================
 
 GameModel::GameModel(sf::Vector2u window_size) : 
-    Model(window_size), init(false) {
-    // 在构造函数中不要调用initGame，等到第一次update时调用
+    Model(window_size), 
+    init(false),
+    next_platform_id(0),
+    next_enemy_id(0),
+    next_bullet_id(0),
+    next_pickup_id(0),
+    next_event_id(0),
+    total_score(0),
+    game_time(0.0f),
+    platform_generate_interval(0.0f),
+    enemy_generate_interval(0.0f),
+    pickup_generate_interval(0.0f),
+    player(nullptr),
+    current_background(""),
+    background_changed(false) {
 }
 
 GameModel::~GameModel() {
@@ -111,25 +124,22 @@ GameModel::~GameModel() {
 // ==================== 游戏初始化方法 ====================
 
 void GameModel::initGame() {
-    // 重置所有配置为初始值
     Common::Config::GameConfig::resetToInitialValues();
     
-    // 初始化游戏状态
     total_score = 0;
     game_time = 0;
     resetPlatformGenerateInterval();
     enemy_generate_interval = Common::Config::GameConfig::ENEMY_GENERATE_INTERVAL;
     pickup_generate_interval = Common::Config::GameConfig::PICKUP_GENERATE_INTERVAL;
     
-    // 初始化背景系统
     current_background = "assets/images/background/misty_forest.png";
     background_changed = false;
     
-    // 初始化游戏实体
     initPlatforms();
     initPlayer();
     initSkills();
     initEvents();
+    
     // just for test
     {
         effects.push_back(new Entities::JumpStrength(this));
@@ -141,11 +151,16 @@ void GameModel::initGame() {
 }
 
 void GameModel::initPlatforms() {
-    platforms[next_platform_id++] = new Entities::Platform(next_platform_id, PlatformType::WALL, 
+    // 创建左右边界墙
+    platforms[next_platform_id] = new Entities::Platform(next_platform_id, PlatformType::WALL, 
         sf::Vector2f(-200, -500), sf::Vector2f(200,window_size.y + 500));
-    platforms[next_platform_id++] = new Entities::Platform(next_platform_id, PlatformType::WALL, 
-        sf::Vector2f(window_size.x, -500), sf::Vector2f(200,window_size.y + 500));
+    next_platform_id++;
     
+    platforms[next_platform_id] = new Entities::Platform(next_platform_id, PlatformType::WALL, 
+        sf::Vector2f(window_size.x, -500), sf::Vector2f(200,window_size.y + 500));
+    next_platform_id++;
+    
+    // 创建初始游戏平台
     const int initial_platforms = 3;
     for (int i = 0; i < initial_platforms; ++i) {
         sf::Vector2f position(
@@ -155,11 +170,15 @@ void GameModel::initPlatforms() {
         
         PlatformType type = PlatformType::NORMAL;
         platforms[next_platform_id] = new Entities::Platform(next_platform_id, type, position, Common::Config::GameConfig::PLATFORM_SIZE);
+        next_platform_id++;
     }
-    next_platform_id += initial_platforms;
 }
 
 void GameModel::initPlayer() {
+    if (platforms.find(2) == platforms.end()) {
+        return;
+    }
+    
     sf::Vector2f platform_pos = platforms[2]->getPosition();
     sf::Vector2f platform_size = platforms[2]->getSize();
     
@@ -510,7 +529,6 @@ void GameModel::playerUseSkill(Common::SkillID skill_id) {
 
 void GameModel::choose(int index) {
     effects[index]->apply();
-    std::cout << "Effect " << index << " applied." << std::endl;
     trigger.fire(Common::NotificationId::EndChoose);
 }
 
@@ -596,31 +614,20 @@ bool GameModel::isPlatformPositionValid(sf::Vector2f position, sf::Vector2f size
 // ==================== 音频系统方法 ====================
 
 void GameModel::startBackgroundMusic() {
-    // 停止当前音乐（如果正在播放）
     stopBackgroundMusic();
     
-    // 加载背景音乐文件
     if (!background_music.openFromFile("assets/music/Things That Scheme in the Dark - Evan Call.mp3")) {
-        std::cout << "Warning: Failed to load background music file" << std::endl;
         return;
     }
     
-    // 设置循环播放
     background_music.setLoop(true);
-    
-    // 设置音量（范围：0-100）
     background_music.setVolume(50.0f);
-    
-    // 开始播放
     background_music.play();
-    
-    std::cout << "Background music started" << std::endl;
 }
 
 void GameModel::stopBackgroundMusic() {
     if (background_music.getStatus() == sf::Music::Playing) {
         background_music.stop();
-        std::cout << "Background music stopped" << std::endl;
     }
 }
 
@@ -634,7 +641,6 @@ void GameModel::setBackground(const std::string& background_file) {
     if (current_background != background_file) {
         current_background = background_file;
         background_changed = true;
-        std::cout << "Background changed to: " << background_file << std::endl;
     }
 }
 

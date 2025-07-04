@@ -76,12 +76,8 @@ int GameConfig::MAX_CHOICES;
 
 // 恢复所有配置为初始值
 void GameConfig::resetToInitialValues() {
-    
-    std::cout << "Resetting GameConfig to initial values..." << std::endl;
-
-    // 分数配置
-    SCORE_UPDATE_INTERVAL = 10;                         // 分数更新间隔(秒)
-    SCORE_INCREMENT = 1;                                // 每秒得分
+    SCORE_UPDATE_INTERVAL = 10;
+    SCORE_INCREMENT = 1;
 
     // 玩家配置
     PLAYER_SIZE = sf::Vector2f(60.0f, 60.0f);           // 玩家大小
