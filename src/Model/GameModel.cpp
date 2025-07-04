@@ -206,18 +206,11 @@ void GameModel::initEvents() {
     events.clear();
     next_event_id = 0;
     
-    // 创建游戏变化事件序列 - 使用简化的Event构造函数
+    // 创建基于时间的游戏变化事件序列
     // 5秒: 滚动速度增加
     events.push_back(new Entities::Event(5.0f, "Scroll Speed Increased", []() {
         Common::Config::GameConfig::SCROLL_SPEED *= 1.2f;
     }));
-    
-    // just for test
-    {
-        events.push_back(new Entities::Event(7.0f, "Choose Effect Test", [this](){
-            trigger.fire(Common::NotificationId::Choose);
-        }));
-    };
 
     // 10秒: 敌人生成频率增加
     events.push_back(new Entities::Event(10.0f, "Enemy Spawn Rate Increased", [this]() {
@@ -240,6 +233,22 @@ void GameModel::initEvents() {
         if (non_normal < 0.9f) {
             Common::Config::GameConfig::PLATFORM_NORMAL_PROBABILITY = 1.0f - non_normal;
         }
+    }));
+    
+    // 创建基于分数的奖励事件序列
+    // 分数达到10: 第一次选择效果
+    events.push_back(new Entities::Event(10, "First Effect Choice", [this]() {
+        trigger.fire(Common::NotificationId::Choose);
+    }));
+    
+    // 分数达到50: 第二次选择效果
+    events.push_back(new Entities::Event(50, "Second Effect Choice", [this]() {
+        trigger.fire(Common::NotificationId::Choose);
+    }));
+    
+    // 分数达到100: 第三次选择效果
+    events.push_back(new Entities::Event(100, "Third Effect Choice", [this]() {
+        trigger.fire(Common::NotificationId::Choose);
     }));
 }
 
@@ -268,7 +277,7 @@ void GameModel::update(float delta_time) {
 
     // 更新事件系统
     for (auto* event : events) {
-        event->update(game_time);
+        event->update(game_time, total_score);
     }
 
     // 平台生成和更新
