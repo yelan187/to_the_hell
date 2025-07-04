@@ -143,8 +143,8 @@ void GameModel::initGame() {
     // just for test
     {
         effects.push_back(new Entities::JumpStrength(this));
-        effects.push_back(new Entities::JumpStrength(this));
-        effects.push_back(new Entities::JumpStrength(this));
+        effects.push_back(new Entities::SpeedBoost(this));
+        effects.push_back(new Entities::HealthBoost(this));
     }
 
     startBackgroundMusic();

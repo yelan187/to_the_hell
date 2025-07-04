@@ -161,6 +161,14 @@ public:
     void addMaxJumpCount(int count) {
         max_jump_count += count;
     }
+    
+    void addWalkSpeed(float multiplier) {
+        walking_speed *= (1.0f + multiplier);
+    }
+    
+    void addMaxHP(int amount) {
+        max_hp += amount;
+    }
 public:
     GameModel* game_model;
     // skill
