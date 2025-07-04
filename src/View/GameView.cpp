@@ -333,7 +333,7 @@ void GameView::preloadBackgrounds() {
         sf::Texture texture;
         if (texture.loadFromFile(file)) {
             background_textures[file] = texture;
-            std::cout << "Preloaded background: " << file << std::endl;
+            // std::cout << "Preloaded background: " << file << std::endl;
         } else {
             std::cerr << "Failed to preload background: " << file << std::endl;
         }
@@ -349,7 +349,7 @@ void GameView::preloadAnimationTextures() {
     
     for (const auto& file : animation_files) {
         animation_renderer.loadTexture(file);
-        std::cout << "Preloaded animation texture: " << file << std::endl;
+        // std::cout << "Preloaded animation texture: " << file << std::endl;
     }
 }
 
@@ -388,7 +388,7 @@ void GameView::switchBackground(const std::string& background_file) {
     is_transitioning = true;
     transition_progress = 0.0f;
     
-    std::cout << "Starting background transition to: " << background_file << std::endl;
+    // std::cout << "Starting background transition to: " << background_file << std::endl;
 }
 
 void GameView::updateBackgroundTransition(float delta_time) {
@@ -406,6 +406,6 @@ void GameView::updateBackgroundTransition(float delta_time) {
         is_transitioning = false;
         transition_progress = 0.0f;
         
-        std::cout << "Background transition completed" << std::endl;
+        // std::cout << "Background transition completed" << std::endl;
     }
 }

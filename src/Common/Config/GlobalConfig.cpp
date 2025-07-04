@@ -14,7 +14,7 @@ const int GlobalConfig::WINDOW_HEIGHT = 800;                    // 窗口高度
 const int GlobalConfig::FPS = 60;                               // 目标帧率
 
 // 调试配置
-bool GlobalConfig::DEBUG_MODE = true;                           // 调试模式开关
+bool GlobalConfig::DEBUG_MODE = false;                           // 调试模式开关
 
 
 

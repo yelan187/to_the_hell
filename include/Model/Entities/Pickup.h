@@ -9,8 +9,8 @@ namespace Model {
 namespace Entities {
 
 enum class PickupType {
-    NORMAL_DOT,    // 普通豆子（圆形）- 2
-    STAR_DOT       // 五角星豆子 - 5分
+    NORMAL_DOT,    // 普通豆子（圆形）
+    STAR_DOT       // 五角星豆子 
 };
 
 class Pickup {

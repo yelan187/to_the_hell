@@ -79,7 +79,7 @@ public:
         gameover_command = command;
     }
     
-    // 统一的技能命令设置（包含射击）
+    // 统一的技能命令设置
     void setPlayerSkillCommand(Common::CommandBase* command) {
         playerSkillCommand = command;
     }

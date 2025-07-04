@@ -4,78 +4,96 @@
 using Model::GameModel;
 using Model::Entities::PlatformType;
 
-/*  GameModel.cpp - 游戏核心逻辑模型实现
-    
-    本文件实现了SFML游戏的核心业务逻辑，包括实体管理、事件系统、
-    音频控制、动态背景切换等功能。遵循MVVM架构模式，负责数据处理和状态管理。
-    
-    重构后的架构特点：
-    - Player类集成了技能系统和碰撞检测
-    - GameModel负责全局状态管理和实体协调
-    - 严格遵循MVVM分层，Model不依赖View层
+/*
+ * ======================== GAMEMODEL.CPP 文件目录 ========================
+ * 
+ * 📄 GameModel.cpp - 游戏核心逻辑模型实现
+ * 
+ * 本文件实现了SFML游戏的核心业务逻辑，包括实体管理、事件系统、
+ * 音频控制、动态背景切换等功能。遵循MVVM架构模式，负责数据处理和状态管理。
+ * 
+ * 🏗️ 架构特点：
+ *    - Player类集成了技能系统和碰撞检测
+ *    - GameModel负责全局状态管理和实体协调
+ *    - 严格遵循MVVM分层，Model不依赖View层
+ * 
+ * 📁 1. 构造函数和析构函数
+ *    - GameModel()                       // 构造函数，初始化窗口大小和背景状态
+ *    - ~GameModel()                      // 析构函数，清理所有资源（玩家、平台、敌人等）
+ * 
+ * 📁 2. 游戏初始化方法
+ *    - initGame()                        // 初始化游戏状态，重置配置，启动背景音乐
+ *    - initPlatforms()                   // 创建初始平台（包括边界平台和游戏平台）
+ *    - initPlayer()                      // 创建玩家并设置在平台上的初始位置
+ *    - initSkills()                      // 初始化玩家技能系统（委托给Player类）
+ *    - initEvents()                      // 初始化游戏事件序列（难度递增、背景切换）
+ *    - initSounds()                      // 初始化音效系统（击中音效、升级音效）
+ *    - resetPlatformGenerateInterval()   // 重置平台生成间隔（含随机变化）
+ * 
+ * 📁 3. 主要更新方法
+ *    - update()                          // 主更新循环：处理事件、实体更新、Player碰撞检测、边界检查
+ * 
+ * 📁 4. 实体生成方法
+ *    - generatePlatform()                // 生成新平台（验证位置有效性，随机类型）
+ *    - generateEnemy()                   // 从窗口四边随机生成敌人
+ *    - generatePickup()                  // 生成拾取物（星星豆子或平台豆子）
+ *    - createBullet()                    // 创建子弹/箭矢（区分玩家和敌人子弹）
+ *    - createHitAnimation()              // 创建击中动画效果
+ * 
+ * 📁 5. 碰撞检测方法
+ *    - checkPlayerBulletsHitEnemies()    // 检测玩家箭矢击中敌人（加分、击杀计数）
+ *    注：Player相关的碰撞检测已移至Player类中
+ * 
+ * 📁 6. 玩家控制方法
+ *    - playerJump()                      // 玩家跳跃
+ *    - playerDown()                      // 玩家下落/在平台上时使用穿透技能
+ *    - playerWalkLeft()                  // 玩家左移
+ *    - playerWalkRight()                 // 玩家右移
+ *    - playerStopLeft()                  // 停止左移动作
+ *    - playerStopRight()                 // 停止右移动作
+ * 
+ * 📁 7. 技能系统方法
+ *    - playerUseSkill()                  // 委托给Player类的技能系统
+ * 
+ * 📁 8. 效果系统方法
+ *    - choose()                          // 选择一个效果
+ * 
+ * 📁 9. 工具方法
+ *    - getPlatformTypeRand()             // 根据配置概率随机获取平台类型
+ *    - isPlatformPositionValid()         // 验证平台位置有效性（避免重叠、保持间距）
+ * 
+ * 📁 10. 音频系统方法
+ *    - startBackgroundMusic()            // 启动循环背景音乐（自动音量控制）
+ *    - stopBackgroundMusic()             // 停止背景音乐播放
+ *    - isBackgroundMusicPlaying()        // 检查背景音乐播放状态
+ *    - playHitSound()                    // 播放击中音效
+ *    - playUpgradeSound()                // 播放升级音效
+ * 
+ * 📁 11. 动态背景系统方法
+ *    - setBackground()                   // 设置新背景图片路径（触发背景切换）
+ *    - getCurrentBackground()            // 获取当前背景图片路径
+ *    - isBackgroundChanged()             // 检查背景是否需要切换
+ *    - markBackgroundAsLoaded()          // 标记背景已加载完成
+ * 
+ * 📁 12. 资源管理方法
+ *    - removeBullet()                    // 删除指定ID的子弹
+ *    - removePickup()                    // 删除指定ID的拾取物
+ * 
+ * 📁 13. 通知和生命周期方法
+ *    - fire()                            // 发送游戏帧更新通知到ViewModel
+ *    - gameOver()                        // 游戏结束处理：停止音乐、发送结束通知
+ * 
+ * ========================================================================
+ */
 
-==================== 构造函数和析构函数 ====================
-- GameModel()           // 构造函数，初始化窗口大小和背景状态
-- ~GameModel()          // 析构函数，清理所有资源（玩家、平台、敌人等）
+// ====================================================================
+// 📁 1. 构造函数和析构函数
+// ====================================================================
 
-==================== 游戏初始化方法 ====================
-- initGame()            // 初始化游戏状态，重置配置，启动背景音乐
-- initPlatforms()       // 创建初始平台（包括边界平台和游戏平台）
-- initPlayer()          // 创建玩家并设置在平台上的初始位置
-- initSkills()          // 初始化玩家技能系统（委托给Player类）
-- initEvents()          // 初始化游戏事件序列（难度递增、背景切换）
-- resetPlatformGenerateInterval()  // 重置平台生成间隔（含随机变化）
-
-==================== 主要更新方法 ====================
-- update()              // 主更新循环：处理事件、实体更新、Player碰撞检测、边界检查
-
-==================== 实体生成方法 ====================
-- generatePlatform()    // 生成新平台（验证位置有效性，随机类型）
-- generateEnemy()       // 从窗口四边随机生成敌人
-- generatePickup()      // 生成拾取物（星星豆子或平台豆子）
-- createBullet()        // 创建子弹/箭矢（区分玩家和敌人子弹）
-
-==================== 碰撞检测方法 ====================
-- checkPlayerBulletsHitEnemies()    // 检测玩家箭矢击中敌人（加分、击杀计数）
-注：Player相关的碰撞检测已移至Player类中
-
-==================== 玩家控制方法 ====================
-- playerJump()          // 玩家跳跃
-- playerDown()          // 玩家下落/在平台上时使用穿透技能
-- playerWalkLeft()      // 玩家左移
-- playerWalkRight()     // 玩家右移
-- playerStopLeft()      // 停止左移动作
-- playerStopRight()     // 停止右移动作
-
-==================== 技能系统方法 ====================
-- playerUseSkill()      // 委托给Player类的技能系统
-
-==================== 效果系统方法 ====================
-- choose()              // 选择一个效果
-
-==================== 工具方法 ====================
-- getPlatformTypeRand() // 根据配置概率随机获取平台类型
-- isPlatformPositionValid() // 验证平台位置有效性（避免重叠、保持间距）
-
-==================== 音频系统方法 ====================
-- startBackgroundMusic() // 启动循环背景音乐（自动音量控制）
-- stopBackgroundMusic()  // 停止背景音乐播放
-- isBackgroundMusicPlaying() // 检查背景音乐播放状态
-
-==================== 动态背景系统方法 ====================
-- setBackground()       // 设置新背景图片路径（触发背景切换）
-- getCurrentBackground() // 获取当前背景图片路径
-- isBackgroundChanged() // 检查背景是否需要切换
-- markBackgroundAsLoaded() // 标记背景已加载完成
-
-==================== 通知和生命周期方法 ====================
-- fire()                // 发送游戏帧更新通知到ViewModel
-- gameOver()            // 游戏结束处理：停止音乐、发送结束通知
-
-*/
-
-// ==================== 构造函数和析构函数 ====================
-
+/**
+ * 构造函数 - 初始化GameModel的基本状态
+ * @param window_size 游戏窗口尺寸
+ */
 GameModel::GameModel(sf::Vector2u window_size) : 
     Model(window_size), 
     init(false),
@@ -95,6 +113,10 @@ GameModel::GameModel(sf::Vector2u window_size) :
     background_changed(false) {
 }
 
+/**
+ * 析构函数 - 清理所有动态分配的资源
+ * 包括玩家、平台、敌人、子弹、拾取物、动画、事件等
+ */
 GameModel::~GameModel() {
     // 清理玩家
     delete player;
@@ -123,8 +145,14 @@ GameModel::~GameModel() {
     events.clear();
 }
 
-// ==================== 游戏初始化方法 ====================
+// ====================================================================
+// 📁 2. 游戏初始化方法
+// ====================================================================
 
+/**
+ * 游戏初始化 - 重置所有游戏状态并启动新游戏
+ * 包括配置重置、资源初始化、背景音乐启动等
+ */
 void GameModel::initGame() {
     Common::Config::GameConfig::resetToInitialValues();
     
@@ -153,6 +181,9 @@ void GameModel::initGame() {
     startBackgroundMusic();
 }
 
+/**
+ * 初始化平台 - 创建边界墙和初始游戏平台
+ */
 void GameModel::initPlatforms() {
     // 创建左右边界墙
     platforms[next_platform_id] = new Entities::Platform(next_platform_id, PlatformType::WALL, 
@@ -177,6 +208,9 @@ void GameModel::initPlatforms() {
     }
 }
 
+/**
+ * 初始化玩家 - 创建玩家并设置在初始平台上
+ */
 void GameModel::initPlayer() {
     if (platforms.find(2) == platforms.end()) {
         return;
@@ -194,6 +228,9 @@ void GameModel::initPlayer() {
     player->setVelocity(platforms[2]->getVelocity());
 }
 
+/**
+ * 初始化技能系统 - 委托给Player类处理
+ */
 void GameModel::initSkills() {
     // 玩家技能初始化现在在Player类中处理
     if (player) {
@@ -201,6 +238,10 @@ void GameModel::initSkills() {
     }
 }
 
+/**
+ * 初始化游戏事件序列 - 设置基于时间和分数的游戏变化
+ * 包括难度递增、背景切换、效果选择等
+ */
 void GameModel::initEvents() {
     // 清理现有事件
     for (auto* event : events) {
@@ -237,6 +278,15 @@ void GameModel::initEvents() {
         // 切换到更暗的背景
         setBackground("assets/images/background/misty_forest_2.png");
     }));
+
+    // 50秒: 敌人生成频率增加
+    events.push_back(new Entities::Event(50.0f, "Enemy Spawn Rate Increased", [this]() {
+        Common::Config::GameConfig::ENEMY_SPAWN_MIN_INTERVAL /= 1.3f;
+        Common::Config::GameConfig::ENEMY_SPAWN_MAX_INTERVAL /= 1.3f;
+
+        // 切换到更暗的背景
+        setBackground("assets/images/background/misty_forest_2.png");
+    }));
     
     // 创建基于分数的奖励事件序列
     // 分数达到10: 第一次选择效果
@@ -258,6 +308,9 @@ void GameModel::initEvents() {
     }));
 }
 
+/**
+ * 初始化音效系统 - 加载击中音效和升级音效
+ */
 void GameModel::initSounds() {
     // 初始化击中音效
     if (!hit_sound_buffer.loadFromFile("assets/sounds/hit01.wav")) {
@@ -276,13 +329,22 @@ void GameModel::initSounds() {
     }
 }
 
+/**
+ * 重置平台生成间隔 - 添加随机变化增加游戏趣味性
+ */
 void GameModel::resetPlatformGenerateInterval() {
     platform_generate_interval = Common::Config::GameConfig::PLATFORM_GENERATE_INTERVAL + 
                                  static_cast<float>(rand()) / RAND_MAX * (2 * Common::Config::GameConfig::PLATFORM_GENERATE_INTERVAL_VARIANCE) - Common::Config::GameConfig::PLATFORM_GENERATE_INTERVAL_VARIANCE;
 }
 
-// ==================== 主要更新方法 ====================
+// ====================================================================
+// 📁 3. 主要更新方法
+// ====================================================================
 
+/**
+ * 主更新循环 - 游戏的核心更新逻辑
+ * 处理事件系统、实体生成和更新、碰撞检测、边界检查等
+ */
 void GameModel::update(float delta_time) {
     if (!init) {
         initGame();
@@ -435,8 +497,13 @@ void GameModel::update(float delta_time) {
     trigger.fire(Common::NotificationId::ChangeGameFrame);
 }
 
-// ==================== 实体生成方法 ====================
+// ====================================================================
+// 📁 4. 实体生成方法
+// ====================================================================
 
+/**
+ * 生成新平台 - 验证位置有效性并创建随机类型平台
+ */
 void GameModel::generatePlatform() {
     int max_attempts = Common::Config::GameConfig::PLATFORM_GENERATION_MAX_ATTEMPTS;
     
@@ -455,6 +522,9 @@ void GameModel::generatePlatform() {
     }
 }
 
+/**
+ * 生成敌人 - 从窗口四边随机位置生成敌人
+ */
 void GameModel::generateEnemy() {
     sf::Vector2f enemy_size = Common::Config::GameConfig::ENEMY_SIZE;
     sf::Vector2f position;
@@ -471,6 +541,10 @@ void GameModel::generateEnemy() {
     next_enemy_id++;
 }
 
+/**
+ * 生成拾取物 - 创建星星豆子或平台豆子
+ * 星星豆子从顶部下落，平台豆子生成在最低平台上
+ */
 void GameModel::generatePickup() {
     sf::Vector2f pickup_size = Common::Config::GameConfig::PICKUP_SIZE;
     int random_chance = rand() % 100;
@@ -515,6 +589,13 @@ void GameModel::generatePickup() {
     }
 }
 
+/**
+ * 创建子弹/箭矢 - 区分玩家箭矢和敌人子弹
+ * @param position 初始位置
+ * @param velocity 速度向量
+ * @param damage 伤害值
+ * @param is_player_bullet 是否为玩家箭矢
+ */
 void GameModel::createBullet(sf::Vector2f position, sf::Vector2f velocity, int damage, bool is_player_bullet) {
     sf::Vector2f bullet_size = is_player_bullet ? 
         Common::Config::GameConfig::SKILL_ARROW_SIZE :
@@ -524,12 +605,105 @@ void GameModel::createBullet(sf::Vector2f position, sf::Vector2f velocity, int d
     next_bullet_id++;
 }
 
-// ==================== 玩家控制方法 ====================
+// ====================================================================
+// 📁 5. 碰撞检测方法
+// ====================================================================
 
+/**
+ * 检测玩家箭矢击中敌人 - 处理伤害、分数、击杀计数和动画
+ * 注：Player相关的碰撞检测已移至Player类中
+ */
+void GameModel::checkPlayerBulletsHitEnemies() {
+    for (auto bullet_it = bullets.begin(); bullet_it != bullets.end(); ) {
+        if (bullet_it->second->isPlayerBullet()) {
+            bool hit_enemy = false;
+            for (auto enemy_it = enemies.begin(); enemy_it != enemies.end(); ) {
+                if (bullet_it->second->collidesWith(enemy_it->second->getPosition(), enemy_it->second->getSize())) {
+                    // 创建击中动画 - 计算敌人中心位置
+                    sf::Vector2f enemy_center = enemy_it->second->getPosition() + enemy_it->second->getSize() / 2.0f;
+                    // 调整动画位置使其中心对齐敌人中心
+                    sf::Vector2f animation_size(120.0f, 120.0f);
+                    sf::Vector2f hit_position = enemy_center - animation_size / 2.0f;
+                    createHitAnimation(hit_position);
+                    
+                    // 播放击中音效
+                    playHitSound();
+                    
+                    // 对敌人造成伤害
+                    enemy_it->second->hp -= bullet_it->second->getDamage();
+                    
+                    // 只有当敌人被完全消灭时才加分和计数
+                    if (enemy_it->second->hp <= 0) {
+                        // 增加分数
+                        total_score += Common::Config::GameConfig::ENEMY_SCORE_VALUE;
+                        
+                        // 增加玩家击杀计数
+                        if (player) {
+                            player->addKillCount();
+                        }
+                        
+                        delete enemy_it->second;
+                        enemy_it = enemies.erase(enemy_it);
+                    } else {
+                        ++enemy_it;
+                    }
+                    
+                    hit_enemy = true;
+                    break;
+                } else {
+                    ++enemy_it;
+                }
+            }
+            
+            if (hit_enemy) {
+                // 删除击中的子弹
+                delete bullet_it->second;
+                bullet_it = bullets.erase(bullet_it);
+            } else {
+                ++bullet_it;
+            }
+        } else {
+            ++bullet_it;
+        }
+    }
+}
+
+/**
+ * 创建击中动画效果 - 在指定位置播放击中动画
+ * @param position 动画播放位置
+ */
+void GameModel::createHitAnimation(sf::Vector2f position) {
+    // 创建击中动画，使用Hit-Yellow.png (4x4的sprite sheet，共16帧)
+    sf::Vector2f animation_size(120.0f, 120.0f); // 动画显示大小（从64增加到120）
+    float animation_duration = 0.8f; // 动画持续时间（秒）（从0.5增加到0.8）
+    
+    animations[next_animation_id] = new Entities::Animation(
+        next_animation_id,
+        "assets/images/others/Hit-Yellow.png",
+        position,
+        animation_size,
+        4, // 4列
+        4, // 4行
+        animation_duration,
+        false // 不循环播放
+    );
+    next_animation_id++;
+}
+
+// ====================================================================
+// 📁 6. 玩家控制方法
+// ====================================================================
+
+/**
+ * 玩家跳跃控制
+ */
 void GameModel::playerJump() {
     player->jump();
 }
 
+/**
+ * 玩家下移/穿透控制 - 下落或使用地面穿透技能
+ */
 void GameModel::playerDown() {
     if (!player->isOnPlatform()) {
         player->fall();
@@ -543,24 +717,42 @@ void GameModel::playerDown() {
     }
 }
 
+/**
+ * 玩家左移控制
+ */
 void GameModel::playerWalkLeft() {
     player->walkLeft();
 }
 
+/**
+ * 玩家右移控制
+ */
 void GameModel::playerWalkRight() {
     player->walkRight();
 }
 
+/**
+ * 停止左移控制
+ */
 void GameModel::playerStopLeft() {
     player->stopLeft();
 }
 
+/**
+ * 停止右移控制
+ */
 void GameModel::playerStopRight() {
     player->stopRight();
 }
 
-// ==================== 技能系统方法 ====================
+// ====================================================================
+// 📁 7. 技能系统方法
+// ====================================================================
 
+/**
+ * 玩家使用技能 - 委托给Player类的技能系统
+ * @param skill_id 技能ID
+ */
 void GameModel::playerUseSkill(Common::SkillID skill_id) {
     if (!player) return;
     
@@ -574,15 +766,27 @@ void GameModel::playerUseSkill(Common::SkillID skill_id) {
     }
 }
 
-// ==================== 效果系统方法 ====================
+// ====================================================================
+// 📁 8. 效果系统方法
+// ====================================================================
 
+/**
+ * 选择效果 - 应用选中的效果并结束选择状态
+ * @param index 效果索引
+ */
 void GameModel::choose(int index) {
     effects[index]->apply();
     trigger.fire(Common::NotificationId::EndChoose);
 }
 
-// ==================== 工具方法 ====================
+// ====================================================================
+// 📁 9. 工具方法
+// ====================================================================
 
+/**
+ * 根据配置概率随机获取平台类型
+ * @return 随机选择的平台类型
+ */
 Model::Entities::PlatformType GameModel::getPlatformTypeRand() {
     float random = static_cast<float>(rand()) / RAND_MAX;
     float cumulative = 0.0f;
@@ -602,6 +806,12 @@ Model::Entities::PlatformType GameModel::getPlatformTypeRand() {
     return Entities::PlatformType::SPIKED;
 }
 
+/**
+ * 验证平台位置有效性 - 避免平台重叠并保持合适间距
+ * @param position 待验证的平台位置
+ * @param size 平台尺寸
+ * @return true表示位置有效
+ */
 bool GameModel::isPlatformPositionValid(sf::Vector2f position, sf::Vector2f size) {
     float min_vertical_spacing = Common::Config::GameConfig::PLAYER_SIZE.y + 20.0f;
     float min_horizontal_spacing = Common::Config::GameConfig::PLAYER_SIZE.x + 30.0f;
@@ -660,8 +870,13 @@ bool GameModel::isPlatformPositionValid(sf::Vector2f position, sf::Vector2f size
     return true;
 }
 
-// ==================== 音频系统方法 ====================
+// ====================================================================
+// 📁 10. 音频系统方法
+// ====================================================================
 
+/**
+ * 启动循环背景音乐 - 自动音量控制
+ */
 void GameModel::startBackgroundMusic() {
     stopBackgroundMusic();
     
@@ -674,30 +889,49 @@ void GameModel::startBackgroundMusic() {
     background_music.play();
 }
 
+/**
+ * 停止背景音乐播放
+ */
 void GameModel::stopBackgroundMusic() {
     if (background_music.getStatus() == sf::Music::Playing) {
         background_music.stop();
     }
 }
 
+/**
+ * 检查背景音乐播放状态
+ * @return true表示正在播放
+ */
 bool GameModel::isBackgroundMusicPlaying() const {
     return background_music.getStatus() == sf::Music::Playing;
 }
 
+/**
+ * 播放击中音效
+ */
 void GameModel::playHitSound() {
     if (hit_sound.getBuffer() != nullptr) {
         hit_sound.play();
     }
 }
 
+/**
+ * 播放升级音效
+ */
 void GameModel::playUpgradeSound() {
     if (upgrade_sound.getBuffer() != nullptr) {
         upgrade_sound.play();
     }
 }
 
-// ==================== 背景系统方法 ====================
+// ====================================================================
+// 📁 11. 动态背景系统方法
+// ====================================================================
 
+/**
+ * 设置新背景图片路径 - 触发背景切换
+ * @param background_file 背景图片文件路径
+ */
 void GameModel::setBackground(const std::string& background_file) {
     if (current_background != background_file) {
         current_background = background_file;
@@ -705,6 +939,31 @@ void GameModel::setBackground(const std::string& background_file) {
     }
 }
 
+/**
+ * 获取当前背景图片路径
+ * @return 当前背景文件路径
+ * 注：此方法在头文件中实现为内联函数
+ */
+
+/**
+ * 检查背景是否需要切换
+ * @return true表示背景已改变，需要重新加载
+ * 注：此方法在头文件中实现为内联函数
+ */
+
+/**
+ * 标记背景已加载完成 - 重置背景变化标志
+ * 注：此方法在头文件中实现为内联函数
+ */
+
+// ====================================================================
+// 📁 12. 资源管理方法
+// ====================================================================
+
+/**
+ * 删除指定ID的子弹
+ * @param id 子弹ID
+ */
 void GameModel::removeBullet(int id) {
     auto it = bullets.find(id);
     if (it != bullets.end()) {
@@ -713,6 +972,10 @@ void GameModel::removeBullet(int id) {
     }
 }
 
+/**
+ * 删除指定ID的拾取物
+ * @param id 拾取物ID
+ */
 void GameModel::removePickup(int id) {
     auto it = pickups.find(id);
     if (it != pickups.end()) {
@@ -721,77 +984,15 @@ void GameModel::removePickup(int id) {
     }
 }
 
-void GameModel::createHitAnimation(sf::Vector2f position) {
-    // 创建击中动画，使用Hit-Yellow.png (4x4的sprite sheet，共16帧)
-    sf::Vector2f animation_size(120.0f, 120.0f); // 动画显示大小（从64增加到120）
-    float animation_duration = 0.8f; // 动画持续时间（秒）（从0.5增加到0.8）
-    
-    animations[next_animation_id] = new Entities::Animation(
-        next_animation_id,
-        "assets/images/others/Hit-Yellow.png",
-        position,
-        animation_size,
-        4, // 4列
-        4, // 4行
-        animation_duration,
-        false // 不循环播放
-    );
-    next_animation_id++;
-}
+// ====================================================================
+// 📁 13. 通知和生命周期方法
+// ====================================================================
 
-// ==================== 玩家子弹击中敌人检测 ====================
-
-void GameModel::checkPlayerBulletsHitEnemies() {
-    for (auto bullet_it = bullets.begin(); bullet_it != bullets.end(); ) {
-        if (bullet_it->second->isPlayerBullet()) {
-            bool hit_enemy = false;
-            for (auto enemy_it = enemies.begin(); enemy_it != enemies.end(); ) {
-                if (bullet_it->second->collidesWith(enemy_it->second->getPosition(), enemy_it->second->getSize())) {
-                    // 创建击中动画 - 计算敌人中心位置
-                    sf::Vector2f enemy_center = enemy_it->second->getPosition() + enemy_it->second->getSize() / 2.0f;
-                    // 调整动画位置使其中心对齐敌人中心
-                    sf::Vector2f animation_size(120.0f, 120.0f);
-                    sf::Vector2f hit_position = enemy_center - animation_size / 2.0f;
-                    createHitAnimation(hit_position);
-                    
-                    // 播放击中音效
-                    playHitSound();
-                    
-                    // 对敌人造成伤害
-                    enemy_it->second->hp -= bullet_it->second->getDamage();
-                    
-                    // 只有当敌人被完全消灭时才加分和计数
-                    if (enemy_it->second->hp <= 0) {
-                        // 增加分数
-                        total_score += Common::Config::GameConfig::ENEMY_SCORE_VALUE;
-                        
-                        // 增加玩家击杀计数
-                        if (player) {
-                            player->addKillCount();
-                        }
-                        
-                        delete enemy_it->second;
-                        enemy_it = enemies.erase(enemy_it);
-                    } else {
-                        ++enemy_it;
-                    }
-                    
-                    hit_enemy = true;
-                    break;
-                } else {
-                    ++enemy_it;
-                }
-            }
-            
-            if (hit_enemy) {
-                // 删除击中的子弹
-                delete bullet_it->second;
-                bullet_it = bullets.erase(bullet_it);
-            } else {
-                ++bullet_it;
-            }
-        } else {
-            ++bullet_it;
-        }
-    }
-}
+/**
+ * 游戏结束处理 - 停止音乐并发送游戏结束通知
+ * 注：此方法在头文件中实现为内联函数
+ * 
+ * 实现内容：
+ * - stopBackgroundMusic()
+ * - trigger.fire(Common::NotificationId::GameOver)
+ */
