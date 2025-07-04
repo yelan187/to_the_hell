@@ -409,6 +409,23 @@ void GameViewModel::forwarding() {
     }
     frame_info.skills_info = skills_info;
 
+    // 动画信息转换
+    std::map<int, Common::FrameInfo::AnimationInfo> animations_info;
+    auto animations = model->getAnimations();
+    for (const auto& animation_pair : animations) {
+        Common::FrameInfo::AnimationInfo animation_info;
+        animation_info.position = animation_pair.second->getPosition();
+        animation_info.size = animation_pair.second->getSize();
+        animation_info.texture_path = animation_pair.second->getTexturePath();
+        animation_info.current_frame_rect = animation_pair.second->getCurrentFrameRect();
+        animation_info.current_frame = animation_pair.second->getCurrentFrame();
+        animation_info.total_frames = animation_pair.second->getTotalFrames();
+        animation_info.finished = animation_pair.second->isFinished();
+        
+        animations_info[animation_pair.first] = animation_info;
+    }
+    frame_info.animations = animations_info;
+
     // 背景信息转换
     frame_info.background_info.background_file = model->getCurrentBackground();
     frame_info.background_info.changed = model->isBackgroundChanged();

@@ -13,6 +13,7 @@
 #include "View/UI/Enemy.h"     // 敌人UI组件
 #include "View/UI/Bullet.h"    // 子弹UI组件
 #include "View/UI/Pickup.h"    // 豆子UI组件
+#include "View/UI/Animation.h" // 动画UI组件
 #include "View/UI/SkillBar.h"  // 技能栏UI组件
 
 namespace View {
@@ -24,6 +25,7 @@ public:
         debug(debug),
         player(window, Common::Config::GameConfig::PLAYER_SIZE),
         skill_bar(sf::Vector2f(10.0f, 180.0f), sf::Vector2f(75.0f, 75.0f)),
+        animation_renderer(window),
         current_background_name(""),
         is_transitioning(false),
         transition_progress(0.0f),
@@ -100,6 +102,7 @@ private:
     void choose();
     void gameOver();
     void preloadBackgrounds(); // 预加载所有背景图片
+    void preloadAnimationTextures(); // 预加载所有动画纹理
     void setBackgroundScale(sf::Sprite& sprite, const sf::Texture& texture); // 设置背景缩放
     void switchBackground(const std::string& background_file); // 切换背景（带淡入淡出）
     void updateBackgroundTransition(float delta_time); // 更新背景过渡效果
@@ -136,6 +139,9 @@ private:
     std::vector<View::UI::Enemy> enemies;
     std::vector<View::UI::Bullet> bullets;
     std::vector<View::UI::Pickup> pickups;
+    
+    // 动画系统
+    View::UI::Animation animation_renderer; // 动画渲染器
     
     // 技能栏
     View::UI::SkillBar skill_bar;

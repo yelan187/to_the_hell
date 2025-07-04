@@ -83,6 +83,7 @@ GameModel::GameModel(sf::Vector2u window_size) :
     next_enemy_id(0),
     next_bullet_id(0),
     next_pickup_id(0),
+    next_animation_id(0),
     next_event_id(0),
     total_score(0),
     game_time(0.0f),
@@ -111,6 +112,7 @@ GameModel::~GameModel() {
     cleanup(enemies);
     cleanup(bullets);
     cleanup(pickups);
+    cleanup(animations);
     
     // 技能现在在Player类中管理，不需要在这里清理
     
@@ -351,6 +353,18 @@ void GameModel::update(float delta_time) {
         if (pickup->outOfWindow(window_size)) {
             delete pickup;
             it = pickups.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    
+    // 动画更新
+    for (auto it = animations.begin(); it != animations.end(); ) {
+        Entities::Animation* animation = it->second;
+        animation->update(delta_time);
+        if (animation->isFinished()) {
+            delete animation;
+            it = animations.erase(it);
         } else {
             ++it;
         }
@@ -671,6 +685,24 @@ void GameModel::removePickup(int id) {
     }
 }
 
+void GameModel::createHitAnimation(sf::Vector2f position) {
+    // 创建击中动画，使用Hit-Yellow.png (4x4的sprite sheet，共16帧)
+    sf::Vector2f animation_size(120.0f, 120.0f); // 动画显示大小（从64增加到120）
+    float animation_duration = 0.8f; // 动画持续时间（秒）（从0.5增加到0.8）
+    
+    animations[next_animation_id] = new Entities::Animation(
+        next_animation_id,
+        "assets/images/others/Hit-Yellow.png",
+        position,
+        animation_size,
+        4, // 4列
+        4, // 4行
+        animation_duration,
+        false // 不循环播放
+    );
+    next_animation_id++;
+}
+
 // ==================== 玩家子弹击中敌人检测 ====================
 
 void GameModel::checkPlayerBulletsHitEnemies() {
@@ -679,18 +711,33 @@ void GameModel::checkPlayerBulletsHitEnemies() {
             bool hit_enemy = false;
             for (auto enemy_it = enemies.begin(); enemy_it != enemies.end(); ) {
                 if (bullet_it->second->collidesWith(enemy_it->second->getPosition(), enemy_it->second->getSize())) {
-                    // 增加分数
-                    total_score += Common::Config::GameConfig::ENEMY_SCORE_VALUE;
+                    // 创建击中动画 - 计算敌人中心位置
+                    sf::Vector2f enemy_center = enemy_it->second->getPosition() + enemy_it->second->getSize() / 2.0f;
+                    // 调整动画位置使其中心对齐敌人中心
+                    sf::Vector2f animation_size(120.0f, 120.0f);
+                    sf::Vector2f hit_position = enemy_center - animation_size / 2.0f;
+                    createHitAnimation(hit_position);
+                    
+                    // 对敌人造成伤害
                     enemy_it->second->hp -= bullet_it->second->getDamage();
+                    
+                    // 只有当敌人被完全消灭时才加分和计数
                     if (enemy_it->second->hp <= 0) {
+                        // 增加分数
+                        total_score += Common::Config::GameConfig::ENEMY_SCORE_VALUE;
+                        
+                        // 增加玩家击杀计数
+                        if (player) {
+                            player->addKillCount();
+                        }
+                        
                         delete enemy_it->second;
                         enemy_it = enemies.erase(enemy_it);
+                    } else {
+                        ++enemy_it;
                     }
+                    
                     hit_enemy = true;
-                    // 增加玩家击杀计数
-                    if (player) {
-                        player->addKillCount();
-                    }
                     break;
                 } else {
                     ++enemy_it;

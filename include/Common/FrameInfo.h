@@ -87,6 +87,21 @@ typedef struct frameInfo{
     std::vector<SkillInfo> skills_info;          ///< 技能信息列表（按技能ID顺序）
     
     /**
+     * @struct AnimationInfo
+     * @brief 动画渲染信息（View层版本）
+     */
+    typedef struct {
+        sf::Vector2f position;       ///< 动画位置
+        sf::Vector2f size;           ///< 动画显示大小
+        std::string texture_path;    ///< 动画纹理文件路径
+        sf::IntRect current_frame_rect; ///< 当前帧在spritesheet中的矩形区域
+        int current_frame;           ///< 当前帧索引
+        int total_frames;            ///< 总帧数
+        bool finished;               ///< 动画是否已完成
+    } AnimationInfo;
+    std::map<int, AnimationInfo> animations;     ///< 动画信息映射表（ID -> 信息）
+    
+    /**
      * @struct BackgroundInfo
      * @brief 背景信息（View层版本）
      */

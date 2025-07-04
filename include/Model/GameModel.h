@@ -9,6 +9,7 @@
 #include "Model/Entities/Pickup.h"
 #include "Model/Entities/Skill.h"
 #include "Model/Entities/Event.h"
+#include "Model/Entities/Animation.h"
 #include "Common/Config/Config.h"
 #include "Common/SkillID.h"
 #include <SFML/Audio.hpp>
@@ -68,6 +69,10 @@ public:
     void removeBullet(int id);
     void removePickup(int id);
     
+    // animations
+    void createHitAnimation(sf::Vector2f position);
+    std::map<int, Entities::Animation*> getAnimations() const { return animations; }
+    
     // pickups
     std::map<int, Entities::Pickup*> getPickups() const { return pickups; }
     Entities::Pickup* getPickupById(int id) const {
@@ -112,6 +117,7 @@ private:
     int next_enemy_id = 0;
     int next_bullet_id = 0;
     int next_pickup_id = 0;
+    int next_animation_id = 0;
     
     int total_score;
     float game_time;
@@ -124,6 +130,7 @@ private:
     std::map<int, Entities::Enemy*> enemies;
     std::map<int, Entities::Bullet*> bullets;
     std::map<int, Entities::Pickup*> pickups;
+    std::map<int, Entities::Animation*> animations;
     
     // 事件系统
     std::vector<Entities::Event*> events;

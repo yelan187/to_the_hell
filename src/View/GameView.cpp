@@ -14,6 +14,9 @@ void GameView::init() {
     // 预加载所有背景
     preloadBackgrounds();
     
+    // 预加载动画纹理
+    preloadAnimationTextures();
+    
     // 设置默认背景
     switchBackground("assets/images/background/misty_forest_1.png");
     
@@ -285,6 +288,22 @@ void GameView::render() {
     for (auto &pickup: pickups)
         pickup.render();
         
+    // 渲染动画
+    if (frame_info) {
+        for (const auto& animation_pair : frame_info->animations) {
+            auto animation_data = animation_pair.second;
+            
+            // 渲染当前帧（纹理已在初始化时预加载，直接指定纹理路径）
+            animation_renderer.render(
+                animation_data.position,
+                animation_data.size,
+                animation_data.current_frame_rect,
+                255.0f,
+                animation_data.texture_path
+            );
+        }
+    }
+        
     // 渲染技能栏
     skill_bar.render(window);
     
@@ -318,6 +337,19 @@ void GameView::preloadBackgrounds() {
         } else {
             std::cerr << "Failed to preload background: " << file << std::endl;
         }
+    }
+}
+
+void GameView::preloadAnimationTextures() {
+    // 预加载所有动画纹理
+    std::vector<std::string> animation_files = {
+        "assets/images/others/Hit-Yellow.png"
+        // 可以在这里添加更多动画文件
+    };
+    
+    for (const auto& file : animation_files) {
+        animation_renderer.loadTexture(file);
+        std::cout << "Preloaded animation texture: " << file << std::endl;
     }
 }
 
