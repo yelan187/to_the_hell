@@ -258,9 +258,11 @@ void GameModel::update(float delta_time) {
     }
     auto prev_time = game_time;
     game_time += delta_time;
-    if (static_cast<int>(game_time) % Common::Config::GameConfig::SCORE_UPDATE_INTERVAL 
-        - static_cast<int>(prev_time)%Common::Config::GameConfig::SCORE_UPDATE_INTERVAL >= 1) 
-    {
+    
+    // 检查是否跨越了默认分数更新间隔
+    int current_interval = static_cast<int>(game_time) / Common::Config::GameConfig::SCORE_UPDATE_INTERVAL;
+    int prev_interval = static_cast<int>(prev_time) / Common::Config::GameConfig::SCORE_UPDATE_INTERVAL;
+    if (current_interval > prev_interval) {
         total_score += Common::Config::GameConfig::SCORE_INCREMENT;
     }
 

@@ -12,8 +12,8 @@ public:
 
 // 分数配置
 
-static int SCORE_UPDATE_INTERVAL;               // 分数更新间隔(秒)
-static int SCORE_INCREMENT;
+static int SCORE_UPDATE_INTERVAL;               // 随时间分数默认更新间隔(秒)
+static int SCORE_INCREMENT;                     // 随时间分数默认增加值
 
 // 玩家配置
 static sf::Vector2f PLAYER_SIZE;                        // 玩家大小
