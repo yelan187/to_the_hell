@@ -52,6 +52,11 @@ void MainMenuView::handleInput(const sf::Event& event) {
                 break;
             case sf::Keyboard::Enter:
             case sf::Keyboard::J:
+                // 先播放音效
+                if (viewmodel_confirm_command) {
+                    viewmodel_confirm_command->execute();
+                }
+                // 然后处理页面切换
                 switch (*current_selection) {
                     case 0:
                         change_page_param.value.new_page_state = View::PAGE_STATE::GAME;

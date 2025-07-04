@@ -40,6 +40,9 @@ public:
     void setConfirmSelectionCommand(Common::CommandBase* command) {
         confirmSelection_command = command;
     }
+    void setViewModelConfirmCommand(Common::CommandBase* command) {
+        viewmodel_confirm_command = command;
+    }
     // notification
     Common::NotificationFunc getNotificationCallback() {
         return &notification_callback;
@@ -60,6 +63,7 @@ private:
     Common::CommandBase* navigateUp_command;
     Common::CommandBase* navigateDown_command;
     Common::CommandBase* confirmSelection_command;
+    Common::CommandBase* viewmodel_confirm_command;
     // notification
     static void notification_callback(Common::NotificationId id, void* view);
     // others

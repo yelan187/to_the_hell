@@ -11,7 +11,8 @@ MainMenuViewModel::MainMenuViewModel(sf::Vector2u window_size) :
     animation_time(0.0f),
     navigateUp_command(this),
     navigateDown_command(this),
-    update_command(this) 
+    update_command(this),
+    confirmSelection_command(this)
 {
     menu_options = {"Start", "Exit"};
 }
@@ -19,10 +20,25 @@ MainMenuViewModel::MainMenuViewModel(sf::Vector2u window_size) :
 // update
 void MainMenuViewModel::navigateUp() {
     current_selection_index = (current_selection_index - 1 + menu_options.size()) % menu_options.size();
+    // 播放菜单选择音效
+    if (model) {
+        model->playMenuClickSound();
+    }
 }
 
 void MainMenuViewModel::navigateDown() {
     current_selection_index = (current_selection_index + 1) % menu_options.size();
+    // 播放菜单选择音效
+    if (model) {
+        model->playMenuClickSound();
+    }
+}
+
+// 添加确认选择方法
+void MainMenuViewModel::confirmSelection() {
+    if (model) {
+        model->playMenuClickSound();
+    }
 }
 
 void MainMenuViewModel::updateAnimationState(float delta_time) {

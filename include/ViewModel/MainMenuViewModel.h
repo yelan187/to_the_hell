@@ -42,6 +42,9 @@ public:
     Common::CommandBase* getUpdateCommand() {
         return &update_command;
     }
+    Common::CommandBase* getConfirmSelectionCommand() {
+        return &confirmSelection_command;
+    }
     // notification
     Common::NotificationFunc getNotificationCallback() {
         return &notification_callback;
@@ -61,6 +64,7 @@ private:
     void initAvailableOptions();
     void navigateUp();
     void navigateDown();
+    void confirmSelection();
     void updateAnimationState(float delta_time);
 
 // commands
@@ -99,9 +103,20 @@ public:
         MainMenuViewModel* view_model;
     };
 
+    class ConfirmSelectionCommand : public Common::CommandBase {
+    public:
+        ConfirmSelectionCommand(MainMenuViewModel* view_model) : view_model(view_model) {}
+        void execute() override {
+            view_model->confirmSelection();
+        }
+    private:
+        MainMenuViewModel* view_model;
+    };
+
 private:
     NavigateUpCommand navigateUp_command;
     NavigateDownCommand navigateDown_command;
     UpdateCommand update_command;
+    ConfirmSelectionCommand confirmSelection_command;
 };
 }

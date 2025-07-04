@@ -41,6 +41,9 @@ public:
     Common::CommandBase* getUpdateCommand() {
         return &update_command;
     }
+    Common::CommandBase* getConfirmSelectionCommand() {
+        return &confirmSelection_command;
+    }
     // notification
     Common::NotificationFunc getNotificationCallback() {
         return &notification_callback;
@@ -56,6 +59,7 @@ private:
     std::vector<std::string> menu_options;
     void navigateUp();
     void navigateDown();
+    void confirmSelection();
 
 // commands
 public:
@@ -89,10 +93,21 @@ public:
         ScoreViewModel* view_model;
     };
 
+    class ConfirmSelectionCommand : public Common::CommandBase {
+    public:
+        ConfirmSelectionCommand(ScoreViewModel* view_model) : view_model(view_model) {}
+        void execute() override {
+            view_model->confirmSelection();
+        }
+    private:
+        ScoreViewModel* view_model;
+    };
+
 private:
     NavigateUpCommand navigateUp_command;
     NavigateDownCommand navigateDown_command;
     UpdateCommand update_command;
+    ConfirmSelectionCommand confirmSelection_command;
 };
 
 }

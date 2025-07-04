@@ -117,6 +117,7 @@ void GameApp::initMainMenu() {
     mainmenu_view->setNavigateUpCommand(mainmenu_view_model->getNavigateUpCommand());
     mainmenu_view->setNavigateDownCommand(mainmenu_view_model->getNavigateDownCommand());
     mainmenu_view->setConfirmSelectionCommand(&change_page_command);
+    mainmenu_view->setViewModelConfirmCommand(mainmenu_view_model->getConfirmSelectionCommand());
     // notification
     mainmenu_view_model->getTrigger().add(
         mainmenu_view->getNotificationCallback(),
@@ -201,6 +202,7 @@ void GameApp::initScore(void* info) {
     score_view->setNavigateDownCommand(score_view_model->getNavigateDownCommand());
     score_view->setUpdateCommand(score_view_model->getUpdateCommand());
     score_view->setConfirmSelectionCommand(&change_page_command);
+    score_view->setViewModelConfirmCommand(score_view_model->getConfirmSelectionCommand());
     // notification
     score_view_model->getTrigger().add(
         score_view->getNotificationCallback(),

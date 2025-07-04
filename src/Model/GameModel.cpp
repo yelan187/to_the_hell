@@ -272,7 +272,7 @@ void GameModel::initSounds() {
         std::cerr << "Failed to load upgrade sound: assets/sounds/weaonupgrade.wav" << std::endl;
     } else {
         upgrade_sound.setBuffer(upgrade_sound_buffer);
-        upgrade_sound.setVolume(40.0f); // 设置音量
+        upgrade_sound.setVolume(50.0f); // 设置音量
     }
 }
 
@@ -670,7 +670,7 @@ void GameModel::startBackgroundMusic() {
     }
     
     background_music.setLoop(true);
-    background_music.setVolume(80.0f);
+    background_music.setVolume(85.0f);
     background_music.play();
 }
 
