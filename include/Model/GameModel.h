@@ -109,6 +109,8 @@ public:
     void startBackgroundMusic();
     void stopBackgroundMusic();
     bool isBackgroundMusicPlaying() const;
+    void playHitSound();        // 播放击中音效
+    void playUpgradeSound();    // 播放升级音效
     // others
     void update(float delta_time);
 private:
@@ -141,6 +143,10 @@ private:
 
     // 音频系统
     sf::Music background_music;
+    sf::SoundBuffer hit_sound_buffer;      // 击中音效缓冲区
+    sf::Sound hit_sound;                   // 击中音效播放器
+    sf::SoundBuffer upgrade_sound_buffer;  // 升级音效缓冲区
+    sf::Sound upgrade_sound;               // 升级音效播放器
     
     // 背景系统
     std::string current_background;
@@ -151,6 +157,7 @@ private:
     void initGame();
     void initSkills();  // 初始化技能
     void initEvents();  // 初始化事件系统
+    void initSounds();  // 初始化音效系统
     void generatePlatform();
     void generateEnemy();
     void generatePickup();

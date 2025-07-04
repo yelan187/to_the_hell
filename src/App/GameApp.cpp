@@ -30,6 +30,17 @@ void GameApp::run() {
 }
 
 void GameApp::changePage(Common::PAGE_STATE new_page_state, bool init, void* info) {
+    // 停止当前页面的音乐
+    if (mainmenu_model) {
+        mainmenu_model->stopBackgroundMusic();
+    }
+    if (score_model) {
+        score_model->stopBackgroundMusic();
+    }
+    if (game_model) {
+        game_model->stopBackgroundMusic();
+    }
+    
     // update the page
     current_page_state = new_page_state;
     switch (new_page_state) {
@@ -80,6 +91,14 @@ void GameApp::GameOverCommand::execute(Common::CommandParam& params) {
 
 // private methods
 void GameApp::initMainMenu() {
+    // 重置其他页面的对象
+    game_view.reset();
+    game_view_model.reset();
+    game_model.reset();
+    score_view.reset();
+    score_view_model.reset();
+    score_model.reset();
+    
     mainmenu_view = std::make_shared<View::MainMenuView>(
         game_title, window_size, fps, window
     );
@@ -108,6 +127,14 @@ void GameApp::initMainMenu() {
 }
 
 void GameApp::initGame() {
+    // 重置其他页面的对象
+    mainmenu_view.reset();
+    mainmenu_view_model.reset();
+    mainmenu_model.reset();
+    score_view.reset();
+    score_view_model.reset();
+    score_model.reset();
+    
     Common::Config::GameConfig::resetToInitialValues();
     game_view = std::make_shared<View::GameView>(
         game_title, window_size, fps, window, debug
@@ -148,6 +175,14 @@ void GameApp::initGame() {
 }
 
 void GameApp::initScore(void* info) {
+    // 重置其他页面的对象
+    mainmenu_view.reset();
+    mainmenu_view_model.reset();
+    mainmenu_model.reset();
+    game_view.reset();
+    game_view_model.reset();
+    game_model.reset();
+    
     ScoreInfo* score_info = static_cast<ScoreInfo*>(info);
     score_view = std::make_shared<View::ScoreView>(
         game_title, window_size, fps, window

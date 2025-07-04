@@ -141,6 +141,7 @@ void GameModel::initGame() {
     initPlayer();
     initSkills();
     initEvents();
+    initSounds();
     
     // just for test
     {
@@ -209,21 +210,12 @@ void GameModel::initEvents() {
     next_event_id = 0;
     
     // 创建基于时间的游戏变化事件序列
-    // 5秒: 滚动速度增加
-    events.push_back(new Entities::Event(5.0f, "Scroll Speed Increased", []() {
+    // 10秒: 滚动速度增加
+    events.push_back(new Entities::Event(10.0f, "Scroll Speed Increased", []() {
         Common::Config::GameConfig::SCROLL_SPEED *= 1.2f;
     }));
-
-    // 10秒: 敌人生成频率增加
-    events.push_back(new Entities::Event(10.0f, "Enemy Spawn Rate Increased", [this]() {
-        Common::Config::GameConfig::ENEMY_SPAWN_MIN_INTERVAL /= 1.3f;
-        Common::Config::GameConfig::ENEMY_SPAWN_MAX_INTERVAL /= 1.3f;
-
-        // 切换到更危险的背景
-        setBackground("assets/images/background/misty_forest_2.png");
-    }));
     
-    // 20秒: 危险平台概率增加 + 背景切换到更暗的场景
+    // 20秒: 危险平台概率增加
     events.push_back(new Entities::Event(20.0f, "More Dangerous Platforms", [this]() {
         Common::Config::GameConfig::PLATFORM_SPIKED_PROBABILITY *= 1.5f;
         Common::Config::GameConfig::PLATFORM_FRAGILE_PROBABILITY *= 1.3f;
@@ -236,22 +228,52 @@ void GameModel::initEvents() {
             Common::Config::GameConfig::PLATFORM_NORMAL_PROBABILITY = 1.0f - non_normal;
         }
     }));
+
+    // 30秒: 敌人生成频率增加
+    events.push_back(new Entities::Event(30.0f, "Enemy Spawn Rate Increased", [this]() {
+        Common::Config::GameConfig::ENEMY_SPAWN_MIN_INTERVAL /= 1.3f;
+        Common::Config::GameConfig::ENEMY_SPAWN_MAX_INTERVAL /= 1.3f;
+
+        // 切换到更暗的背景
+        setBackground("assets/images/background/misty_forest_2.png");
+    }));
     
     // 创建基于分数的奖励事件序列
     // 分数达到10: 第一次选择效果
     events.push_back(new Entities::Event(10, "First Effect Choice", [this]() {
+        playUpgradeSound();
         trigger.fire(Common::NotificationId::Choose);
     }));
     
     // 分数达到50: 第二次选择效果
     events.push_back(new Entities::Event(50, "Second Effect Choice", [this]() {
+        playUpgradeSound();
         trigger.fire(Common::NotificationId::Choose);
     }));
     
     // 分数达到100: 第三次选择效果
     events.push_back(new Entities::Event(100, "Third Effect Choice", [this]() {
+        playUpgradeSound();
         trigger.fire(Common::NotificationId::Choose);
     }));
+}
+
+void GameModel::initSounds() {
+    // 初始化击中音效
+    if (!hit_sound_buffer.loadFromFile("assets/sounds/hit01.wav")) {
+        std::cerr << "Failed to load hit sound: assets/sounds/hit01.wav" << std::endl;
+    } else {
+        hit_sound.setBuffer(hit_sound_buffer);
+        hit_sound.setVolume(60.0f); // 设置音量
+    }
+    
+    // 初始化升级音效
+    if (!upgrade_sound_buffer.loadFromFile("assets/sounds/weaonupgrade.wav")) {
+        std::cerr << "Failed to load upgrade sound: assets/sounds/weaonupgrade.wav" << std::endl;
+    } else {
+        upgrade_sound.setBuffer(upgrade_sound_buffer);
+        upgrade_sound.setVolume(40.0f); // 设置音量
+    }
 }
 
 void GameModel::resetPlatformGenerateInterval() {
@@ -377,10 +399,12 @@ void GameModel::update(float delta_time) {
         // 使用Player类的碰撞检测系统
         int bullet_id = player->checkBulletCollisions();
         if (bullet_id != -1) {
+            playHitSound();  // 玩家受到攻击时播放击中音效
             player->beDamagedByBullet(bullet_id);
         }
         
-        // 我觉得碰到鬼不应该掉血(
+        // -- 我觉得碰到鬼不应该掉血(
+        // -- 那确实，而且可以避免很多棘手的逻辑、bug，但相关函数可以先保留着()
         // int enemy_id = player->checkEnemyCollisions();
         // if (enemy_id != -1) {
         //     player->beDamagedByEnemy(enemy_id);
@@ -646,7 +670,7 @@ void GameModel::startBackgroundMusic() {
     }
     
     background_music.setLoop(true);
-    background_music.setVolume(50.0f);
+    background_music.setVolume(80.0f);
     background_music.play();
 }
 
@@ -658,6 +682,18 @@ void GameModel::stopBackgroundMusic() {
 
 bool GameModel::isBackgroundMusicPlaying() const {
     return background_music.getStatus() == sf::Music::Playing;
+}
+
+void GameModel::playHitSound() {
+    if (hit_sound.getBuffer() != nullptr) {
+        hit_sound.play();
+    }
+}
+
+void GameModel::playUpgradeSound() {
+    if (upgrade_sound.getBuffer() != nullptr) {
+        upgrade_sound.play();
+    }
 }
 
 // ==================== 背景系统方法 ====================
@@ -717,6 +753,9 @@ void GameModel::checkPlayerBulletsHitEnemies() {
                     sf::Vector2f animation_size(120.0f, 120.0f);
                     sf::Vector2f hit_position = enemy_center - animation_size / 2.0f;
                     createHitAnimation(hit_position);
+                    
+                    // 播放击中音效
+                    playHitSound();
                     
                     // 对敌人造成伤害
                     enemy_it->second->hp -= bullet_it->second->getDamage();
