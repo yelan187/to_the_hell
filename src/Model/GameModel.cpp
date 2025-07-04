@@ -170,8 +170,7 @@ void GameModel::initGame() {
     initSkills();
     initEvents();
     initSounds();
-    
-    // just for test
+
     {
         effects.push_back(new Entities::JumpStrength(this));
         effects.push_back(new Entities::SpeedBoost(this));
@@ -179,6 +178,8 @@ void GameModel::initGame() {
     }
 
     startBackgroundMusic();
+    
+    std::cout << std::endl << "Game Started!" << std::endl  << std::endl;
 }
 
 /**
