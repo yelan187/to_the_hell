@@ -307,6 +307,22 @@ void GameViewModel::notification_callback(Common::NotificationId id, void* view_
                     Common::choiceInfo info;
                     info.name = game_view_model->model->getEffectName(i);
                     info.description = game_view_model->model->getEffectDescription(i);
+                    
+                    // 根据效果类型设置图标
+                    std::string effect_name = info.name;
+                    if (effect_name == "Jump Strength") {
+                        info.icon_path = "assets/images/effect/body-height-green.png";
+                    } else {
+                        // 为未来的效果类型预留匹配逻辑
+                        if (effect_name.find("Speed") != std::string::npos || effect_name.find("速度") != std::string::npos || effect_name.find("Fast") != std::string::npos) {
+                            info.icon_path = "assets/images/effect/fast-arrow-yellow.png";
+                        } else if (effect_name.find("Health") != std::string::npos || effect_name.find("生命") != std::string::npos || effect_name.find("Heart") != std::string::npos) {
+                            info.icon_path = "assets/images/effect/glass-heart-red.png";
+                        } else {
+                            info.icon_path = "assets/images/effect/body-height-green.png"; // 默认图标
+                        }
+                    }
+                    
                     game_view_model->choices_info.push_back(info);
                 }
                 game_view_model->trigger.fire(Common::NotificationId::Choose);

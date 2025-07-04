@@ -10,6 +10,7 @@ namespace Common {
 typedef struct choiceInfo{
     std::string name;
     std::string description;
+    std::string icon_path;  // 图标图片路径
 } ChoiceInfo;
 typedef std::vector<ChoiceInfo> ChoicesInfo;
 }

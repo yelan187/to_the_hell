@@ -20,9 +20,11 @@ public:
     sf::RectangleShape rect;
     sf::Text name;
     sf::Text description;
+    sf::Sprite icon_sprite;
     
 private:
     sf::Font font;
+    sf::Texture icon_texture;
     sf::RenderWindow& window;
 };
 
