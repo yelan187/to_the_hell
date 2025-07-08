@@ -1,0 +1,57 @@
+name: Build ToTheHell
+
+# 触发条件：推送到main分支或创建PR时
+on:
+  push:
+    branches: [ main, master, action ]
+  pull_request:
+    branches: [ main, master, action ]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+    # 1. 检出代码
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    
+    # 2. 安装MinGW
+    - name: Setup MinGW
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        install: >-
+          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-cmake
+          mingw-w64-x86_64-make
+    
+    # 3. 创建构建目录
+    - name: Create build directory
+      run: mkdir build
+    
+    # 4. 配置CMake
+    - name: Configure CMake
+      shell: msys2 {0}
+      run: |
+        cd build
+        cmake -G "MinGW Makefiles" ..
+    
+    # 5. 编译项目
+    - name: Build project
+      shell: msys2 {0}
+      run: |
+        cd build
+        mingw32-make
+    
+    # 6. 上传构建产物
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ToTheHell-Windows
+        path: |
+          build/bin/ToTheHell.exe
+          build/bin/*.dll
+          build/bin/assets/
